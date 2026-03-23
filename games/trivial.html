@@ -471,7 +471,7 @@ input, select { font-family: inherit; }
       color-scheme: dark;
       --g-bg:          #0e0a22;
       --g-panel:       #12102a;
-      --g-board-bg:    radial-gradient(ellipse at center, #1a1230 0%, #0a0812 100%);
+      --g-board-bg:    #0a0812;
       --g-border:      rgba(255,255,255,.08);
       --g-text:        #e8eaf2;
       --g-text-sub:    rgba(255,255,255,.45);
@@ -498,7 +498,7 @@ input, select { font-family: inherit; }
       color-scheme: light;
       --g-bg:          #f4f5f8;
       --g-panel:       #ffffff;
-      --g-board-bg:    radial-gradient(ellipse at center, #e8e4f8 0%, #d4cef0 100%);
+      --g-board-bg:    #d4cef0;
       --g-border:      rgba(26,31,46,.1);
       --g-text:        #1a1f2e;
       --g-text-sub:    rgba(26,31,46,.5);
@@ -528,11 +528,11 @@ input, select { font-family: inherit; }
       --c-music:  #fbbf24; --c-series: #fb923c; --c-pokemon:#60a5fa;
     }
 
-    .game-layout { display:grid; grid-template-columns:185px 1fr 210px; height:calc(100vh - 48px); gap:0; }
+    .game-layout { display:grid; grid-template-columns:185px 1fr 210px; height:calc(100vh - 48px); gap:0; overflow:hidden; }
     .panel { padding:14px; overflow-y:auto; }
     .left-panel  { background:var(--g-panel); border-right:1px solid var(--g-border); }
     .right-panel { background:var(--g-panel); border-left:1px solid var(--g-border); }
-    .board-area  { display:flex; align-items:center; justify-content:center; background:var(--g-board-bg); }
+    .board-area  { display:flex; align-items:center; justify-content:center; background:var(--g-board-bg); overflow:hidden; padding:8px; }
 
     /* Navbar */
     .navbar { background:var(--g-navbar); border-bottom:1px solid var(--g-navbar-brd); height:48px; }
@@ -609,8 +609,14 @@ input, select { font-family: inherit; }
     .action-btn.primary { background:linear-gradient(90deg,#7c3aed,#4f46e5); color:#fff; }
     .action-btn.volt    { background:linear-gradient(90deg,#c8f135,#a8d020); color:#1a1f2e; }
 
-    /* SVG board */
-    #boardSvg { width:100%; height:100%; max-width:680px; max-height:680px; }
+    /* SVG board — always a perfect square, sized to the smaller board-area dimension */
+    #boardSvg {
+      aspect-ratio: 1 / 1;
+      height: 100%;
+      width: auto;
+      max-width: 100%;
+      max-height: 100%;
+    }
 
     /* Modals */
     .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(14px); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; }
@@ -699,10 +705,106 @@ input, select { font-family: inherit; }
     .help-box { margin-top:16px; padding:10px; background:var(--g-card); border-radius:8px; font-size:12px; color:var(--g-text-sub); }
     .help-box-title { margin-bottom:4px; font-weight:600; color:var(--g-text); }
 
-    @media(max-width:700px){
-      .game-layout { grid-template-columns:1fr; grid-template-rows:auto 1fr auto; }
-      .left-panel,.right-panel { display:none; }
-      .board-area { height:360px; }
+    /* ── Dice Overlay (center screen when rolling) ── */
+    #diceOverlay {
+      position:fixed; inset:0; z-index:150;
+      display:flex; align-items:center; justify-content:center; flex-direction:column;
+      gap:18px;
+      background:rgba(0,0,0,.6); backdrop-filter:blur(10px);
+      transition:opacity .25s;
+    }
+    #diceOverlay.hidden { opacity:0; pointer-events:none; }
+    #diceOverlayArea {
+      width:clamp(150px,22vmin,210px); height:clamp(150px,22vmin,210px);
+      cursor:pointer;
+      filter:drop-shadow(0 0 36px rgba(167,139,250,.7));
+      transition:.15s;
+    }
+    #diceOverlayArea:hover { transform:scale(1.06); }
+    #diceOverlayArea.rolling { animation:diceRoll .5s; }
+    #diceOverlayArea svg { width:100%; height:100%; display:block; }
+    .dice-overlay-label { font-size:15px; font-weight:700; color:#fff; letter-spacing:.04em; }
+    .dice-overlay-turn  { font-size:13px; color:rgba(255,255,255,.5); }
+    .dice-overlay-result {
+      font-size:32px; font-weight:900; color:#c8f135;
+      opacity:0; transition:opacity .2s;
+      letter-spacing:.02em;
+    }
+    .dice-overlay-result.show { opacity:1; }
+
+    /* ── Mobile floating players button ── */
+    .mobile-players-btn {
+      display:none;
+      position:fixed; bottom:74px; left:12px; z-index:140;
+      width:44px; height:44px; border-radius:50%;
+      background:var(--g-panel); border:1.5px solid var(--g-border);
+      color:var(--g-text); font-size:20px;
+      align-items:center; justify-content:center;
+      cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.35);
+      transition:.15s;
+    }
+    .mobile-players-btn:hover { transform:scale(1.1); }
+    #mobilePlayersOverlay {
+      position:fixed; inset:0; z-index:145;
+      background:rgba(0,0,0,.65); backdrop-filter:blur(8px);
+      display:flex; align-items:flex-end;
+      transition:opacity .25s;
+    }
+    #mobilePlayersOverlay.hidden { opacity:0; pointer-events:none; }
+    .mobile-players-sheet {
+      width:100%; max-height:65vh; overflow-y:auto;
+      background:var(--g-panel); border-radius:20px 20px 0 0;
+      padding:16px;
+    }
+    .mobile-players-handle {
+      width:40px; height:4px; border-radius:2px;
+      background:var(--g-border); margin:0 auto 14px;
+    }
+
+    /* ── Tablet (640–960 px) ── */
+    @media(max-width:960px) and (min-width:641px) {
+      .game-layout { grid-template-columns:140px 1fr 165px; }
+      .panel { padding:10px; }
+      .player-card { padding:8px; margin-bottom:6px; }
+      .player-name { font-size:12px; }
+      .cat-legend  { display:none; }
+      .help-box    { display:none; }
+      .wedge { width:18px; height:18px; font-size:9px; }
+      .turn-name { font-size:14px; }
+      .dice-area { width:72px; height:72px; }
+    }
+
+    /* ── Mobile (<640 px) ── */
+    @media(max-width:640px) {
+      .game-layout { display:flex; flex-direction:column; height:calc(100vh - 48px); overflow:hidden; }
+      .left-panel { display:none; }
+      .board-area { flex:1; min-height:0; width:100%; display:flex; align-items:center; justify-content:center; }
+      #boardSvg   { aspect-ratio:1/1; height:100%; width:auto; max-width:100%; max-height:100%; }
+
+      /* Right panel becomes horizontal bottom bar */
+      .right-panel {
+        flex-shrink:0; height:auto; max-height:30vw;
+        border-left:none; border-top:1px solid var(--g-border);
+        display:flex; flex-direction:row; align-items:center;
+        gap:8px; padding:6px 10px; overflow-x:auto; overflow-y:hidden;
+      }
+      .turn-info { text-align:left; padding:0; flex-shrink:0; }
+      .turn-label { display:none; }
+      .turn-name  { font-size:13px; white-space:nowrap; max-width:72px; overflow:hidden; text-overflow:ellipsis; }
+      .dice-area  { width:52px; height:52px; margin:0; flex-shrink:0; }
+      .action-panel {
+        flex:1; min-width:0; margin-top:0;
+        display:flex; flex-direction:row; gap:6px; overflow-x:auto;
+      }
+      .action-panel .action-btn {
+        white-space:nowrap; width:auto; min-width:max-content;
+        margin-bottom:0; padding:7px 11px; font-size:12px; flex-shrink:0;
+      }
+      .dir-inline { padding:0; display:flex; flex-direction:row; gap:6px; }
+      .dir-title  { display:none; }
+      .dir-btn    { margin-bottom:0; padding:8px 12px; font-size:13px; flex-shrink:0; min-width:max-content; }
+      .help-box, #phaseMsg { display:none; }
+      .mobile-players-btn { display:flex !important; }
     }
   </style>
 </head>
@@ -761,6 +863,26 @@ input, select { font-family: inherit; }
     </div>
   </div>
 
+</div>
+
+<!-- ══════════════════ DADO OVERLAY ══════════════════ -->
+<div id="diceOverlay" class="hidden">
+  <div class="dice-overlay-turn" id="diceOverlayTurn"></div>
+  <div id="diceOverlayArea" onclick="handleDiceClick()">
+    <svg id="diceOverlaySvg" viewBox="0 0 100 100"></svg>
+  </div>
+  <div class="dice-overlay-label" id="diceOverlayLabel">Tocca per lanciare!</div>
+  <div class="dice-overlay-result" id="diceOverlayResult"></div>
+</div>
+
+<!-- ══════════════════ MOBILE PLAYERS ══════════════════ -->
+<button class="mobile-players-btn" onclick="toggleMobilePlayers()">👥</button>
+<div id="mobilePlayersOverlay" class="hidden" onclick="toggleMobilePlayers()">
+  <div class="mobile-players-sheet" onclick="event.stopPropagation()">
+    <div class="mobile-players-handle"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--g-text-sub);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Giocatori</div>
+    <div id="mobilePlayersList"></div>
+  </div>
 </div>
 
 <!-- ══════════════════ MODAL SETUP ══════════════════ -->
@@ -1564,10 +1686,13 @@ function drawBoard() {
   // Defs: gradients + filters
   const defs = svgEl('defs', {});
 
-  // Background gradient
+  // Background gradient (theme-aware)
+  const isDark  = document.body.dataset.theme !== 'light';
+  const bgInner = isDark ? '#1a1230' : '#e8e4f8';
+  const bgOuter = isDark ? '#0a0812' : '#d4cef0';
   const bgGrad = svgEl('radialGradient', { id:'bg_g', cx:'50%', cy:'50%', r:'50%' });
-  const bgS1 = svgEl('stop', { offset:'0%', 'stop-color':'#1a1230' });
-  const bgS2 = svgEl('stop', { offset:'100%', 'stop-color':'#0a0812' });
+  const bgS1 = svgEl('stop', { offset:'0%',   'stop-color': bgInner });
+  const bgS2 = svgEl('stop', { offset:'100%', 'stop-color': bgOuter });
   bgGrad.appendChild(bgS1); bgGrad.appendChild(bgS2);
   defs.appendChild(bgGrad);
 
@@ -1791,8 +1916,13 @@ function setPhase(ph) {
   };
   document.getElementById('phaseMsg').textContent = msgs[ph] || '';
   if (diceArea) {
-    if (ph === 'idle') diceArea.classList.remove('disabled');
-    else diceArea.classList.add('disabled');
+    if (ph === 'idle') {
+      diceArea.classList.remove('disabled');
+      showDiceOverlay();
+    } else {
+      diceArea.classList.add('disabled');
+      hideDiceOverlay();
+    }
   }
   // Auto-trigger streak when idle at center with all wedges
   if (ph === 'idle') {
@@ -1804,19 +1934,33 @@ function setPhase(ph) {
 }
 
 function rollDice() {
-  const area = document.getElementById('diceArea');
+  const area        = document.getElementById('diceArea');
+  const overlayArea = document.getElementById('diceOverlayArea');
+  const lbl         = document.getElementById('diceOverlayLabel');
+  const res         = document.getElementById('diceOverlayResult');
+
   area.classList.add('rolling', 'disabled');
+  if (overlayArea) overlayArea.classList.add('rolling');
+  if (lbl) lbl.textContent = '';
+
   let rolls = 0;
   const iv = setInterval(() => {
     G.diceVal = Math.floor(Math.random()*6) + 1;
     renderDice(G.diceVal);
-    if (++rolls >= 8) {
+    _renderDiceInto(document.getElementById('diceOverlaySvg'), G.diceVal, 'or');
+    if (++rolls >= 10) {
       clearInterval(iv);
       area.classList.remove('rolling');
+      if (overlayArea) overlayArea.classList.remove('rolling');
+      // Show result briefly on overlay, then continue
+      if (res) { res.textContent = `Hai ottenuto ${G.diceVal}!`; res.classList.add('show'); }
       G.stepsLeft = G.diceVal;
-      processMove();
+      setTimeout(() => {
+        hideDiceOverlay();
+        processMove();
+      }, 750);
     }
-  }, 80);
+  }, 75);
 }
 
 function processMove() {
@@ -1832,7 +1976,11 @@ function processMove() {
 
   // If on spoke: move toward ring OR toward center
   if (pos !== 'C' && pos[0] !== 'R') {
-    if (G.pendingDir === 'center') {
+    // Once all wedges are collected, the only valid direction is toward center —
+    // even if pendingDir was reset by endTurn() after a wrong answer.
+    const hasAllWedges = CAT_IDS.every(c => player.wedges[c]);
+    if (hasAllWedges || G.pendingDir === 'center') {
+      G.pendingDir = 'center'; // reinforce so it persists across turns
       moveSpokeBackward();
     } else {
       moveSpokeForward();
@@ -2295,6 +2443,9 @@ function updateTurnUI() {
   document.getElementById('turnName').style.color = p.color;
   if (G.diceVal) renderDice(G.diceVal);
   else renderDicePlaceholder();
+  // Keep overlay turn label in sync
+  const turnEl = document.getElementById('diceOverlayTurn');
+  if (turnEl) { turnEl.textContent = `Turno di ${p.name}`; turnEl.style.color = p.color; }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2324,8 +2475,18 @@ function toggleTheme() {
   localStorage.setItem('pd_theme', next);
   const btn = document.getElementById('themeToggleBtn');
   if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
-  if (G.diceVal) renderDice(G.diceVal);
-  else renderDicePlaceholder();
+  if (G.diceVal) {
+    renderDice(G.diceVal);
+    _renderDiceInto(document.getElementById('diceOverlaySvg'), G.diceVal, 'or');
+  } else {
+    renderDicePlaceholder();
+    _renderPlaceholderInto(document.getElementById('diceOverlaySvg'), 'op');
+  }
+  // Redraw board so background gradient matches the new theme
+  if (G.players && G.players.length > 0) {
+    drawBoard();
+    renderPlayers();
+  }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2344,12 +2505,10 @@ function _buildDiceBase(svg, idSuffix) {
   const isDark = document.body.dataset.theme !== 'light';
   svg.innerHTML = '';
   const ns = 'http://www.w3.org/2000/svg';
+  const gid = 'dg' + idSuffix;
+  const fid = 'df' + idSuffix;
 
-  // Defs: gradient + drop-shadow
   const defs = document.createElementNS(ns, 'defs');
-  const gid  = 'dg' + idSuffix;
-  const fid  = 'df' + idSuffix;
-
   const grad = document.createElementNS(ns, 'linearGradient');
   grad.setAttribute('id', gid);
   grad.setAttribute('x1','0%'); grad.setAttribute('y1','0%');
@@ -2361,18 +2520,15 @@ function _buildDiceBase(svg, idSuffix) {
   s2.setAttribute('offset','100%');
   s2.setAttribute('stop-color', isDark ? '#1a1230' : '#d8d3f5');
   grad.appendChild(s1); grad.appendChild(s2);
-
   const filt = document.createElementNS(ns, 'filter');
   filt.setAttribute('id', fid);
   const ds = document.createElementNS(ns, 'feDropShadow');
   ds.setAttribute('dx','0'); ds.setAttribute('dy','3'); ds.setAttribute('stdDeviation','4');
   ds.setAttribute('flood-color', isDark ? 'rgba(0,0,0,.7)' : 'rgba(0,0,0,.2)');
   filt.appendChild(ds);
-
   defs.appendChild(grad); defs.appendChild(filt);
   svg.appendChild(defs);
 
-  // Rounded rect body
   const rect = document.createElementNS(ns, 'rect');
   rect.setAttribute('x','6'); rect.setAttribute('y','5');
   rect.setAttribute('width','88'); rect.setAttribute('height','88');
@@ -2382,18 +2538,16 @@ function _buildDiceBase(svg, idSuffix) {
   rect.setAttribute('stroke-width','2');
   rect.setAttribute('filter', `url(#${fid})`);
   svg.appendChild(rect);
-
   return isDark;
 }
 
-function renderDice(value) {
-  const svg = document.getElementById('diceSvg');
+/* Render dice value into any SVG element (sidebar or overlay) */
+function _renderDiceInto(svg, value, suffix) {
   if (!svg) return;
-  const isDark = _buildDiceBase(svg, 'r');
+  const isDark = _buildDiceBase(svg, suffix);
   const ns = 'http://www.w3.org/2000/svg';
   const dotColor = isDark ? '#c4b5fd' : '#7c3aed';
   (DICE_DOTS[value] || []).forEach(([px, py]) => {
-    // Map 0-100 percentage to rect coords (rect: x=6, w=88 → 6..94; y=5, h=88 → 5..93)
     const cx = 6 + (px / 100) * 88;
     const cy = 5 + (py / 100) * 88;
     const c = document.createElementNS(ns, 'circle');
@@ -2405,12 +2559,11 @@ function renderDice(value) {
   });
 }
 
-function renderDicePlaceholder() {
-  const svg = document.getElementById('diceSvg');
+/* Render placeholder into any SVG element */
+function _renderPlaceholderInto(svg, suffix) {
   if (!svg) return;
-  const isDark = _buildDiceBase(svg, 'p');
+  const isDark = _buildDiceBase(svg, suffix);
   const ns = 'http://www.w3.org/2000/svg';
-  // Dashed overlay to indicate "click to roll"
   const dash = document.createElementNS(ns, 'rect');
   dash.setAttribute('x','6'); dash.setAttribute('y','5');
   dash.setAttribute('width','88'); dash.setAttribute('height','88');
@@ -2420,7 +2573,6 @@ function renderDicePlaceholder() {
   dash.setAttribute('stroke-width','2');
   dash.setAttribute('stroke-dasharray','6,5');
   svg.appendChild(dash);
-  // Center question mark
   const txt = document.createElementNS(ns, 'text');
   txt.setAttribute('x','50'); txt.setAttribute('y','60');
   txt.setAttribute('text-anchor','middle');
@@ -2428,6 +2580,36 @@ function renderDicePlaceholder() {
   txt.setAttribute('fill', isDark ? 'rgba(196,181,253,.45)' : 'rgba(124,58,237,.35)');
   txt.textContent = '?';
   svg.appendChild(txt);
+}
+
+function renderDice(value) {
+  _renderDiceInto(document.getElementById('diceSvg'), value, 's');
+}
+function renderDicePlaceholder() {
+  _renderPlaceholderInto(document.getElementById('diceSvg'), 'sp');
+}
+
+/* ── Dice Overlay ── */
+function showDiceOverlay() {
+  const overlay = document.getElementById('diceOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  const p = G.players[G.curIdx];
+  const turnEl = document.getElementById('diceOverlayTurn');
+  if (turnEl && p) {
+    turnEl.textContent = `Turno di ${p.name}`;
+    turnEl.style.color = p.color;
+  }
+  const lbl = document.getElementById('diceOverlayLabel');
+  if (lbl) lbl.textContent = 'Tocca per lanciare! 🎲';
+  const res = document.getElementById('diceOverlayResult');
+  if (res) { res.textContent = ''; res.classList.remove('show'); }
+  _renderPlaceholderInto(document.getElementById('diceOverlaySvg'), 'op');
+}
+
+function hideDiceOverlay() {
+  const overlay = document.getElementById('diceOverlay');
+  if (overlay) overlay.classList.add('hidden');
 }
 
 function handleDiceClick() {
@@ -2490,6 +2672,17 @@ function showDirPreview(cwIdx, ccwIdx) {
 
 function clearDirPreview() {
   document.querySelectorAll('.dir-preview').forEach(e => e.remove());
+}
+
+/* ── Mobile players panel ── */
+function toggleMobilePlayers() {
+  const overlay = document.getElementById('mobilePlayersOverlay');
+  if (!overlay) return;
+  overlay.classList.toggle('hidden');
+  // Sync content with main players list
+  const src  = document.getElementById('playersList');
+  const dest = document.getElementById('mobilePlayersList');
+  if (dest && src) dest.innerHTML = src.innerHTML;
 }
 
 /* ── Init: mostra setup ── */
