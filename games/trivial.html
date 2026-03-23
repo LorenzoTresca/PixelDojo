@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelDojo — Trivial Otaku</title>
+  <style>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Design System
+   Tokens, componenti condivisi, layout globale
+═══════════════════════════════════════════════════════════ */
+
+:root {
+  --ink:    #1a1f2e;
+  --ink2:   #4a5068;
+  --ink3:   #8892a4;
+  --surf:   #ffffff;
+  --surf2:  #f4f5f8;
+  --surf3:  #eef0f5;
+  --neon:   #7c3aed;
+  --neon2:  #6025c9;
+  --volt:   #c8f135;
+  --volt2:  #a8d020;
+  --fire:   #ff5722;
+  --fire2:  #e64a19;
+  --ice:    #0ea5e9;
+  --gold:   #f59e0b;
+  --mint:   #10b981;
+  --border: rgba(26,31,46,0.1);
+  --r:      10px;
+  --r2:     16px;
+  --r3:     24px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-neon: 0 8px 32px rgba(124,58,237,0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink:    #e8eaf2;
+    --ink2:   #9ba3b8;
+    --ink3:   #5c6478;
+    --surf:   #1c2030;
+    --surf2:  #242840;
+    --surf3:  #2e3350;
+    --border: rgba(232,234,242,0.08);
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--surf2);
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+input, select { font-family: inherit; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════════ */
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 10px 24px;
+  background: var(--surf);
+  border-bottom: 0.5px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 8px;
+}
+.nav-logo {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-right: 12px;
+  white-space: nowrap;
+}
+.nav-logo span { color: var(--neon); }
+.nav-links { display: flex; gap: 2px; flex: 1; }
+.nav-link {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+  transition: all .15s;
+  cursor: pointer;
+}
+.nav-link:hover, .nav-link.active {
+  background: rgba(124,58,237,.1);
+  color: var(--neon);
+}
+.nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.nav-coins {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(245,158,11,.08);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+}
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(124,58,237,.15);
+  color: var(--neon);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--r);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn-primary  { background: var(--neon); color: #fff; }
+.btn-primary:hover { background: var(--neon2); transform: translateY(-1px); box-shadow: var(--shadow-neon); }
+.btn-volt     { background: var(--volt); color: #1a1f2e; }
+.btn-volt:hover { background: var(--volt2); transform: translateY(-1px); }
+.btn-ghost    { background: transparent; color: var(--ink); border: 0.5px solid var(--border); }
+.btn-ghost:hover { background: var(--surf2); }
+.btn-danger   { background: var(--fire); color: #fff; }
+.btn-danger:hover { background: var(--fire2); }
+.btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+.btn-lg { padding: 14px 28px; font-size: 16px; border-radius: var(--r2); }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   TAGS / BADGES
+═══════════════════════════════════════════════════════════ */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tag-neon  { background: rgba(124,58,237,.12); color: var(--neon); }
+.tag-fire  { background: rgba(255,87,34,.12);  color: var(--fire); }
+.tag-ice   { background: rgba(14,165,233,.12); color: var(--ice); }
+.tag-gold  { background: rgba(245,158,11,.12); color: var(--gold); }
+.tag-mint  { background: rgba(16,185,129,.12); color: var(--mint); }
+.tag-gray  { background: var(--surf3); color: var(--ink2); }
+.tag-volt  { background: rgba(200,241,53,.15); color: #7a9300; }
+
+.badge-new {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: var(--volt);
+  color: #1a1f2e;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+  letter-spacing: .04em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GAME CARD
+═══════════════════════════════════════════════════════════ */
+.game-card {
+  background: var(--surf);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+  transition: all .2s;
+  cursor: pointer;
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.game-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--neon);
+  box-shadow: 0 12px 32px rgba(124,58,237,.15);
+}
+.card-thumb {
+  width: 100%;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+.card-body  { padding: 14px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.card-meta  { font-size: 12px; color: var(--ink3); margin-bottom: 10px; line-height: 1.4; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; }
+.diff-pip   { display: inline-flex; gap: 3px; }
+.pip        { width: 6px; height: 6px; border-radius: 50%; background: var(--surf3); }
+.pip.on     { background: var(--fire); }
+
+/* ═══════════════════════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════════════════════ */
+.lb-list { display: flex; flex-direction: column; gap: 4px; }
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surf);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r);
+  transition: background .15s;
+}
+.lb-item:hover { background: var(--surf2); }
+.lb-rank       { font-size: 13px; font-weight: 600; min-width: 24px; color: var(--ink3); }
+.lb-rank.gold   { color: var(--gold); }
+.lb-rank.silver { color: #94a3b8; }
+.lb-rank.bronze { color: #cd7c4b; }
+.lb-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  flex-shrink: 0;
+}
+.lb-name  { flex: 1; font-size: 13px; font-weight: 500; color: var(--ink); }
+.lb-score { font-size: 13px; font-weight: 700; color: var(--neon); }
+.lb-delta { font-size: 11px; margin-left: 6px; }
+.lb-delta.up { color: var(--mint); }
+.lb-delta.dn { color: var(--fire); }
+
+/* ═══════════════════════════════════════════════════════════
+   XP / PLAYER PANEL
+═══════════════════════════════════════════════════════════ */
+.xp-bar {
+  height: 5px;
+  background: var(--surf3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.xp-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--neon), var(--volt));
+  transition: width .4s;
+}
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.stat-box  {
+  background: var(--surf);
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+  border: 0.5px solid var(--border);
+}
+.stat-val { font-size: 18px; font-weight: 700; color: var(--ink); }
+.stat-lbl { font-size: 10px; color: var(--ink3); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION HELPERS
+═══════════════════════════════════════════════════════════ */
+.section-hd {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-hd a {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--neon);
+  text-decoration: none;
+}
+.section-hd a:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════════════════
+   FORM INPUTS
+═══════════════════════════════════════════════════════════ */
+.inp {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--r);
+  border: 0.5px solid var(--border);
+  background: var(--surf2);
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s;
+}
+.inp:focus { border-color: var(--neon); box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+.inp::placeholder { color: var(--ink3); }
+.form-label { font-size: 12px; font-weight: 600; color: var(--ink2); margin-bottom: 6px; display: block; }
+.form-group { margin-bottom: 16px; }
+.form-error { font-size: 12px; color: var(--fire); margin-top: 4px; }
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-box {
+  background: var(--surf);
+  border-radius: var(--r3);
+  border: 0.5px solid var(--border);
+  padding: 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  animation: modalIn .2s ease;
+}
+.modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.modal-sub {
+  font-size: 13px;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)  translateY(0); }
+}
+.hidden { display: none !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   HERO BAND
+═══════════════════════════════════════════════════════════ */
+.hero-band {
+  background: linear-gradient(135deg, #0e0a22 0%, #1e0a4a 50%, #0a1a3a 100%);
+  padding: 32px 24px;
+}
+.feat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(200,241,53,.15);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--volt);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CATEGORY BOX
+═══════════════════════════════════════════════════════════ */
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cat-box {
+  border-radius: 9px;
+  padding: 12px 8px;
+  text-align: center;
+  background: var(--surf2);
+  border: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+}
+.cat-box:hover { border-color: var(--neon); background: rgba(124,58,237,.05); }
+.cat-icon { font-size: 22px; margin-bottom: 4px; }
+.cat-name { font-size: 11px; font-weight: 600; color: var(--ink2); }
+
+/* ═══════════════════════════════════════════════════════════
+   TOASTS / ALERTS
+═══════════════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 12px 18px;
+  border-radius: var(--r2);
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: toastIn .25s ease;
+  max-width: 320px;
+}
+.toast-success { background: var(--mint); }
+.toast-error   { background: var(--fire); }
+.toast-info    { background: var(--neon); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════ */
+.text-neon  { color: var(--neon); }
+.text-volt  { color: var(--volt); }
+.text-fire  { color: var(--fire); }
+.text-gold  { color: var(--gold); }
+.text-mint  { color: var(--mint); }
+.text-ink3  { color: var(--ink3); }
+.fw-700     { font-weight: 700; }
+.fw-800     { font-weight: 800; }
+.fs-12      { font-size: 12px; }
+.fs-11      { font-size: 11px; }
+.mt-4       { margin-top: 4px; }
+.mt-8       { margin-top: 8px; }
+.mt-12      { margin-top: 12px; }
+.mt-16      { margin-top: 16px; }
+.mb-4       { margin-bottom: 4px; }
+.mb-8       { margin-bottom: 8px; }
+.mb-12      { margin-bottom: 12px; }
+.gap-8      { gap: 8px; }
+.flex       { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.w-full     { width: 100%; }
+
+</style>
+  <style>
+    /* ── THEME VARIABLES ──────────────────────────────────── */
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --g-bg:          #0e0a22;
+      --g-panel:       #12102a;
+      --g-board-bg:    radial-gradient(ellipse at center, #1a1230 0%, #0a0812 100%);
+      --g-border:      rgba(255,255,255,.08);
+      --g-text:        #e8eaf2;
+      --g-text-sub:    rgba(255,255,255,.45);
+      --g-text-muted:  rgba(255,255,255,.25);
+      --g-card:        rgba(255,255,255,.04);
+      --g-card-active: rgba(255,255,255,.08);
+      --g-modal:       linear-gradient(145deg,#13111f,#1a1630);
+      --g-modal-brd:   rgba(167,139,250,.38);
+      --g-btn:         rgba(255,255,255,.08);
+      --g-btn-hover:   rgba(255,255,255,.15);
+      --g-dice-g1:     #2d2545;
+      --g-dice-g2:     #1a1230;
+      --g-dice-dot:    #c4b5fd;
+      --g-dice-brd:    rgba(124,58,237,.7);
+      --g-navbar:      linear-gradient(90deg,#12102a,#0e0a22);
+      --g-navbar-brd:  rgba(255,255,255,.08);
+      --ink:    #e8eaf2; --ink2: #9ba3b8; --ink3: #5c6478;
+      --surf:   #1c2030; --surf2: #12102a; --surf3: #2e3350;
+      --border: rgba(232,234,242,.08);
+      --shadow: 0 4px 24px rgba(0,0,0,.3);
+      --shadow-neon: 0 8px 32px rgba(124,58,237,.25);
+    }
+    body[data-theme="light"] {
+      color-scheme: light;
+      --g-bg:          #f4f5f8;
+      --g-panel:       #ffffff;
+      --g-board-bg:    radial-gradient(ellipse at center, #e8e4f8 0%, #d4cef0 100%);
+      --g-border:      rgba(26,31,46,.1);
+      --g-text:        #1a1f2e;
+      --g-text-sub:    rgba(26,31,46,.5);
+      --g-text-muted:  rgba(26,31,46,.3);
+      --g-card:        rgba(26,31,46,.04);
+      --g-card-active: rgba(26,31,46,.08);
+      --g-modal:       #ffffff;
+      --g-modal-brd:   rgba(124,58,237,.3);
+      --g-btn:         rgba(26,31,46,.07);
+      --g-btn-hover:   rgba(26,31,46,.13);
+      --g-dice-g1:     #ede9f8;
+      --g-dice-g2:     #d8d3f5;
+      --g-dice-dot:    #7c3aed;
+      --g-dice-brd:    rgba(124,58,237,.5);
+      --g-navbar:      #ffffff;
+      --g-navbar-brd:  rgba(26,31,46,.1);
+      --ink:    #1a1f2e; --ink2: #4a5068; --ink3: #8892a4;
+      --surf:   #ffffff; --surf2: #f4f5f8; --surf3: #eef0f5;
+      --border: rgba(26,31,46,.1);
+      --shadow: 0 4px 24px rgba(0,0,0,.08);
+      --shadow-neon: 0 8px 32px rgba(124,58,237,.15);
+    }
+
+    body { background: var(--g-bg); color: var(--g-text); }
+    :root {
+      --c-anime:  #f87171; --c-sport:  #34d399; --c-games:  #a78bfa;
+      --c-music:  #fbbf24; --c-series: #fb923c; --c-pokemon:#60a5fa;
+    }
+
+    .game-layout { display:grid; grid-template-columns:185px 1fr 210px; height:calc(100vh - 48px); gap:0; }
+    .panel { padding:14px; overflow-y:auto; }
+    .left-panel  { background:var(--g-panel); border-right:1px solid var(--g-border); }
+    .right-panel { background:var(--g-panel); border-left:1px solid var(--g-border); }
+    .board-area  { display:flex; align-items:center; justify-content:center; background:var(--g-board-bg); }
+
+    /* Navbar */
+    .navbar { background:var(--g-navbar); border-bottom:1px solid var(--g-navbar-brd); height:48px; }
+    .navbar .nav-logo { color:var(--g-text); }
+    .navbar .nav-logo span { color:#c8f135; }
+    .nav-link { color:var(--g-text-sub); }
+    .nav-link:hover { background:var(--g-btn-hover); color:var(--g-text); }
+
+    /* Theme toggle */
+    .theme-toggle {
+      width:36px; height:36px; border-radius:50%;
+      background:var(--g-btn); border:1px solid var(--g-border);
+      color:var(--g-text); font-size:18px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition:.18s; flex-shrink:0;
+    }
+    .theme-toggle:hover { background:var(--g-btn-hover); transform:scale(1.1); }
+
+    /* Player cards */
+    .player-card {
+      border-radius:12px; padding:12px; margin-bottom:8px;
+      background:var(--g-card); border:1.5px solid transparent; transition:.25s;
+    }
+    .player-card.active {
+      border-color:var(--player-color, #7c3aed);
+      background:var(--g-card-active);
+      box-shadow:0 0 16px rgba(124,58,237,.15);
+    }
+    .player-name { font-size:13px; font-weight:700; color:var(--g-text); }
+    .player-pos  { font-size:11px; color:var(--g-text-sub); margin-top:2px; }
+    .wedges-row  { display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+    .wedge       {
+      width:22px; height:22px; border-radius:50%;
+      background:var(--g-btn); border:1.5px solid var(--g-border);
+      transition:all .3s; display:flex; align-items:center; justify-content:center;
+      font-size:11px; line-height:1;
+    }
+    .wedge.earned{
+      border-color:transparent; transform:scale(1.15);
+      box-shadow:0 0 8px currentColor;
+    }
+
+    /* SVG Dice area */
+    .dice-area {
+      width:90px; height:90px; margin:8px auto; cursor:pointer;
+      display:block; transition:.15s;
+    }
+    .dice-area:hover:not(.disabled) { transform:scale(1.08); }
+    .dice-area.disabled { opacity:.4; cursor:not-allowed; }
+    .dice-area svg { width:100%; height:100%; display:block; }
+    .dice-area.rolling { animation:diceRoll .5s; }
+    @keyframes diceRoll { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-20deg)} 75%{transform:rotate(20deg)} }
+
+    /* Turn info */
+    .turn-info { text-align:center; padding:10px 0; }
+    .turn-label { font-size:12px; color:var(--g-text-sub); text-transform:uppercase; letter-spacing:.06em; }
+    .turn-name  { font-size:16px; font-weight:700; margin-top:2px; }
+
+    /* Category legend */
+    .cat-legend { margin-top:14px; }
+    .cat-row { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:12px; color:var(--g-text-sub); }
+    .cat-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+    /* Action buttons */
+    .action-panel { margin-top:12px; }
+    .action-btn {
+      width:100%; margin-bottom:6px; padding:10px;
+      border-radius:8px; font-size:13px; font-weight:600;
+      border:none; cursor:pointer; transition:.15s;
+      background:var(--g-btn); color:var(--g-text);
+    }
+    .action-btn:hover:not(:disabled) { background:var(--g-btn-hover); }
+    .action-btn:disabled { opacity:.3; cursor:not-allowed; }
+    .action-btn.primary { background:linear-gradient(90deg,#7c3aed,#4f46e5); color:#fff; }
+    .action-btn.volt    { background:linear-gradient(90deg,#c8f135,#a8d020); color:#1a1f2e; }
+
+    /* SVG board */
+    #boardSvg { width:100%; height:100%; max-width:680px; max-height:680px; }
+
+    /* Modals */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(14px); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .modal-box {
+      background:var(--g-modal);
+      border:2px solid var(--g-modal-brd); border-radius:24px; padding:28px;
+      max-width:540px; width:100%;
+      box-shadow:0 0 50px rgba(167,139,250,.2), 0 24px 64px rgba(0,0,0,.5);
+      animation:modalIn .2s ease;
+    }
+    .modal-box .modal-title { font-size:22px; font-weight:900; color:var(--g-text); margin-bottom:8px; }
+    .modal-box .modal-sub   { font-size:13px; color:var(--g-text-sub); margin-bottom:20px; line-height:1.5; }
+
+    /* Question modal */
+    .q-cat  { font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; margin-bottom:10px; }
+    .q-text {
+      font-size:17px; font-weight:600; line-height:1.55; margin-bottom:20px; color:var(--g-text);
+      background:var(--g-card); border:1px solid var(--g-border);
+      border-radius:12px; padding:16px 18px; text-align:center;
+    }
+    .q-opts { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .q-opt  {
+      padding:12px 16px; border-radius:12px;
+      background:var(--g-card); border:1.5px solid var(--g-border);
+      font-size:14px; color:var(--g-text); cursor:pointer; transition:.18s; text-align:left;
+      display:flex; align-items:center; gap:10px;
+    }
+    .q-opt::before {
+      content:attr(data-letter);
+      width:22px; height:22px; border-radius:6px;
+      background:var(--g-btn); color:var(--g-text-sub);
+      font-size:11px; font-weight:800;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .q-opt:hover:not(:disabled) { background:rgba(124,58,237,.18); border-color:#a78bfa; }
+    .q-opt.correct { background:rgba(52,211,153,.2); border-color:#34d399; box-shadow:0 0 12px rgba(52,211,153,.25); }
+    .q-opt.wrong   { background:rgba(248,113,113,.15); border-color:#f87171; }
+    .q-opt:disabled{ cursor:not-allowed; }
+    .q-timer-bar { height:5px; background:var(--g-btn); border-radius:3px; overflow:hidden; margin-bottom:18px; }
+    .q-timer-fill{ height:100%; background:linear-gradient(90deg,#34d399,#c8f135); border-radius:3px; transition:width 1s linear; box-shadow:0 0 8px rgba(52,211,153,.5); }
+
+    /* Setup modal */
+    .player-setup { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+    .player-row   { display:flex; align-items:center; gap:10px; }
+    .color-swatch { width:24px; height:24px; border-radius:50%; flex-shrink:0; }
+
+    /* Streak modal */
+    .streak-q {
+      font-size:16px; font-weight:600; color:var(--g-text); margin-bottom:16px;
+      background:rgba(232,121,249,.06); border:1px solid rgba(232,121,249,.15);
+      border-radius:12px; padding:14px 16px; text-align:center; line-height:1.55;
+    }
+    .streak-bar { display:flex; gap:8px; margin-bottom:18px; }
+    .streak-pip { flex:1; height:10px; border-radius:5px; background:var(--g-btn); transition:all .3s; }
+    .streak-pip.done  { background:linear-gradient(90deg,#34d399,#10b981); box-shadow:0 0 8px rgba(52,211,153,.5); }
+    .streak-pip.wrong { background:#ff5722; }
+
+    /* Win modal */
+    .win-emoji { font-size:72px; text-align:center; margin-bottom:16px; }
+    .win-name  { font-size:28px; font-weight:800; text-align:center; margin-bottom:8px; color:var(--g-text); }
+    .win-sub   { font-size:14px; color:var(--g-text-sub); text-align:center; margin-bottom:24px; }
+
+    /* Direction inline chooser */
+    .dir-inline { padding:8px 0; }
+    .dir-title { font-size:11px; font-weight:700; color:var(--g-text-sub); text-transform:uppercase; letter-spacing:.07em; margin-bottom:10px; text-align:center; }
+    .dir-btn {
+      width:100%; margin-bottom:8px; padding:13px 10px;
+      border-radius:10px; font-size:15px; font-weight:700;
+      border:2px solid transparent; cursor:pointer; transition:.18s;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .dir-btn.cw  { background:rgba(167,139,250,.15); border-color:rgba(167,139,250,.5); color:#a78bfa; }
+    .dir-btn.cw:hover  { background:rgba(167,139,250,.28); }
+    .dir-btn.ccw { background:rgba(251,146,60,.15); border-color:rgba(251,146,60,.5); color:#fb923c; }
+    .dir-btn.ccw:hover { background:rgba(251,146,60,.28); }
+    .dir-btn.center { background:linear-gradient(90deg,#c8f135,#a8d020); color:#1a1f2e; border-color:transparent; }
+    .dir-btn.center:hover { filter:brightness(1.08); }
+
+    /* Direction preview animation */
+    @keyframes dirPulse { 0%,100%{opacity:.85;} 50%{opacity:.35;} }
+
+    /* Phase message */
+    #phaseMsg { text-align:center; font-size:12px; color:var(--g-text-muted); margin-top:4px; }
+
+    /* Help box */
+    .help-box { margin-top:16px; padding:10px; background:var(--g-card); border-radius:8px; font-size:12px; color:var(--g-text-sub); }
+    .help-box-title { margin-bottom:4px; font-weight:600; color:var(--g-text); }
+
+    @media(max-width:700px){
+      .game-layout { grid-template-columns:1fr; grid-template-rows:auto 1fr auto; }
+      .left-panel,.right-panel { display:none; }
+      .board-area { height:360px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" style="display:flex;align-items:center;padding:0 16px;gap:8px">
+  <a class="nav-logo" href="../index.html" style="font-size:15px;font-weight:800;color:#e8eaf2;text-decoration:none">Pixel<span>Dojo</span></a>
+  <span style="color:rgba(255,255,255,.3);font-size:12px">/ Trivial Otaku</span>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Cambia tema">🌙</button>
+    <button class="action-btn" style="width:auto;padding:6px 14px;font-size:12px;margin:0" onclick="showSetup()">Nuova partita</button>
+    <a class="action-btn" href="../index.html" style="width:auto;padding:6px 14px;font-size:12px;margin:0;text-decoration:none;display:inline-flex;align-items:center">← Home</a>
+  </div>
+</nav>
+
+<div class="game-layout">
+
+  <!-- ── PANNELLO SINISTRO: Giocatori ── -->
+  <div class="panel left-panel" id="playersPanel">
+    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Giocatori</div>
+    <div id="playersList"></div>
+    <div class="cat-legend">
+      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Categorie</div>
+      <div class="cat-row"><div class="cat-dot" style="background:var(--c-anime)"></div>⛩️ Anime</div>
+      <div class="cat-row"><div class="cat-dot" style="background:var(--c-sport)"></div>⚽ Sport</div>
+      <div class="cat-row"><div class="cat-dot" style="background:var(--c-games)"></div>🎮 Videogiochi</div>
+      <div class="cat-row"><div class="cat-dot" style="background:var(--c-music)"></div>🎵 Musica</div>
+      <div class="cat-row"><div class="cat-dot" style="background:var(--c-series)"></div>🎬 Serie/Film</div>
+      <div class="cat-row"><div class="cat-dot" style="background:var(--c-pokemon)"></div>⚡ Pokémon</div>
+    </div>
+  </div>
+
+  <!-- ── BOARD CENTRALE ── -->
+  <div class="board-area">
+    <svg id="boardSvg" viewBox="0 0 600 600"></svg>
+  </div>
+
+  <!-- ── PANNELLO DESTRO: Azioni ── -->
+  <div class="panel right-panel">
+    <div class="turn-info">
+      <div class="turn-label">Turno di</div>
+      <div class="turn-name" id="turnName" style="color:#c8f135">—</div>
+    </div>
+    <div class="dice-area disabled" id="diceArea" onclick="handleDiceClick()">
+      <svg id="diceSvg" viewBox="0 0 100 100"></svg>
+    </div>
+    <div id="phaseMsg">Attendi la partita</div>
+
+    <div class="action-panel" id="actionPanel"></div>
+
+    <div class="help-box">
+      <div class="help-box-title">Come vincere:</div>
+      <div>• Colleziona tutti e 6 gli spicchi (uno per QG)</div>
+      <div>• Vai ad un QG e premi "Verso il Centro"</div>
+      <div>• Rispondi a 5 domande di fila ✓</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ MODAL SETUP ══════════════════ -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal-box">
+    <div class="modal-title">🎌 Trivial Otaku</div>
+    <div class="modal-sub">Configura i giocatori (2–6) e inizia la partita!</div>
+    <div class="player-setup" id="playerSetup"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="action-btn" style="width:auto;flex:1" onclick="addPlayer()" id="addPlayerBtn">+ Aggiungi giocatore</button>
+    </div>
+    <button class="action-btn volt" style="margin-top:14px" onclick="startGame()">🎲 Inizia partita!</button>
+  </div>
+</div>
+
+<!-- ══════════════════ MODAL DOMANDA ══════════════════ -->
+<div class="modal-overlay hidden" id="questionModal">
+  <div class="modal-box">
+    <div class="q-cat" id="qCat"></div>
+    <div class="q-timer-bar"><div class="q-timer-fill" id="qTimerFill" style="width:100%"></div></div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-opts" id="qOpts"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ MODAL STREAK ══════════════════ -->
+<div class="modal-overlay hidden" id="streakModal">
+  <div class="modal-box" style="border-color:rgba(232,121,249,.5);box-shadow:0 0 60px rgba(232,121,249,.3),0 24px 64px rgba(0,0,0,.6)">
+    <div class="modal-title">🔥 Sfida Finale!</div>
+    <div class="modal-sub">Rispondi a 5 domande consecutive per vincere. Un errore azzera la streak!</div>
+    <div class="streak-bar" id="streakBar"></div>
+    <div class="q-cat" id="sQCat"></div>
+    <div class="q-timer-bar"><div class="q-timer-fill" id="sTimerFill" style="width:100%"></div></div>
+    <div class="streak-q" id="sQText"></div>
+    <div class="q-opts" id="sQOpts"></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════ MODAL RAGGIO ══════════════════ -->
+<div class="modal-overlay hidden" id="spokeModal">
+  <div class="modal-box">
+    <div class="modal-title">🛤️ Scegli un sentiero</div>
+    <div class="modal-sub">Da quale sentiero vuoi avventurarti?</div>
+    <div id="spokeOptions" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ MODAL VITTORIA ══════════════════ -->
+<div class="modal-overlay hidden" id="winModal">
+  <div class="modal-box">
+    <div class="win-emoji">🏆</div>
+    <div class="win-name" id="winName"></div>
+    <div class="win-sub" id="winSub"></div>
+    <button class="action-btn volt" onclick="showSetup()">Nuova partita</button>
+    <a class="action-btn" href="../classifica.html" style="text-decoration:none;display:block;text-align:center;margin-top:8px">Vedi classifica</a>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Auth Module (localStorage, pronto per Firebase)
+═══════════════════════════════════════════════════════════ */
+
+const Auth = (() => {
+  const USERS_KEY    = 'pd_users';
+  const SESSION_KEY  = 'pd_session';
+
+  function _getUsers()  { return JSON.parse(localStorage.getItem(USERS_KEY)  || '{}'); }
+  function _saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+  function _getSession(){ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+
+  function register(email, password, nickname) {
+    email = email.trim().toLowerCase();
+    nickname = nickname.trim();
+    if (!email || !password || !nickname) return { ok:false, err:'Compila tutti i campi.' };
+    if (password.length < 6) return { ok:false, err:'Password minima 6 caratteri.' };
+    const users = _getUsers();
+    if (users[email]) return { ok:false, err:'Email già registrata.' };
+    const user = {
+      email, nickname,
+      passwordHash: btoa(password),   // placeholder — sostituire con Firebase Auth
+      createdAt: Date.now(),
+      xp: 0, level: 1,
+      avatar: nickname.slice(0,2).toUpperCase(),
+    };
+    users[email] = user;
+    _saveUsers(users);
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ email, nickname, xp: user.xp, level: user.level, avatar: user.avatar }));
+    return { ok:true, user };
+  }
+
+  function login(email, password) {
+    email = email.trim().toLowerCase();
+    const users = _getUsers();
+    const user  = users[email];
+    if (!user) return { ok:false, err:'Email non trovata.' };
+    if (user.passwordHash !== btoa(password)) return { ok:false, err:'Password errata.' };
+    const session = { email, nickname: user.nickname, xp: user.xp, level: user.level, avatar: user.avatar };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return { ok:true, user: session };
+  }
+
+  function logout() {
+    localStorage.removeItem(SESSION_KEY);
+    window.location.href = '../login.html';
+  }
+
+  function currentUser() { return _getSession(); }
+
+  function isLoggedIn() { return !!_getSession(); }
+
+  function addXP(amount) {
+    const session = _getSession();
+    if (!session) return;
+    const users = _getUsers();
+    const user  = users[session.email];
+    if (!user) return;
+    user.xp += amount;
+    user.level = Math.floor(user.xp / 1000) + 1;
+    _saveUsers(users);
+    session.xp    = user.xp;
+    session.level = user.level;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return { xp: user.xp, level: user.level };
+  }
+
+  function requireLogin() {
+    if (!isLoggedIn()) {
+      window.location.href = '../login.html';
+      return null;
+    }
+    return currentUser();
+  }
+
+  return { register, login, logout, currentUser, isLoggedIn, addXP, requireLogin };
+})();
+
+
+/* ── Helpers UI condivisi ── */
+function showToast(msg, type = 'info') {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function renderNavUser() {
+  const user = Auth.currentUser();
+  const navRight = document.querySelector('.nav-right');
+  if (!navRight) return;
+
+  if (user) {
+    navRight.innerHTML = `
+      <div class="nav-coins">★ ${user.xp} XP</div>
+      <div class="nav-avatar" title="${user.nickname}">${user.avatar}</div>
+      <button class="btn btn-ghost btn-sm" onclick="Auth.logout()">Esci</button>
+    `;
+  } else {
+    navRight.innerHTML = `
+      <a class="btn btn-ghost btn-sm" href="../login.html">Accedi</a>
+      <a class="btn btn-volt btn-sm" href="../login.html#register">Registrati</a>
+    `;
+  }
+}
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Leaderboard Module (localStorage → Firebase ready)
+═══════════════════════════════════════════════════════════ */
+
+const Leaderboard = (() => {
+  const KEY = 'pd_leaderboard';
+
+  const GAMES = {
+    trivial:        { name:'Trivial Otaku',      emoji:'🎌', metric:'turns',  label:'turni',   lowerIsBetter: true  },
+    quiz_pokemon:   { name:'Pokémon Expert',     emoji:'⚡', metric:'score',  label:'punti',   lowerIsBetter: false },
+    quiz_generale:  { name:'Cultura Generale',   emoji:'🌍', metric:'score',  label:'punti',   lowerIsBetter: false },
+  };
+
+  function _getData()    { return JSON.parse(localStorage.getItem(KEY) || '{}'); }
+  function _saveData(d)  { localStorage.setItem(KEY, JSON.stringify(d)); }
+
+  /* Aggiunge un risultato; mantiene top 10 per gioco */
+  function submit(gameId, entry) {
+    // entry: { nickname, avatar, value, meta? }
+    const data   = _getData();
+    if (!data[gameId]) data[gameId] = [];
+    const board  = data[gameId];
+
+    // Rimuoviamo eventuale record precedente stesso utente (teniamo il migliore)
+    const existing = board.findIndex(e => e.nickname === entry.nickname);
+    if (existing !== -1) {
+      const old = board[existing];
+      const game = GAMES[gameId];
+      const isBetter = game.lowerIsBetter
+        ? entry.value < old.value
+        : entry.value > old.value;
+      if (!isBetter) { _saveData(data); return; }
+      board.splice(existing, 1);
+    }
+
+    board.push({ ...entry, date: Date.now() });
+
+    // Sort
+    const game = GAMES[gameId];
+    board.sort((a, b) => game.lowerIsBetter ? a.value - b.value : b.value - a.value);
+
+    // Top 10
+    data[gameId] = board.slice(0, 10);
+    _saveData(data);
+  }
+
+  function getBoard(gameId) {
+    const data = _getData();
+    return data[gameId] || [];
+  }
+
+  function getAllBoards() {
+    const data = _getData();
+    return Object.fromEntries(
+      Object.keys(GAMES).map(id => [id, data[id] || []])
+    );
+  }
+
+  function getGameInfo(gameId) { return GAMES[gameId] || null; }
+  function getAllGames()        { return GAMES; }
+
+  /* Rendering HTML di una leaderboard */
+  function renderBoard(gameId, container) {
+    const board = getBoard(gameId);
+    const game  = GAMES[gameId];
+    if (!game) return;
+
+    const rankClass = ['gold','silver','bronze'];
+    if (!board.length) {
+      container.innerHTML = `<div style="color:var(--ink3);font-size:13px;padding:20px;text-align:center;">Nessun punteggio ancora — sii il primo!</div>`;
+      return;
+    }
+
+    container.innerHTML = board.map((e, i) => `
+      <div class="lb-item">
+        <div class="lb-rank ${rankClass[i] || ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</div>
+        <div class="lb-avatar" style="background:${avatarColor(e.nickname)};color:#fff">${e.avatar || e.nickname.slice(0,2).toUpperCase()}</div>
+        <div class="lb-name">${escapeHtml(e.nickname)}</div>
+        <div class="lb-score">${e.value} <span style="font-size:11px;color:var(--ink3)">${game.label}</span></div>
+      </div>
+    `).join('');
+  }
+
+  function avatarColor(str) {
+    const colors = ['#7c3aed','#ff5722','#0ea5e9','#f59e0b','#10b981','#e91e63','#9c27b0','#3f51b5'];
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+    return colors[Math.abs(h) % colors.length];
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  return { submit, getBoard, getAllBoards, getGameInfo, getAllGames, renderBoard, avatarColor };
+})();
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Domande Trivial Otaku
+   6 categorie × 50 domande = 300 totali
+   diff: 1=facile, 2=medio, 3=difficile
+   ans: indice della risposta corretta in opts[]
+═══════════════════════════════════════════════════════════ */
+
+const TRIVIAL_QUESTIONS_RAW = {
+
+  /* ── ANIME ─────────────────────────────────────────────── */
+  anime: [
+    { id:"a01", text:"Chi è il creatore di Dragon Ball?", opts:["Kishimoto","Toriyama","Oda","Togashi"], ans:1, diff:1 },
+    { id:"a02", text:"Quale studio ha prodotto Spirited Away?", opts:["Trigger","Madhouse","Ghibli","A-1 Pictures"], ans:2, diff:1 },
+    { id:"a03", text:"In Naruto, come si chiama il villaggio protagonista?", opts:["Sunagakure","Kumogakure","Konohagakure","Iwagakure"], ans:2, diff:1 },
+    { id:"a04", text:"Quale studio ha animato la stagione 1 di Attack on Titan?", opts:["Wit Studio","MAPPA","Ufotable","Bones"], ans:0, diff:2 },
+    { id:"a05", text:"In Steins;Gate, qual è il numero del laboratorio?", opts:["204","001","011","042"], ans:2, diff:3 },
+    { id:"a06", text:"Chi ha scritto sia Yu Yu Hakusho che Hunter x Hunter?", opts:["Urasawa","Togashi","Miura","Isayama"], ans:1, diff:2 },
+    { id:"a07", text:"In quale anno è ambientato Ghost in the Shell (1995)?", opts:["2019","2025","2029","2045"], ans:2, diff:2 },
+    { id:"a08", text:"Qual è il vero nome di Light Yagami in Death Note?", opts:["Kira","Light","Ryuk","L"], ans:1, diff:1 },
+    { id:"a09", text:"Quante sfere del drago esistono in Dragon Ball?", opts:["5","6","7","8"], ans:2, diff:1 },
+    { id:"a10", text:"In One Piece, come si chiama la ciurma di Rufy?", opts:["Cappello di Paglia","Cuori","Bestie","Fiamma"], ans:0, diff:1 },
+    { id:"a11", text:"Chi è il villain principale di Fullmetal Alchemist: Brotherhood?", opts:["Scar","Father","Envy","Wrath"], ans:1, diff:2 },
+    { id:"a12", text:"In quale anno è uscito il primo ep. di Neon Genesis Evangelion?", opts:["1993","1995","1997","1999"], ans:1, diff:3 },
+    { id:"a13", text:"Come si chiama la Zanpakuto di Ichigo in Bleach?", opts:["Zangetsu","Senbonzakura","Ryujin Jakka","Hyorinmaru"], ans:0, diff:2 },
+    { id:"a14", text:"Quale stile di respirazione usa Tanjiro in Demon Slayer?", opts:["Fiamma","Acqua e Sole","Tuono","Vento"], ans:1, diff:2 },
+    { id:"a15", text:"Quale studio ha prodotto Fullmetal Alchemist: Brotherhood?", opts:["Bones","Madhouse","Sunrise","A-1 Pictures"], ans:0, diff:2 },
+    { id:"a16", text:"In quale anno è uscito Il Castello Errante di Howl?", opts:["2001","2003","2004","2006"], ans:2, diff:2 },
+    { id:"a17", text:"Chi è il protagonista di Sword Art Online?", opts:["Kirito","Asuna","Klein","Agil"], ans:0, diff:1 },
+    { id:"a18", text:"Come si chiama il Titan di Eren Jaeger?", opts:["Titan Corazzato","Titan Colosso","Titan Attaccante","Titan di Guerra"], ans:2, diff:2 },
+    { id:"a19", text:"In My Hero Academia, qual è il Quirk di Izuku Midoriya?", opts:["One For All","All For One","Half-Cold Half-Hot","Zero Gravity"], ans:0, diff:1 },
+    { id:"a20", text:"In Jujutsu Kaisen, chi è il maestro di Yuji Itadori?", opts:["Nanami","Gojo","Megumi","Todo"], ans:1, diff:1 },
+    { id:"a21", text:"Come si chiama la protagonista di Sailor Moon?", opts:["Rei","Ami","Usagi","Makoto"], ans:2, diff:1 },
+    { id:"a22", text:"Quale tecnica usa Goku per teletrasportarsi?", opts:["Teletrasporto Istantaneo","Kamehameha","Kaioken","Spirit Bomb"], ans:0, diff:2 },
+    { id:"a23", text:"In Tokyo Ghoul, di quale organizzazione fa parte Kaneki inizialmente?", opts:["Aogiri","Anteiku","CCG","Quinx Squad"], ans:1, diff:2 },
+    { id:"a24", text:"Chi è l'autore di Berserk?", opts:["Togashi","Miura","Oda","Fujimoto"], ans:1, diff:2 },
+    { id:"a25", text:"In Re:Zero, come si chiama il potere di Subaru?", opts:["Return by Death","Gate of Babylon","Sharingan","Nen"], ans:0, diff:2 },
+    { id:"a26", text:"In Code Geass, qual è il vero nome di Zero?", opts:["Suzaku","Lelouch","Charles","Schneizel"], ans:1, diff:1 },
+    { id:"a27", text:"In Cowboy Bebop, come si chiama la nave dei protagonisti?", opts:["Red Tail","Bebop","Swordfish","Hammerhead"], ans:1, diff:2 },
+    { id:"a28", text:"In NGE, qual è il numero dell'unità di Shinji?", opts:["00","01","02","03"], ans:1, diff:2 },
+    { id:"a29", text:"Chi è il villain principale di Jujutsu Kaisen?", opts:["Geto","Mahito","Sukuna","Kenjaku"], ans:2, diff:2 },
+    { id:"a30", text:"Quale studio ha prodotto Demon Slayer?", opts:["Wit Studio","Bones","Ufotable","MAPPA"], ans:2, diff:2 },
+    { id:"a31", text:"In One Piece, come si chiama il frutto del diavolo di Rufy?", opts:["Gomu Gomu no Mi","Mera Mera no Mi","Hie Hie no Mi","Gura Gura no Mi"], ans:0, diff:1 },
+    { id:"a32", text:"Chi ha diretto il film anime Akira (1988)?", opts:["Hayao Miyazaki","Katsuhiro Otomo","Satoshi Kon","Mamoru Oshii"], ans:1, diff:3 },
+    { id:"a33", text:"In Hunter x Hunter, qual è il tipo di Nen di Gon?", opts:["Enhancement","Emission","Transmutation","Manipulation"], ans:0, diff:3 },
+    { id:"a34", text:"Come si chiama il palazzo nella Soul Society in Bleach?", opts:["Las Noches","Seireitei","Dangai","Urahara Shop"], ans:1, diff:3 },
+    { id:"a35", text:"Come si chiama il protagonista di Vinland Saga?", opts:["Bjorn","Thorfinn","Askeladd","Thorkell"], ans:1, diff:2 },
+    { id:"a36", text:"In quale anno ha vinto MAPPA la produzione di AoT?", opts:["2017","2019","2020","2022"], ans:2, diff:3 },
+    { id:"a37", text:"Quale studio ha prodotto Attack on Titan dalla stagione 3 parte 2?", opts:["Wit Studio","MAPPA","Bones","Ufotable"], ans:1, diff:2 },
+    { id:"a38", text:"In Spy x Family, qual è il nome in codice della missione?", opts:["Operation Strix","Operation Owl","Operation Hawk","Operation Fox"], ans:0, diff:2 },
+    { id:"a39", text:"In Mob Psycho 100, qual è la percentuale massima di Mob?", opts:["99","100","???%","1000"], ans:2, diff:2 },
+    { id:"a40", text:"Chi è il protagonista di Haikyuu!!?", opts:["Tobio Kageyama","Shoyo Hinata","Tanaka","Sugawara"], ans:1, diff:1 },
+    { id:"a41", text:"In FMA, cosa sacrifica Edward per riportare Alphonse?", opts:["Occhio sinistro","Gamba sinistra","Braccio destro","Cuore"], ans:2, diff:2 },
+    { id:"a42", text:"Come si chiama il protagonista di Chainsaw Man?", opts:["Aki","Power","Denji","Kobeni"], ans:2, diff:1 },
+    { id:"a43", text:"In Violet Evergarden, chi dà il nome alla protagonista?", opts:["Gilbert","Claudia","Dietfried","Leon"], ans:0, diff:3 },
+    { id:"a44", text:"Quale tipo di Nen usa Killua in HxH?", opts:["Enhancement","Transmutation","Emission","Manipulation"], ans:1, diff:3 },
+    { id:"a45", text:"In Code Geass, quale potere ha Lelouch nell'occhio?", opts:["Byakugan","Geass","Sharingan","Rinnegan"], ans:1, diff:1 },
+    { id:"a46", text:"Chi è l'autore di Chainsaw Man?", opts:["Isayama","Fujimoto","Miura","Gege Akutami"], ans:1, diff:2 },
+    { id:"a47", text:"Quale tecnica firma di Naruto è più famosa?", opts:["Chidori","Rasengan","Kage Bunshin","Amaterasu"], ans:1, diff:1 },
+    { id:"a48", text:"In Tokyo Revengers, a quale gang appartiene Mikey?", opts:["Black Dragon","Toman","Valhalla","Brahman"], ans:1, diff:2 },
+    { id:"a49", text:"Quanti personaggi principali ha il gruppo dei Pilastri in Demon Slayer?", opts:["7","8","9","10"], ans:2, diff:3 },
+    { id:"a50", text:"In quale anime il protagonista si chiama Tanjiro Kamado?", opts:["Jujutsu Kaisen","My Hero Academia","Demon Slayer","Black Clover"], ans:2, diff:1 },
+  ],
+
+  /* ── SPORT ─────────────────────────────────────────────── */
+  sport: [
+    { id:"s01", text:"In quale anno l'Italia ha vinto il suo primo Mondiale di calcio?", opts:["1930","1934","1938","1950"], ans:1, diff:1 },
+    { id:"s02", text:"Quanti anelli compone il simbolo olimpico?", opts:["4","5","6","7"], ans:1, diff:1 },
+    { id:"s03", text:"In quale sport si usa il termine 'slam dunk'?", opts:["Pallavolo","Tennis","Basket","Pallamano"], ans:2, diff:1 },
+    { id:"s04", text:"Chi detiene il record mondiale dei 100 metri piani?", opts:["Powell","Gatlin","Bolt","Gay"], ans:2, diff:2 },
+    { id:"s05", text:"Quante volte il Brasile ha vinto la Coppa del Mondo FIFA?", opts:["4","5","6","7"], ans:1, diff:2 },
+    { id:"s06", text:"In quale anno Schumacher ha vinto il suo primo titolo F1?", opts:["1992","1993","1994","1995"], ans:2, diff:3 },
+    { id:"s07", text:"Quanti giocatori in campo per una squadra di pallavolo?", opts:["5","6","7","8"], ans:1, diff:1 },
+    { id:"s08", text:"In quale sport si usa il termine 'hat-trick'?", opts:["Basket","Calcio","Rugby","Tennis"], ans:1, diff:1 },
+    { id:"s09", text:"Chi ha vinto più titoli di Wimbledon in singolare maschile (storico)?", opts:["Federer","Sampras","Djokovic","McEnroe"], ans:2, diff:3 },
+    { id:"s10", text:"In quale paese è nato il Rugby?", opts:["Francia","Scozia","Inghilterra","Irlanda"], ans:2, diff:2 },
+    { id:"s11", text:"Quanti giocatori per squadra nel football americano?", opts:["9","10","11","12"], ans:2, diff:1 },
+    { id:"s12", text:"In quale anno si sono svolte le prime Olimpiadi moderne?", opts:["1892","1896","1900","1904"], ans:1, diff:2 },
+    { id:"s13", text:"Quanti titoli mondiali F1 ha vinto Michael Schumacher?", opts:["5","6","7","8"], ans:2, diff:2 },
+    { id:"s14", text:"In quale anno Roger Federer ha vinto il suo primo Wimbledon?", opts:["2001","2002","2003","2004"], ans:2, diff:2 },
+    { id:"s15", text:"Chi detiene il record mondiale della maratona (uomini)?", opts:["Kipchoge","Bekele","Haile","Farah"], ans:0, diff:2 },
+    { id:"s16", text:"Quanti km è la distanza ufficiale della maratona?", opts:["40","42.195","43","44.5"], ans:1, diff:2 },
+    { id:"s17", text:"Quale club ha vinto più Champions League nella storia?", opts:["Barcellona","Liverpool","AC Milan","Real Madrid"], ans:3, diff:1 },
+    { id:"s18", text:"Chi ha vinto il Pallone d'Oro più volte fino al 2023?", opts:["Ronaldo","Messi","Lewandowski","Modric"], ans:1, diff:2 },
+    { id:"s19", text:"Quanti giocatori compongono una squadra di rugby union?", opts:["13","14","15","16"], ans:2, diff:2 },
+    { id:"s20", text:"Quante buche ha un campo da golf standard?", opts:["9","12","18","24"], ans:2, diff:1 },
+    { id:"s21", text:"Qual è il record olimpico dei 100m stabilito da Usain Bolt?", opts:["9.63","9.69","9.81","9.58"], ans:0, diff:3 },
+    { id:"s22", text:"Quante squadre partecipano alla NBA?", opts:["28","30","32","34"], ans:1, diff:2 },
+    { id:"s23", text:"In quale anno Michael Jordan si è ritirato la prima volta dall'NBA?", opts:["1993","1995","1998","2003"], ans:0, diff:2 },
+    { id:"s24", text:"Quale tennista ha il record di titoli Slam maschili (2023)?", opts:["Federer","Djokovic","Nadal","Agassi"], ans:1, diff:2 },
+    { id:"s25", text:"Quale nazione ha vinto più Mondiali di calcio femminile?", opts:["Germania","Brasile","USA","Norvegia"], ans:2, diff:2 },
+    { id:"s26", text:"In quale anno Marcell Jacobs ha vinto il 100m alle Olimpiadi?", opts:["2019","2021","2022","2023"], ans:1, diff:1 },
+    { id:"s27", text:"Quanti punti vale una 'try' nel rugby union?", opts:["3","4","5","6"], ans:2, diff:2 },
+    { id:"s28", text:"Qual è la lunghezza di una piscina olimpionica?", opts:["25m","50m","75m","100m"], ans:1, diff:1 },
+    { id:"s29", text:"In quale sport gareggia Federica Pellegrini?", opts:["Atletica","Nuoto","Ginnastica","Canoa"], ans:1, diff:1 },
+    { id:"s30", text:"Quante volte ha vinto il Tour de France Eddy Merckx?", opts:["4","5","6","7"], ans:1, diff:2 },
+    { id:"s31", text:"In quale anno l'Italia ha vinto l'Europeo di calcio più recentemente?", opts:["2016","2019","2021","2024"], ans:2, diff:1 },
+    { id:"s32", text:"Chi è stato il primo pilota a vincere il campionato di F1?", opts:["Farina","Fangio","Ascari","Hawthorn"], ans:0, diff:3 },
+    { id:"s33", text:"Quale nazione ha vinto più medaglie d'oro totali nella storia olimpica?", opts:["Russia","Cina","USA","UK"], ans:2, diff:2 },
+    { id:"s34", text:"Quante corsie ha una pista di atletica standard?", opts:["4","6","8","10"], ans:2, diff:2 },
+    { id:"s35", text:"Quanti giocatori ha una squadra di cricket?", opts:["9","10","11","12"], ans:2, diff:2 },
+    { id:"s36", text:"In quale sport si usano i termini 'birdie' e 'eagle'?", opts:["Tennis","Golf","Badminton","Squash"], ans:1, diff:1 },
+    { id:"s37", text:"Quale club italiano ha vinto più Scudetti?", opts:["Inter","AC Milan","Juventus","Roma"], ans:2, diff:1 },
+    { id:"s38", text:"Quanti giocatori ha una squadra di pallacanestro in campo?", opts:["4","5","6","7"], ans:1, diff:1 },
+    { id:"s39", text:"In quale anno si sono svolte le Olimpiadi di Tokyo (ultima edizione)?", opts:["2019","2020","2021","2022"], ans:2, diff:1 },
+    { id:"s40", text:"Quanti set al massimo nel tennis Grand Slam maschile?", opts:["3","4","5","6"], ans:2, diff:2 },
+    { id:"s41", text:"Qual è il soprannome di Muhammad Ali prima di cambiare nome?", opts:["Iron Mike","The Greatest","Cassius Clay","The Real Deal"], ans:2, diff:2 },
+    { id:"s42", text:"In quale paese ha sede il quartier generale della FIFA?", opts:["Francia","Germania","Svizzera","Italia"], ans:2, diff:2 },
+    { id:"s43", text:"Quale Sport ha le discipline di Free Style e Greco-Romana?", opts:["Judo","Lotta","Karate","Taekwondo"], ans:1, diff:2 },
+    { id:"s44", text:"Quanti minuti dura un tempo nel calcio professionistico?", opts:["40","45","50","60"], ans:1, diff:1 },
+    { id:"s45", text:"Chi ha realizzato più gol nella storia dei Mondiali (uomini)?", opts:["Pelé","Ronaldo","Miroslav Klose","Müller"], ans:2, diff:3 },
+    { id:"s46", text:"Quale squadra NBA ha vinto più titoli?", opts:["Chicago Bulls","LA Lakers","Boston Celtics","Golden State"], ans:2, diff:2 },
+    { id:"s47", text:"Quante medaglie d'oro ha vinto Usain Bolt alle Olimpiadi?", opts:["6","7","8","9"], ans:2, diff:2 },
+    { id:"s48", text:"In cricket, come si chiama il giocatore che batte?", opts:["Bowler","Batsman","Fielder","Wicket-keeper"], ans:1, diff:2 },
+    { id:"s49", text:"Quale paese ospiterà i Mondiali di calcio 2026?", opts:["USA alone","Canada alone","USA/Canada/Messico","Brasile"], ans:2, diff:1 },
+    { id:"s50", text:"Quanti punti vale un canestro da 3 nel basket?", opts:["2","3","4","1"], ans:1, diff:1 },
+  ],
+
+  /* ── VIDEOGIOCHI ────────────────────────────────────────── */
+  games: [
+    { id:"g01", text:"In quale anno è stato lanciato il primo Nintendo Game Boy?", opts:["1985","1987","1989","1991"], ans:2, diff:1 },
+    { id:"g02", text:"Come si chiama il protagonista di The Legend of Zelda?", opts:["Zelda","Link","Ganon","Navi"], ans:1, diff:1 },
+    { id:"g03", text:"Quale azienda ha sviluppato Minecraft?", opts:["Valve","Mojang","Epic Games","Bethesda"], ans:1, diff:1 },
+    { id:"g04", text:"Qual è il nome del protagonista di Half-Life?", opts:["Gordon Freeman","Master Chief","Solid Snake","Marcus Fenix"], ans:0, diff:2 },
+    { id:"g05", text:"In quale anno è uscito il primo The Witcher di CD Projekt RED?", opts:["2005","2007","2009","2011"], ans:1, diff:3 },
+    { id:"g06", text:"Qual è il vero nome di Solid Snake in Metal Gear Solid?", opts:["David","Jack","Frank","John"], ans:0, diff:3 },
+    { id:"g07", text:"Quale personaggio Nintendo può copiare i poteri dei nemici?", opts:["Yoshi","Kirby","Meta Knight","Dedede"], ans:1, diff:1 },
+    { id:"g08", text:"In quale anno è uscito il primo Super Mario Bros.?", opts:["1981","1983","1985","1987"], ans:2, diff:1 },
+    { id:"g09", text:"Chi è il protagonista di The Last of Us?", opts:["Joel","Ellie","Tommy","Bill"], ans:0, diff:1 },
+    { id:"g10", text:"In quale genere rientra Dark Souls?", opts:["JRPG","Action RPG","Platformer","RTS"], ans:1, diff:2 },
+    { id:"g11", text:"Come si chiama la valuta principale di World of Warcraft?", opts:["Gold","Coin","Gil","Zenny"], ans:0, diff:2 },
+    { id:"g12", text:"In quale anno è uscita la prima PlayStation?", opts:["1992","1993","1994","1995"], ans:2, diff:2 },
+    { id:"g13", text:"Quale casa ha prodotto la console Mega Drive?", opts:["Nintendo","Sega","Sony","Atari"], ans:1, diff:1 },
+    { id:"g14", text:"In Pac-Man classico, come si chiama il fantasma rosso?", opts:["Pinky","Blinky","Clyde","Inky"], ans:1, diff:3 },
+    { id:"g15", text:"In quale anno è uscita la Nintendo Switch?", opts:["2015","2016","2017","2018"], ans:2, diff:1 },
+    { id:"g16", text:"Quale gioco ha il personaggio Altaïr Ibn-La'Ahad?", opts:["Assassin's Creed","Prince of Persia","God of War","Uncharted"], ans:0, diff:1 },
+    { id:"g17", text:"Come si chiama il protagonista di God of War?", opts:["Kratos","Ares","Atreus","Zeus"], ans:0, diff:1 },
+    { id:"g18", text:"Quale azienda sviluppa la serie Dark Souls?", opts:["Namco","FromSoftware","Bandai","Square Enix"], ans:1, diff:2 },
+    { id:"g19", text:"In quale anno è uscito il primo Skyrim?", opts:["2009","2010","2011","2012"], ans:2, diff:2 },
+    { id:"g20", text:"Come si chiama la spada magica in The Legend of Zelda?", opts:["Excalibur","Master Sword","Dark Sword","Blade of Light"], ans:1, diff:1 },
+    { id:"g21", text:"Chi è l'antagonista principale di Final Fantasy VII?", opts:["Kefka","Sephiroth","Ultimecia","Zeromus"], ans:1, diff:1 },
+    { id:"g22", text:"Come si chiama la protagonista di Horizon Zero Dawn?", opts:["Aloy","Nora","Rost","Erend"], ans:0, diff:1 },
+    { id:"g23", text:"Quale gioco ha lanciato il genere Battle Royale nel mainstream?", opts:["Fortnite","PUBG","H1Z1","Apex Legends"], ans:1, diff:2 },
+    { id:"g24", text:"In Portal, chi è la IA antagonista?", opts:["HAL 9000","GLaDOS","Shodan","AM"], ans:1, diff:2 },
+    { id:"g25", text:"Quale azienda produce Gran Turismo?", opts:["Microsoft","Polyphony Digital","Konami","Namco"], ans:1, diff:2 },
+    { id:"g26", text:"In Street Fighter II, chi è il boss finale?", opts:["M. Bison","Balrog","Sagat","Vega"], ans:0, diff:2 },
+    { id:"g27", text:"Come si chiama il protagonista di Devil May Cry?", opts:["Dante","Nero","Vergil","Trish"], ans:0, diff:1 },
+    { id:"g28", text:"Quale gioco contiene la frase 'Stay a while and listen'?", opts:["Diablo","StarCraft","Warcraft","Path of Exile"], ans:0, diff:3 },
+    { id:"g29", text:"In Cyberpunk 2077, in quale città è ambientato il gioco?", opts:["Neo Tokyo","Night City","New Chicago","Mega City"], ans:1, diff:1 },
+    { id:"g30", text:"Quale azienda ha sviluppato Fortnite?", opts:["Activision","Epic Games","EA","Valve"], ans:1, diff:1 },
+    { id:"g31", text:"Quale console ha venduto di più nella storia?", opts:["NES","PS2","Wii","PlayStation 4"], ans:1, diff:2 },
+    { id:"g32", text:"Quale gioco ha la frase 'It's dangerous to go alone! Take this.'?", opts:["Zelda","Final Fantasy","Dragon Quest","Earthbound"], ans:0, diff:2 },
+    { id:"g33", text:"In Hollow Knight, che tipo di gioco è?", opts:["Platformer 3D","Metroidvania","Beat 'em up","Roguelike"], ans:1, diff:2 },
+    { id:"g34", text:"In Fire Emblem, cosa succede a un personaggio che muore?", opts:["Respawn","Permadeath (classic)","Retirement","Injury"], ans:1, diff:2 },
+    { id:"g35", text:"In quale anno è uscito World of Warcraft?", opts:["2002","2003","2004","2005"], ans:2, diff:2 },
+    { id:"g36", text:"In Minecraft, quale materiale serve per un portale del Nether?", opts:["Obsidian","Bedrock","End Stone","Magma"], ans:0, diff:2 },
+    { id:"g37", text:"Quale gioco ha la protagonista Kassandra come personaggio giocabile?", opts:["God of War","Assassin's Creed Odyssey","Horizon","Ghost of Tsushima"], ans:1, diff:2 },
+    { id:"g38", text:"In Overwatch, quale personaggio usa Justice Rains From Above?", opts:["Soldier:76","Cassidy","Pharah","Reaper"], ans:2, diff:2 },
+    { id:"g39", text:"Quale azienda ha sviluppato Red Dead Redemption?", opts:["Rockstar","Ubisoft","Naughty Dog","Bethesda"], ans:0, diff:1 },
+    { id:"g40", text:"Quale gioco introduce il personaggio Master Chief?", opts:["Gears of War","Halo","Call of Duty","Destiny"], ans:1, diff:1 },
+    { id:"g41", text:"Quante stelle è il massimo in Super Mario 64?", opts:["100","120","150","130"], ans:1, diff:2 },
+    { id:"g42", text:"Quale azienda ha sviluppato Cyberpunk 2077?", opts:["Bioware","Obsidian","CD Projekt RED","Bethesda"], ans:2, diff:1 },
+    { id:"g43", text:"In BioShock, a Rapture si sente 'Would you kindly' da chi?", opts:["Andrew Ryan","Jack","Atlas","Fontaine"], ans:2, diff:3 },
+    { id:"g44", text:"In quale anno è uscita la prima PlayStation Portable (PSP)?", opts:["2003","2004","2005","2006"], ans:1, diff:2 },
+    { id:"g45", text:"Quale personaggio di Nintendo dice 'Mamma mia!'?", opts:["Link","Mario","Wario","Yoshi"], ans:1, diff:1 },
+    { id:"g46", text:"Quale gioco ha la valuta Rupee?", opts:["Final Fantasy","Zelda","Pokemon","Fire Emblem"], ans:1, diff:2 },
+    { id:"g47", text:"In Among Us, cos'è l'obiettivo degli impostori?", opts:["Raccogliere gemme","Eliminare tutti i crewmate","Hackerare il sistema","Scappare dalla nave"], ans:1, diff:1 },
+    { id:"g48", text:"Quale studio ha sviluppato The Last of Us?", opts:["Insomniac","Naughty Dog","Santa Monica","Sucker Punch"], ans:1, diff:2 },
+    { id:"g49", text:"In quale anno è uscito il primo Halo?", opts:["1999","2000","2001","2002"], ans:2, diff:2 },
+    { id:"g50", text:"Come si chiama il villaggio principale in Stardew Valley?", opts:["Pelican Town","Stardew","Meadow Farm","Valley Creek"], ans:0, diff:3 },
+  ],
+
+  /* ── MUSICA ─────────────────────────────────────────────── */
+  music: [
+    { id:"m01", text:"In quale anno è uscito 'Thriller' di Michael Jackson?", opts:["1979","1982","1985","1988"], ans:1, diff:1 },
+    { id:"m02", text:"Quante corde ha una chitarra classica?", opts:["4","5","6","7"], ans:2, diff:1 },
+    { id:"m03", text:"Da quale città provengono i Beatles?", opts:["Londra","Birmingham","Liverpool","Manchester"], ans:2, diff:1 },
+    { id:"m04", text:"Quale strumento suona Yo-Yo Ma?", opts:["Violino","Viola","Violoncello","Contrabbasso"], ans:2, diff:2 },
+    { id:"m05", text:"Chi ha composto le 'Variazioni Goldberg'?", opts:["Vivaldi","Handel","Bach","Mozart"], ans:2, diff:3 },
+    { id:"m06", text:"Chi ha composto l'opera 'La Traviata'?", opts:["Puccini","Verdi","Rossini","Donizetti"], ans:1, diff:3 },
+    { id:"m07", text:"Quante note conta la scala cromatica occidentale?", opts:["7","8","12","13"], ans:2, diff:2 },
+    { id:"m08", text:"In quale anno è uscito 'Bohemian Rhapsody' dei Queen?", opts:["1973","1975","1977","1979"], ans:1, diff:2 },
+    { id:"m09", text:"Chi è il cantante dei Nirvana?", opts:["Eddie Vedder","Chris Cornell","Kurt Cobain","Dave Grohl"], ans:2, diff:1 },
+    { id:"m10", text:"Quale strumento è tipico del flamenco?", opts:["Mandolino","Chitarra","Violino","Contrabbasso"], ans:1, diff:1 },
+    { id:"m11", text:"Come si chiama l'album d'esordio dei Pink Floyd?", opts:["Wish You Were Here","The Wall","Piper at the Gates of Dawn","Animals"], ans:2, diff:3 },
+    { id:"m12", text:"Quale genere musicale ha origine a New Orleans?", opts:["Blues","Jazz","Soul","Funk"], ans:1, diff:2 },
+    { id:"m13", text:"Quale canzone italiana ha vinto Sanremo 2021?", opts:["Zitti e Buoni","Musica Leggerissima","Dieci","Afro Intro"], ans:0, diff:1 },
+    { id:"m14", text:"Chi ha composto la Quinta Sinfonia?", opts:["Mozart","Beethoven","Schubert","Brahms"], ans:1, diff:1 },
+    { id:"m15", text:"Quale band ha pubblicato Dark Side of the Moon?", opts:["Led Zeppelin","The Beatles","Pink Floyd","Deep Purple"], ans:2, diff:1 },
+    { id:"m16", text:"In quale anno è morto Kurt Cobain?", opts:["1992","1993","1994","1995"], ans:2, diff:2 },
+    { id:"m17", text:"Quale cantante è soprannominata 'Lady Soul'?", opts:["Tina Turner","Diana Ross","Aretha Franklin","Whitney Houston"], ans:2, diff:2 },
+    { id:"m18", text:"Di quale paese è originaria Björk?", opts:["Danimarca","Norvegia","Svezia","Islanda"], ans:3, diff:2 },
+    { id:"m19", text:"Quale rapper ha l'album 'The Marshall Mathers LP'?", opts:["Jay-Z","Eminem","Kanye West","50 Cent"], ans:1, diff:1 },
+    { id:"m20", text:"Chi ha composto il Requiem incompiuto?", opts:["Beethoven","Chopin","Mozart","Schubert"], ans:2, diff:2 },
+    { id:"m21", text:"Quale strumento suona Jimi Hendrix?", opts:["Basso","Chitarra","Batteria","Tastiera"], ans:1, diff:1 },
+    { id:"m22", text:"In quale anno è uscito 'Nevermind' dei Nirvana?", opts:["1989","1991","1993","1995"], ans:1, diff:2 },
+    { id:"m23", text:"Quale band ha pubblicato 'Appetite for Destruction'?", opts:["Guns N' Roses","Aerosmith","Bon Jovi","Mötley Crüe"], ans:0, diff:1 },
+    { id:"m24", text:"Quale artista ha pubblicato 'Purple Rain'?", opts:["Prince","Michael Jackson","Stevie Wonder","James Brown"], ans:0, diff:1 },
+    { id:"m25", text:"Come si chiama il ritmo a 3 tempi del ballo viennese?", opts:["Mazurca","Valzer","Polka","Minuetto"], ans:1, diff:2 },
+    { id:"m26", text:"Chi ha scritto 'Nessun Dorma'?", opts:["Rossini","Verdi","Puccini","Donizetti"], ans:2, diff:2 },
+    { id:"m27", text:"Quale band ha l'album detto 'L'Album Bianco'?", opts:["The Rolling Stones","The Beatles","The Who","Led Zeppelin"], ans:1, diff:1 },
+    { id:"m28", text:"In quale anno si è sciolta la band Daft Punk?", opts:["2019","2020","2021","2022"], ans:2, diff:2 },
+    { id:"m29", text:"Quale cantante ha inciso 'My Way'?", opts:["Elvis Presley","Frank Sinatra","Tony Bennett","Dean Martin"], ans:1, diff:2 },
+    { id:"m30", text:"Quanti tasti ha un pianoforte standard?", opts:["76","82","88","92"], ans:2, diff:2 },
+    { id:"m31", text:"Di quale paese è originario il tango?", opts:["Brasile","Colombia","Argentina","Cuba"], ans:2, diff:1 },
+    { id:"m32", text:"Quale rapper ha pubblicato l'album 'Damn.' nel 2017?", opts:["Drake","J. Cole","Kendrick Lamar","Chance the Rapper"], ans:2, diff:2 },
+    { id:"m33", text:"Qual è il tempo musicale indicato da 'Allegro'?", opts:["Lento","Moderato","Veloce","Molto lento"], ans:2, diff:2 },
+    { id:"m34", text:"Quale artista ha inciso 'Shape of You'?", opts:["Justin Bieber","Ed Sheeran","Harry Styles","Sam Smith"], ans:1, diff:1 },
+    { id:"m35", text:"Chi ha composto 'Für Elise'?", opts:["Schubert","Chopin","Beethoven","Bach"], ans:2, diff:1 },
+    { id:"m36", text:"Quale album di Michael Jackson è il più venduto della storia?", opts:["Off The Wall","Bad","Thriller","Dangerous"], ans:2, diff:1 },
+    { id:"m37", text:"Di quale nazione è originario il K-pop?", opts:["Giappone","Cina","Corea del Sud","Taiwan"], ans:2, diff:1 },
+    { id:"m38", text:"Quale band ha prodotto 'Smoke on the Water'?", opts:["Black Sabbath","Deep Purple","Led Zeppelin","AC/DC"], ans:1, diff:2 },
+    { id:"m39", text:"Chi è il cantante dei Radiohead?", opts:["Damon Albarn","Thom Yorke","Liam Gallagher","Chris Martin"], ans:1, diff:2 },
+    { id:"m40", text:"In quale anno ha debuttato Lady Gaga con 'Just Dance'?", opts:["2006","2007","2008","2009"], ans:2, diff:2 },
+    { id:"m41", text:"Quale tipo di voce è più acuta tra le voci maschili?", opts:["Basso","Baritono","Tenore","Controtenore"], ans:3, diff:3 },
+    { id:"m42", text:"Quante note ha la scala pentatonica?", opts:["4","5","6","7"], ans:1, diff:2 },
+    { id:"m43", text:"Chi è il cantante dei Coldplay?", opts:["Bono","Thom Yorke","Chris Martin","Matt Bellamy"], ans:2, diff:1 },
+    { id:"m44", text:"Quale strumento è alla base del jazz tradizionale di New Orleans?", opts:["Chitarra","Tromba","Violino","Pianoforte"], ans:1, diff:2 },
+    { id:"m45", text:"Quale band italiana ha vinto l'Eurovision 2021?", opts:["Sottotono","Negramaro","Måneskin","Modà"], ans:2, diff:1 },
+    { id:"m46", text:"In quale anno è uscito 'Back in Black' degli AC/DC?", opts:["1978","1980","1982","1984"], ans:1, diff:3 },
+    { id:"m47", text:"Come si chiama il fenomeno acustico di suono che sembra salire all'infinito?", opts:["Shepard Tone","Penrose Scale","Infinite Chord","Loop Tone"], ans:0, diff:3 },
+    { id:"m48", text:"Quale artista italiana ha pubblicato 'Almeno tu nell'universo'?", opts:["Mia Martini","Patty Pravo","Milva","Ornella Vanoni"], ans:0, diff:2 },
+    { id:"m49", text:"Quante ottave circa copre una voce umana media?", opts:["1","2","3","4"], ans:1, diff:3 },
+    { id:"m50", text:"Quale band ha cantato 'Stairway to Heaven'?", opts:["Deep Purple","Led Zeppelin","Black Sabbath","Pink Floyd"], ans:1, diff:1 },
+  ],
+
+  /* ── SERIE TV / FILM ────────────────────────────────────── */
+  series: [
+    { id:"t01", text:"In Breaking Bad, in quale stato americano si svolge la vicenda?", opts:["Texas","Arizona","New Mexico","Colorado"], ans:2, diff:1 },
+    { id:"t02", text:"Chi interpreta Iron Man nel MCU?", opts:["C.Evans","R.Downey Jr.","C.Hemsworth","M.Ruffalo"], ans:1, diff:1 },
+    { id:"t03", text:"Quante stagioni conta Game of Thrones?", opts:["6","7","8","9"], ans:2, diff:1 },
+    { id:"t04", text:"Chi interpreta Geralt in The Witcher (Netflix)?", opts:["Kit Harington","N.Coster-Waldau","Henry Cavill","Richard Madden"], ans:2, diff:2 },
+    { id:"t05", text:"In quale anno è uscito il film Matrix originale?", opts:["1997","1998","1999","2000"], ans:2, diff:2 },
+    { id:"t06", text:"Come si chiama il locale di Tony Soprano?", opts:["Bada Bing!","The Bing","Club T","Jersey Night"], ans:0, diff:3 },
+    { id:"t07", text:"Chi ha diretto '2001: Odissea nello Spazio'?", opts:["Scott","Kubrick","Spielberg","Lucas"], ans:1, diff:3 },
+    { id:"t08", text:"In Stranger Things, come si chiama il mostro della prima stagione?", opts:["Mind Flayer","Demogorgon","Shadow Monster","Vecna"], ans:1, diff:2 },
+    { id:"t09", text:"Quante stagioni ha la serie Friends?", opts:["8","9","10","11"], ans:2, diff:1 },
+    { id:"t10", text:"In quale anno è uscito il film Inception?", opts:["2008","2009","2010","2011"], ans:2, diff:2 },
+    { id:"t11", text:"Chi interpreta il protagonista in Peaky Blinders?", opts:["Tom Hardy","Cillian Murphy","Paul Anderson","Joe Cole"], ans:1, diff:2 },
+    { id:"t12", text:"Qual è il nome dell'antagonista principale in Squid Game?", opts:["Il Giocatore 1","Il Frontman","Il Gioco","Il Boss"], ans:1, diff:2 },
+    { id:"t13", text:"In quale anno ha debuttato The Mandalorian?", opts:["2018","2019","2020","2021"], ans:1, diff:2 },
+    { id:"t14", text:"Chi ha diretto 'Il Padrino' (1972)?", opts:["Spielberg","Coppola","Scorsese","Kubrick"], ans:1, diff:2 },
+    { id:"t15", text:"Chi interpreta Walter White in Breaking Bad?", opts:["Jon Hamm","Bryan Cranston","Aaron Paul","Bob Odenkirk"], ans:1, diff:1 },
+    { id:"t16", text:"In quale anno è uscito Titanic di James Cameron?", opts:["1995","1996","1997","1998"], ans:2, diff:1 },
+    { id:"t17", text:"Chi ha diretto la trilogia del Signore degli Anelli?", opts:["Spielberg","Peter Jackson","Cameron","Scott"], ans:1, diff:1 },
+    { id:"t18", text:"In quale anno è uscito Pulp Fiction?", opts:["1991","1992","1993","1994"], ans:3, diff:2 },
+    { id:"t19", text:"Chi interpreta Daenerys Targaryen in Game of Thrones?", opts:["Sophie Turner","Emilia Clarke","Lena Headey","Natalie Dormer"], ans:1, diff:1 },
+    { id:"t20", text:"Chi è il regista di Interstellar?", opts:["Ridley Scott","Christopher Nolan","Denis Villeneuve","Alfonso Cuarón"], ans:1, diff:1 },
+    { id:"t21", text:"In quale film appare il personaggio Tyler Durden?", opts:["American Psycho","Fight Club","Se7en","Memento"], ans:1, diff:1 },
+    { id:"t22", text:"In quale anno è uscita la prima stagione di Stranger Things?", opts:["2014","2015","2016","2017"], ans:2, diff:2 },
+    { id:"t23", text:"Chi interpreta Thor nel MCU?", opts:["Chris Evans","Chris Pratt","Chris Hemsworth","Chris Pine"], ans:2, diff:1 },
+    { id:"t24", text:"In Squid Game, quale numero ha il protagonista Seong Gi-hun?", opts:["001","067","218","456"], ans:3, diff:2 },
+    { id:"t25", text:"Quale film ha la scena 'I see dead people'?", opts:["The Sixth Sense","Poltergeist","A Quiet Place","Hereditary"], ans:0, diff:2 },
+    { id:"t26", text:"Chi ha diretto Blade Runner (1982)?", opts:["James Cameron","Ridley Scott","Denis Villeneuve","Terry Gilliam"], ans:1, diff:2 },
+    { id:"t27", text:"In quale serie TV appare il personaggio Don Draper?", opts:["Suits","Mad Men","Billions","Succession"], ans:1, diff:2 },
+    { id:"t28", text:"Quale film italiano ha vinto l'Oscar al miglior film straniero nel 2014?", opts:["La Grande Bellezza","Gomorra","Io sono Li","Terraferma"], ans:0, diff:2 },
+    { id:"t29", text:"In quale anno è uscito Il Signore degli Anelli: La Compagnia dell'Anello?", opts:["1999","2000","2001","2002"], ans:2, diff:1 },
+    { id:"t30", text:"Chi ha diretto Parasite (2019)?", opts:["Park Chan-wook","Kim Ji-woon","Bong Joon-ho","Lee Chang-dong"], ans:2, diff:2 },
+    { id:"t31", text:"In Sherlock (BBC), chi interpreta Sherlock Holmes?", opts:["Hugh Laurie","Benedict Cumberbatch","Martin Freeman","David Tennant"], ans:1, diff:1 },
+    { id:"t32", text:"In quale anno è uscito Avatar di James Cameron?", opts:["2007","2008","2009","2010"], ans:2, diff:1 },
+    { id:"t33", text:"Quale film ha il personaggio Hannibal Lecter?", opts:["Seven","Il Silenzio degli Innocenti","American Psycho","Zodiac"], ans:1, diff:1 },
+    { id:"t34", text:"In The Last of Us (serie HBO), chi interpreta Joel?", opts:["Jeffrey Dean Morgan","Pedro Pascal","Jon Bernthal","Joel Edgerton"], ans:1, diff:1 },
+    { id:"t35", text:"Quale film ha vinto l'Oscar come miglior film nel 2020?", opts:["1917","Joker","Parasite","The Irishman"], ans:2, diff:2 },
+    { id:"t36", text:"In The Witcher (Netflix), chi interpreta Yennefer?", opts:["Anya Chalotra","Freya Allan","Mimi Ndiweni","Natalia Tena"], ans:0, diff:2 },
+    { id:"t37", text:"Chi ha scritto i romanzi su cui è basato Game of Thrones?", opts:["J.R.R. Tolkien","George R.R. Martin","Patrick Rothfuss","Brandon Sanderson"], ans:1, diff:1 },
+    { id:"t38", text:"Quale film ha diretto Hayao Miyazaki nel 2013 dopo un lungo ritiro?", opts:["Porco Rosso","Il Vento si Alza","Totoro","Lupin III"], ans:1, diff:3 },
+    { id:"t39", text:"Chi interpreta Hannibal Lecter ne Il Silenzio degli Innocenti?", opts:["Kevin Spacey","Anthony Hopkins","Jack Nicholson","Gary Oldman"], ans:1, diff:1 },
+    { id:"t40", text:"In quale anno è uscito The Dark Knight?", opts:["2006","2007","2008","2009"], ans:2, diff:1 },
+    { id:"t41", text:"Quale serie Netflix segue un cavallo di Hollywood?", opts:["BoJack Horseman","Disenchantment","Big Mouth","F is for Family"], ans:0, diff:1 },
+    { id:"t42", text:"Chi ha diretto Schindler's List?", opts:["Kubrick","Scorsese","Spielberg","Polanski"], ans:2, diff:2 },
+    { id:"t43", text:"Quante stagioni ha Breaking Bad?", opts:["3","4","5","6"], ans:2, diff:1 },
+    { id:"t44", text:"In quale serie appare il personaggio Eleven?", opts:["Dark","Stranger Things","Black Mirror","The OA"], ans:1, diff:1 },
+    { id:"t45", text:"In quale anno è uscito il primo episodio de I Soprano?", opts:["1996","1997","1999","2001"], ans:2, diff:3 },
+    { id:"t46", text:"Quale regista ha diretto The Shining?", opts:["Spielberg","Scorsese","Kubrick","De Palma"], ans:2, diff:2 },
+    { id:"t47", text:"In quale film ci sono le icone draghi di Charizard come easter egg?", opts:["Ready Player One","Wreck-It Ralph","Free Guy","Pixels"], ans:0, diff:3 },
+    { id:"t48", text:"Chi interpreta il personaggio di Joker nel film del 2019?", opts:["Heath Ledger","Joaquin Phoenix","Jack Nicholson","Jared Leto"], ans:1, diff:1 },
+    { id:"t49", text:"Quale serie è ambientata nell'universo di Star Wars su Disney+?", opts:["Loki","The Witcher","The Mandalorian","Hawkeye"], ans:2, diff:1 },
+    { id:"t50", text:"Chi ha diretto il film 'La Vita è Bella' del 1997?", opts:["Nanni Moretti","Gabriele Salvatores","Roberto Benigni","Paolo Sorrentino"], ans:2, diff:1 },
+  ],
+
+  /* ── POKÉMON ────────────────────────────────────────────── */
+  pokemon: [
+    { id:"p01", text:"Qual è il Pokémon starter erba della regione di Kanto?", opts:["Charmander","Squirtle","Bulbasaur","Pikachu"], ans:2, diff:1 },
+    { id:"p02", text:"Come si chiama l'evoluzione finale di Charmander?", opts:["Charmeleon","Charizard","Blastoise","Venusaur"], ans:1, diff:1 },
+    { id:"p03", text:"In quale regione si svolgono Pokémon Gold e Silver?", opts:["Kanto","Johto","Hoenn","Sinnoh"], ans:1, diff:1 },
+    { id:"p04", text:"Quanti Pokémon compongono la prima generazione?", opts:["149","150","151","152"], ans:2, diff:1 },
+    { id:"p05", text:"Chi è il rivale di Ash nella serie anime originale?", opts:["Gary","Brock","Misty","Clemont"], ans:0, diff:1 },
+    { id:"p06", text:"Quale tipo è SUPER EFFICACE contro il tipo Fuoco?", opts:["Elettro","Acqua","Normale","Erba"], ans:1, diff:1 },
+    { id:"p07", text:"Chi è il Pokémon numero 25 nel Pokédex?", opts:["Eevee","Pikachu","Raichu","Clefairy"], ans:1, diff:1 },
+    { id:"p08", text:"In quale gioco appare per la prima volta Eevee come starter?", opts:["Rosso/Blu","Giallo","Let's Go Eevee","Colosseum"], ans:2, diff:2 },
+    { id:"p09", text:"Come si chiama il tipo di Pokémon introdotto in Gen 6?", opts:["Fantasma","Fata","Buio","Acciaio"], ans:1, diff:2 },
+    { id:"p10", text:"In quali giochi appare la regione di Alola?", opts:["X/Y","Sole/Luna","Spada/Scudo","Scarlatto/Violetto"], ans:1, diff:1 },
+    { id:"p11", text:"Quante medaglie di palestra ci sono in Kanto?", opts:["6","7","8","9"], ans:2, diff:1 },
+    { id:"p12", text:"Come si evolve Haunter in Gengar?", opts:["Per livello","Per scambio","Con Pietra","Con oggetto tenuto"], ans:1, diff:2 },
+    { id:"p13", text:"Quale Pokémon Leggendario è associato al tempo?", opts:["Lugia","Ho-Oh","Dialga","Palkia"], ans:2, diff:2 },
+    { id:"p14", text:"In quale generazione è ambientata la regione di Hoenn?", opts:["2a","3a","4a","5a"], ans:1, diff:2 },
+    { id:"p15", text:"Quante forme ha Deoxys?", opts:["2","3","4","5"], ans:2, diff:3 },
+    { id:"p16", text:"Quale Pokémon ha il tipo esclusivo Normale ed è starter in Pikachu/Eevee?", opts:["Pikachu","Eevee","Snorlax","Meowth"], ans:1, diff:2 },
+    { id:"p17", text:"Come si chiama la forma Shiny speciale di Gyarados in Gold/Silver?", opts:["Rosso","Verde","Viola","Dorato"], ans:0, diff:2 },
+    { id:"p18", text:"Qual è il tipo del Pokémon Eevee?", opts:["Normale","Fuoco","Erba","Psico"], ans:0, diff:1 },
+    { id:"p19", text:"Quale Pokémon Leggendario protegge gli oceani?", opts:["Groudon","Kyogre","Rayquaza","Lugia"], ans:1, diff:2 },
+    { id:"p20", text:"Come si chiama il Pokémon con il numero 132 nel Pokédex?", opts:["Eevee","Snorlax","Ditto","Jolteon"], ans:2, diff:2 },
+    { id:"p21", text:"I Pokémon di tipo Spettro sono immuni a quali tipi?", opts:["Psico e Normale","Normale e Lotta","Lotta e Buio","Acciaio e Fuoco"], ans:1, diff:2 },
+    { id:"p22", text:"Quale gioco introduce la Mega Evoluzione?", opts:["Diamante/Perla","Nero/Bianco","X/Y","Sole/Luna"], ans:2, diff:2 },
+    { id:"p23", text:"Quale Pokémon non è di tipo Drago nonostante l'aspetto?", opts:["Flygon","Altaria","Kingdra","Gyarados"], ans:3, diff:3 },
+    { id:"p24", text:"Quante forme di Eeveelution ci sono fino alla Gen 8?", opts:["7","8","9","10"], ans:1, diff:2 },
+    { id:"p25", text:"In quale gioco appare la Wild Area per la prima volta?", opts:["Sole/Luna","Spada/Scudo","Scarlatto/Violetto","Nero/Bianco"], ans:1, diff:2 },
+    { id:"p26", text:"Quale Pokémon fossile è basato su un'ammonite?", opts:["Omanyte","Kabuto","Aerodactyl","Lileep"], ans:0, diff:2 },
+    { id:"p27", text:"Qual è l'Ability standard di Pikachu?", opts:["Parafulmine","Static","Volt Absorb","Quick Feet"], ans:1, diff:2 },
+    { id:"p28", text:"Chi è il Pokémon Leggendario del Tempo nella Gen 4?", opts:["Palkia","Dialga","Giratina","Arceus"], ans:1, diff:2 },
+    { id:"p29", text:"Quale mossa permette di guarire dormendo?", opts:["Dormitore","Amnesia","Riposo","Turbolento"], ans:2, diff:2 },
+    { id:"p30", text:"In quale regione si svolge Pokémon Scarlatto e Violetto?", opts:["Kalos","Paldea","Galar","Hisui"], ans:1, diff:1 },
+    { id:"p31", text:"Quale Pokémon si chiama Il Pokémon Genetico nel Pokédex?", opts:["Ditto","Mewtwo","Mew","Clefable"], ans:1, diff:2 },
+    { id:"p32", text:"Che tipo è la mossa 'Surf'?", opts:["Normale","Acqua","Ghiaccio","Terra"], ans:1, diff:1 },
+    { id:"p33", text:"Quale Pokémon è il numero 001 nel Pokédex nazionale?", opts:["Mew","Bulbasaur","Caterpie","Pidgey"], ans:1, diff:1 },
+    { id:"p34", text:"Quante palestre ci sono nella regione di Hoenn?", opts:["6","7","8","9"], ans:2, diff:2 },
+    { id:"p35", text:"Come si chiama il Pokémon ancestrale di tutti i Pokémon?", opts:["Mew","Arceus","Celebi","Lugia"], ans:1, diff:2 },
+    { id:"p36", text:"Quale tipo è immune agli attacchi di tipo Elettro?", opts:["Terra","Roccia","Acciaio","Acqua"], ans:0, diff:2 },
+    { id:"p37", text:"In quale gioco appare per la prima volta Espeon?", opts:["Rosso/Blu","Oro/Argento","Rubino/Zaffiro","Diamante/Perla"], ans:1, diff:2 },
+    { id:"p38", text:"Come si chiama la mossa esclusiva di Pikachu in alcune versioni?", opts:["Voltotackle","Fulminazione","Tuonobolide","Megavolt"], ans:0, diff:3 },
+    { id:"p39", text:"Quale Pokémon si evolve con una Pietra Tuono in Pikachu?", opts:["Raichu","Jolteon","Electrode","Magneton"], ans:0, diff:1 },
+    { id:"p40", text:"Chi è il capo della Lega Pokémon di Kanto?", opts:["Agatha","Bruno","Lorelei","Giovanni"], ans:3, diff:3 },
+    { id:"p41", text:"In quale generazione è introdotto il tipo Buio?", opts:["1a","2a","3a","4a"], ans:1, diff:2 },
+    { id:"p42", text:"Quale Pokémon è noto come il Pokémon Sonno?", opts:["Snorlax","Hypno","Jigglypuff","Drowzee"], ans:0, diff:2 },
+    { id:"p43", text:"Come si chiama la protagonista femminile dell'anime originale?", opts:["May","Dawn","Misty","Serena"], ans:2, diff:1 },
+    { id:"p44", text:"Quante forme base ha Rotom?", opts:["1","4","5","6"], ans:3, diff:3 },
+    { id:"p45", text:"Quale Pokémon è il simbolo del Team Rocket?", opts:["Meowth","Arbok","Weezing","Lickitung"], ans:0, diff:1 },
+    { id:"p46", text:"In quale regione si svolge Pokémon Diamante e Perla?", opts:["Johto","Hoenn","Sinnoh","Unova"], ans:2, diff:1 },
+    { id:"p47", text:"Quale tipo è doppiamente efficace contro Gyarados?", opts:["Fuoco","Elettro","Ghiaccio","Lotta"], ans:1, diff:3 },
+    { id:"p48", text:"Come si chiama il personaggio antagonista principale in Pokémon Rosso/Blu?", opts:["Cyrus","Giovanni","Ghetsis","Lysandre"], ans:1, diff:2 },
+    { id:"p49", text:"Quale Pokémon ha la capacità di trasformarsi in qualsiasi Pokémon?", opts:["Mew","Ditto","Zoroark","Smeargle"], ans:1, diff:1 },
+    { id:"p50", text:"In quale anno è uscito Pokémon GO?", opts:["2014","2015","2016","2017"], ans:2, diff:1 },
+  ],
+};
+
+/* ── Shuffle con seed giornaliero ── */
+function seededShuffle(arr, seed) {
+  const a = [...arr]; let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    const j = Math.abs(s) % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const _SESSION_SEED = Math.floor(Date.now() / 86400000);
+const TRIVIAL_QUESTIONS = Object.fromEntries(
+  Object.entries(TRIVIAL_QUESTIONS_RAW).map(([cat, qs]) => [cat, seededShuffle(qs, _SESSION_SEED)])
+);
+
+function getTrivialQuestion(catId, usedIds, turnNum = 1) {
+  const all  = TRIVIAL_QUESTIONS[catId] || [];
+  const diff = turnNum < 6 ? 1 : turnNum < 14 ? 2 : 3;
+  let pool = all.filter(q => !usedIds.includes(q.id) && q.diff <= diff);
+  if (!pool.length) pool = all.filter(q => !usedIds.includes(q.id));
+  if (!pool.length) pool = [...all];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════
+   COSTANTI
+═══════════════════════════════════════════════════ */
+const CATS = {
+  anime:  { label:"Anime",        emoji:"⛩️", color:"#f87171" },
+  sport:  { label:"Sport",        emoji:"⚽", color:"#34d399" },
+  games:  { label:"Videogiochi",  emoji:"🎮", color:"#a78bfa" },
+  music:  { label:"Musica",       emoji:"🎵", color:"#fbbf24" },
+  series: { label:"Serie/Film",   emoji:"🎬", color:"#fb923c" },
+  pokemon:{ label:"Pokémon",      emoji:"⚡", color:"#60a5fa" },
+};
+const CAT_IDS = Object.keys(CATS);
+const PLAYER_COLORS = ['#f87171','#34d399','#fbbf24','#a78bfa','#fb923c','#e879f9'];
+const PLAYER_EMOJIS = ['🔴','🟢','🟡','🟣','🟠','🟤'];
+
+/* Board geometry */
+const CX = 300, CY = 300, RING_R = 230, SPOKE_STEPS = 4;
+const N_CATS = 6;
+const RING_N  = N_CATS * 6;  // 36 nodes
+const HQ_IDXS = [0, 6, 12, 18, 24, 30]; // ring positions of each HQ
+
+function spokeAngle(si) { return (si / N_CATS) * 2 * Math.PI - Math.PI / 2; }
+function ringAngle(ri)  { return (ri / RING_N) * 2 * Math.PI - Math.PI / 2; }
+
+function nodePos(id) {
+  if (id === 'C') return { x: CX, y: CY };
+  if (id[0] === 'R') {
+    const ri = parseInt(id.slice(1));
+    return { x: CX + RING_R * Math.cos(ringAngle(ri)), y: CY + RING_R * Math.sin(ringAngle(ri)) };
+  }
+  // Spoke node: e.g. "AN2"
+  const prefix = id.slice(0, 2);
+  const step   = parseInt(id.slice(2));
+  const si     = { AN:0, SP:1, GV:2, MU:3, SR:4, PK:5 }[prefix];
+  const t      = (step + 1) / (SPOKE_STEPS + 1);
+  const ang    = spokeAngle(si);
+  return { x: CX + RING_R * t * Math.cos(ang), y: CY + RING_R * t * Math.sin(ang) };
+}
+
+/* Build node metadata */
+function buildNodes() {
+  const nodes = {};
+  nodes['C'] = { id:'C', type:'start', cat:null };
+
+  const SPOKES = ['AN','SP','GV','MU','SR','PK'];
+  SPOKES.forEach((prefix, si) => {
+    const cat = CAT_IDS[si];
+    for (let s = 0; s < SPOKE_STEPS; s++) {
+      nodes[`${prefix}${s}`] = { id:`${prefix}${s}`, type:'path', cat, spokeIdx:si };
+    }
+  });
+
+  for (let ri = 0; ri < RING_N; ri++) {
+    const sec    = Math.floor(ri / 6);
+    const pos    = ri % 6;
+    const hqCat  = CAT_IDS[sec];
+    const others = CAT_IDS.filter(c => c !== hqCat);
+    let cat;
+    let type = 'ring';
+    if (pos === 0) { cat = hqCat; type = 'hq'; }
+    else if (pos === 3) { cat = others[(sec + 2) % others.length]; type = 'bonus'; }
+    else {
+      const rotated = [...others.slice(sec % others.length), ...others.slice(0, sec % others.length)];
+      cat = rotated[pos - 1] || hqCat;
+    }
+    nodes[`R${ri}`] = { id:`R${ri}`, type, cat, ringIdx:ri };
+  }
+  return nodes;
+}
+const NODES = buildNodes();
+
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let G = {
+  phase: 'setup',    // setup | idle | moving | dir | spoke | question | streak | win
+  players: [],
+  curIdx: 0,
+  diceVal: 0,
+  stepsLeft: 0,
+  pendingDir: null,
+  usedQ: {},         // { playerId: [ids] }
+  turnCount: 0,
+  streakCount: 0,
+  streakCat: null,
+  qTimer: null,
+};
+
+/* ═══════════════════════════════════════════════════
+   SETUP
+═══════════════════════════════════════════════════ */
+let _setupPlayers = [];
+
+function showSetup() {
+  hideAllModals();
+  _setupPlayers = [
+    { name:'Giocatore 1', color: PLAYER_COLORS[0] },
+    { name:'Giocatore 2', color: PLAYER_COLORS[1] },
+  ];
+  renderSetup();
+  show('setupModal');
+}
+
+function renderSetup() {
+  const cont = document.getElementById('playerSetup');
+  cont.innerHTML = _setupPlayers.map((p, i) => `
+    <div class="player-row">
+      <div class="color-swatch" style="background:${p.color}"></div>
+      <input type="text" class="inp" style="flex:1;background:#1c2030;color:#e8eaf2;border-color:rgba(255,255,255,.12)"
+             value="${p.name}" oninput="_setupPlayers[${i}].name=this.value" placeholder="Nome giocatore">
+      ${_setupPlayers.length > 2 ? `<button onclick="removePlayer(${i})" style="background:none;border:none;color:rgba(255,87,34,.8);font-size:18px;cursor:pointer">✕</button>` : ''}
+    </div>
+  `).join('');
+  document.getElementById('addPlayerBtn').style.display = _setupPlayers.length >= 6 ? 'none' : '';
+}
+
+function addPlayer() {
+  if (_setupPlayers.length >= 6) return;
+  _setupPlayers.push({ name: `Giocatore ${_setupPlayers.length + 1}`, color: PLAYER_COLORS[_setupPlayers.length] });
+  renderSetup();
+}
+
+function removePlayer(idx) {
+  _setupPlayers.splice(idx, 1);
+  renderSetup();
+}
+
+function startGame() {
+  const names = _setupPlayers.map(p => p.name.trim() || 'Giocatore');
+  G = {
+    phase: 'idle',
+    players: names.map((name, i) => ({
+      id: i,
+      name,
+      color: PLAYER_COLORS[i],
+      emoji: PLAYER_EMOJIS[i],
+      position: 'C',
+      wedges: Object.fromEntries(CAT_IDS.map(c => [c, false])),
+      onSpoke: null,  // { prefix, idx }
+      onRing: null,
+    })),
+    curIdx: 0,
+    diceVal: 0,
+    stepsLeft: 0,
+    pendingDir: null,
+    usedQ: Object.fromEntries(names.map((_, i) => [i, []])),
+    turnCount: 0,
+    streakCount: 0,
+    streakCat: null,
+    qTimer: null,
+  };
+  hide('setupModal');
+  drawBoard();
+  renderPlayers();
+  updateTurnUI();
+  setPhase('idle');
+}
+
+/* ═══════════════════════════════════════════════════
+   BOARD SVG
+═══════════════════════════════════════════════════ */
+function drawBoard() {
+  const svg = document.getElementById('boardSvg');
+  svg.innerHTML = '';
+
+  // Defs: gradients + filters
+  const defs = svgEl('defs', {});
+
+  // Background gradient
+  const bgGrad = svgEl('radialGradient', { id:'bg_g', cx:'50%', cy:'50%', r:'50%' });
+  const bgS1 = svgEl('stop', { offset:'0%', 'stop-color':'#1a1230' });
+  const bgS2 = svgEl('stop', { offset:'100%', 'stop-color':'#0a0812' });
+  bgGrad.appendChild(bgS1); bgGrad.appendChild(bgS2);
+  defs.appendChild(bgGrad);
+
+  // HQ glow filter
+  const hqFilter = svgEl('filter', { id:'hq_f', x:'-50%', y:'-50%', width:'200%', height:'200%' });
+  const blur = svgEl('feGaussianBlur', { stdDeviation:'4', result:'b' });
+  const merge = svgEl('feMerge', {});
+  const mn1 = svgEl('feMergeNode', { in:'b' });
+  const mn2 = svgEl('feMergeNode', { in:'SourceGraphic' });
+  merge.appendChild(mn1); merge.appendChild(mn2);
+  hqFilter.appendChild(blur); hqFilter.appendChild(merge);
+  defs.appendChild(hqFilter);
+
+  CAT_IDS.forEach(cat => {
+    const f = svgEl('filter', { id:`glow-${cat}` });
+    const fe = svgEl('feDropShadow', { dx:'0', dy:'0', stdDeviation:'5', 'flood-color': CATS[cat].color, 'flood-opacity':'0.85' });
+    f.appendChild(fe);
+    defs.appendChild(f);
+  });
+  svg.appendChild(defs);
+
+  // Background
+  svg.appendChild(svgEl('rect', { width:'600', height:'600', fill:'url(#bg_g)' }));
+
+  // Ring track polygon (subtle filled band)
+  const ringPoints = Array.from({length:RING_N}, (_,i) => {
+    const p = nodePos(`R${i}`); return `${p.x},${p.y}`;
+  }).join(' ');
+  svg.appendChild(svgEl('polygon', { points:ringPoints, fill:'none', stroke:'rgba(255,255,255,.06)', 'stroke-width':'42' }));
+  svg.appendChild(svgEl('polygon', { points:ringPoints, fill:'none', stroke:'rgba(255,255,255,.12)', 'stroke-width':'1' }));
+
+  // Spoke connections (dashed colored lines)
+  ['AN','SP','GV','MU','SR','PK'].forEach((prefix, si) => {
+    const hqRing = `R${HQ_IDXS[si]}`;
+    const nodes  = ['C', ...Array.from({length:SPOKE_STEPS},(_,s)=>`${prefix}${s}`), hqRing];
+    const col = CATS[CAT_IDS[si]].color;
+    for (let i = 0; i < nodes.length-1; i++) {
+      const p1 = nodePos(nodes[i]);
+      const p2 = nodePos(nodes[i+1]);
+      svg.appendChild(svgEl('line', { x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y,
+        stroke:col, 'stroke-width':'2', opacity:'.28', 'stroke-dasharray':'5 4' }));
+    }
+  });
+
+  // Ring nodes
+  for (let ri = 0; ri < RING_N; ri++) {
+    const id   = `R${ri}`;
+    const node = NODES[id];
+    const pos  = nodePos(id);
+    const color= CATS[node.cat]?.color || '#fff';
+    const isHQ = node.type === 'hq';
+    const isBonus = node.type === 'bonus';
+    const r    = isHQ ? 18 : isBonus ? 13 : 10;
+    const g    = svgEl('g', { id:`node-${id}`, class:'board-node', 'data-id':id });
+
+    if (isHQ) {
+      // Glow halos
+      const halo1 = svgEl('circle', { cx:pos.x, cy:pos.y, r:'32', fill:color, opacity:'.06', filter:`url(#hq_f)` });
+      const halo2 = svgEl('circle', { cx:pos.x, cy:pos.y, r:'24', fill:color, opacity:'.12' });
+      const dash  = svgEl('circle', { cx:pos.x, cy:pos.y, r:'23', fill:'none', stroke:color, 'stroke-width':'1.5', opacity:'.4', 'stroke-dasharray':'4 3' });
+      g.appendChild(halo1); g.appendChild(halo2); g.appendChild(dash);
+    }
+
+    // Main circle
+    g.appendChild(svgEl('circle', {
+      cx:pos.x, cy:pos.y, r,
+      fill: isHQ ? `${color}28` : isBonus ? `${color}20` : '#0e0c1a',
+      stroke: color,
+      'stroke-width': isHQ ? '2.5' : isBonus ? '2' : '1.2',
+      style: isHQ ? `filter:drop-shadow(0 0 8px ${color})` : ''
+    }));
+
+    if (isHQ) {
+      const em = document.createElementNS('http://www.w3.org/2000/svg','text');
+      em.setAttribute('x', pos.x); em.setAttribute('y', pos.y-3); em.setAttribute('text-anchor','middle');
+      em.setAttribute('font-size','13'); em.textContent = CATS[node.cat].emoji;
+      g.appendChild(em);
+      const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x', pos.x); lbl.setAttribute('y', pos.y+10); lbl.setAttribute('text-anchor','middle');
+      lbl.setAttribute('font-size','7'); lbl.setAttribute('fill', color); lbl.setAttribute('font-weight','bold');
+      lbl.textContent = 'QG';
+      g.appendChild(lbl);
+    } else if (isBonus) {
+      const em = document.createElementNS('http://www.w3.org/2000/svg','text');
+      em.setAttribute('x', pos.x); em.setAttribute('y', pos.y+4); em.setAttribute('text-anchor','middle');
+      em.setAttribute('font-size','10'); em.textContent = '🎁';
+      g.appendChild(em);
+    } else {
+      const em = document.createElementNS('http://www.w3.org/2000/svg','text');
+      em.setAttribute('x', pos.x); em.setAttribute('y', pos.y+4); em.setAttribute('text-anchor','middle');
+      em.setAttribute('font-size','9'); em.textContent = CATS[node.cat]?.emoji || '';
+      g.appendChild(em);
+    }
+    svg.appendChild(g);
+  }
+
+  // Spoke path nodes
+  ['AN','SP','GV','MU','SR','PK'].forEach((prefix, si) => {
+    const cat = CAT_IDS[si];
+    const col = CATS[cat].color;
+    for (let s = 0; s < SPOKE_STEPS; s++) {
+      const id  = `${prefix}${s}`;
+      const pos = nodePos(id);
+      const g   = svgEl('g', { id:`node-${id}`, class:'board-node', 'data-id':id });
+      g.appendChild(svgEl('circle', { cx:pos.x, cy:pos.y, r:9,
+        fill:`${col}18`, stroke:col, 'stroke-width':'1.5', opacity:'.88' }));
+      const em = document.createElementNS('http://www.w3.org/2000/svg','text');
+      em.setAttribute('x', pos.x); em.setAttribute('y', pos.y+4); em.setAttribute('text-anchor','middle');
+      em.setAttribute('font-size','9'); em.textContent = CATS[cat].emoji;
+      g.appendChild(em);
+      svg.appendChild(g);
+    }
+  });
+
+  // Center
+  const cp = nodePos('C');
+  const cg = svgEl('g', { id:'node-C' });
+  cg.appendChild(svgEl('circle', { cx:cp.x, cy:cp.y, r:26, fill:'#1a1230',
+    stroke:'rgba(232,121,249,.55)', 'stroke-width':'2' }));
+  cg.appendChild(svgEl('circle', { cx:cp.x, cy:cp.y, r:19, fill:'#120d20',
+    stroke:'rgba(232,121,249,.25)', 'stroke-width':'1.5', 'stroke-dasharray':'3 2' }));
+  const ct = document.createElementNS('http://www.w3.org/2000/svg','text');
+  ct.setAttribute('x',cp.x); ct.setAttribute('y',cp.y-3); ct.setAttribute('text-anchor','middle');
+  ct.setAttribute('font-size','15'); ct.textContent = '🎲';
+  cg.appendChild(ct);
+  const cLbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+  cLbl.setAttribute('x',cp.x); cLbl.setAttribute('y',cp.y+11); cLbl.setAttribute('text-anchor','middle');
+  cLbl.setAttribute('font-size','8'); cLbl.setAttribute('fill','rgba(232,121,249,.7)'); cLbl.setAttribute('font-weight','bold');
+  cLbl.textContent = 'START';
+  cg.appendChild(cLbl);
+  svg.appendChild(cg);
+
+  // Player tokens layer
+  svg.appendChild(svgEl('g', { id:'tokens' }));
+  renderTokens();
+}
+
+function renderTokens() {
+  const layer = document.getElementById('tokens');
+  if (!layer) return;
+  layer.innerHTML = '';
+
+  // Group players by position
+  const byPos = {};
+  G.players.forEach((p, i) => {
+    if (!byPos[p.position]) byPos[p.position] = [];
+    byPos[p.position].push({ p, i });
+  });
+
+  Object.entries(byPos).forEach(([pos, entries]) => {
+    const nodeP = nodePos(pos);
+    entries.forEach(({ p, i }, pi) => {
+      const n = entries.length;
+      const ox = (pi - (n-1)/2) * 16;
+      const oy = -22;
+      const isActive = i === G.curIdx;
+      const cx = nodeP.x + ox;
+      const cy = nodeP.y + oy;
+      const g  = svgEl('g', { 'aria-label': p.name });
+
+      // Outer glow ring for active player
+      if (isActive) {
+        g.appendChild(svgEl('circle', {
+          cx, cy, r:'15',
+          fill:'none', stroke:p.color, 'stroke-width':'2',
+          opacity:'.6', style:`filter:drop-shadow(0 0 6px ${p.color})`
+        }));
+      }
+
+      // Shadow/base circle
+      g.appendChild(svgEl('circle', {
+        cx, cy, r:'11',
+        fill:'#0a0812', opacity:'.5'
+      }));
+
+      // Main filled circle
+      g.appendChild(svgEl('circle', {
+        cx, cy, r:'11',
+        fill: p.color,
+        stroke: isActive ? '#fff' : 'rgba(255,255,255,.6)',
+        'stroke-width': isActive ? '2.5' : '1.5',
+        style: `filter:drop-shadow(0 0 ${isActive?8:4}px ${p.color})`
+      }));
+
+      // Player initial letter
+      const initial = document.createElementNS('http://www.w3.org/2000/svg','text');
+      initial.setAttribute('x', cx); initial.setAttribute('y', cy + 4);
+      initial.setAttribute('text-anchor','middle');
+      initial.setAttribute('font-size', '11');
+      initial.setAttribute('font-weight', '800');
+      initial.setAttribute('fill', '#fff');
+      initial.setAttribute('style', 'text-shadow:0 1px 3px rgba(0,0,0,.8)');
+      initial.textContent = p.name.charAt(0).toUpperCase();
+      g.appendChild(initial);
+
+      layer.appendChild(g);
+    });
+  });
+}
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
+  return el;
+}
+
+/* ═══════════════════════════════════════════════════
+   GAME LOGIC
+═══════════════════════════════════════════════════ */
+function setPhase(ph) {
+  G.phase = ph;
+  const diceArea = document.getElementById('diceArea');
+  const msgs = {
+    idle:     `È il turno di ${G.players[G.curIdx].name}`,
+    moving:   'In movimento…',
+    dir:      'Scegli direzione',
+    spoke:    'Scegli un sentiero',
+    question: 'Rispondi alla domanda!',
+    streak:   'Fase finale — 5 risposte!',
+    win:      '',
+  };
+  document.getElementById('phaseMsg').textContent = msgs[ph] || '';
+  if (diceArea) {
+    if (ph === 'idle') diceArea.classList.remove('disabled');
+    else diceArea.classList.add('disabled');
+  }
+  // Auto-trigger streak when idle at center with all wedges
+  if (ph === 'idle') {
+    const p = G.players[G.curIdx];
+    if (p && p.position === 'C' && CAT_IDS.every(c => p.wedges[c])) {
+      setTimeout(() => { if (G.phase === 'idle') startStreak(); }, 600);
+    }
+  }
+}
+
+function rollDice() {
+  const area = document.getElementById('diceArea');
+  area.classList.add('rolling', 'disabled');
+  let rolls = 0;
+  const iv = setInterval(() => {
+    G.diceVal = Math.floor(Math.random()*6) + 1;
+    renderDice(G.diceVal);
+    if (++rolls >= 8) {
+      clearInterval(iv);
+      area.classList.remove('rolling');
+      G.stepsLeft = G.diceVal;
+      processMove();
+    }
+  }, 80);
+}
+
+function processMove() {
+  const player = G.players[G.curIdx];
+  const pos    = player.position;
+
+  // If at center: must choose spoke
+  if (pos === 'C') {
+    setPhase('spoke');
+    showSpokeChoice();
+    return;
+  }
+
+  // If on spoke: move toward ring OR toward center
+  if (pos !== 'C' && pos[0] !== 'R') {
+    if (G.pendingDir === 'center') {
+      moveSpokeBackward();
+    } else {
+      moveSpokeForward();
+    }
+    return;
+  }
+
+  // If on ring: choose direction
+  if (pos[0] === 'R') {
+    setPhase('dir');
+    showDirModal();
+    return;
+  }
+}
+
+function showSpokeChoice() {
+  const cont = document.getElementById('spokeOptions');
+  const prefixes = ['AN','SP','GV','MU','SR','PK'];
+  cont.innerHTML = prefixes.map((prefix, si) => {
+    const cat = CAT_IDS[si];
+    return `
+      <button class="action-btn" style="border-left:4px solid ${CATS[cat].color}"
+              onclick="enterSpoke('${prefix}','${cat}')">
+        ${CATS[cat].emoji} ${CATS[cat].label}
+      </button>
+    `;
+  }).join('');
+  show('spokeModal');
+}
+
+function enterSpoke(prefix, cat) {
+  hide('spokeModal');
+  const player = G.players[G.curIdx];
+  player.position = `${prefix}0`;
+  G.stepsLeft--;
+  renderTokens();
+  if (G.stepsLeft > 0) {
+    moveSpokeForward();
+  } else {
+    landOn(player.position);
+  }
+}
+
+function moveSpokeForward() {
+  const player   = G.players[G.curIdx];
+  const pos      = player.position;
+  const prefix   = pos.slice(0,2);
+  const step     = parseInt(pos.slice(2));
+  const si       = ['AN','SP','GV','MU','SR','PK'].indexOf(prefix);
+
+  setTimeout(() => {
+    if (step + 1 < SPOKE_STEPS) {
+      player.position = `${prefix}${step+1}`;
+    } else {
+      // Reach HQ on ring
+      player.position = `R${HQ_IDXS[si]}`;
+    }
+    G.stepsLeft--;
+    renderTokens();
+    if (G.stepsLeft > 0 && player.position[0] !== 'R') {
+      moveSpokeForward();
+    } else if (G.stepsLeft > 0 && player.position[0] === 'R') {
+      // Continuing from HQ on ring — need direction
+      setPhase('dir');
+      showDirModal();
+    } else {
+      landOn(player.position);
+    }
+  }, 520);
+}
+
+/* ── showDirModal: inline direction chooser with board preview ── */
+function showDirModal() {
+  const player = G.players[G.curIdx];
+  const ri     = parseInt(player.position.slice(1));
+  const cwIdx  = (ri + G.stepsLeft + RING_N * 10) % RING_N;
+  const ccwIdx = (ri - G.stepsLeft + RING_N * 10) % RING_N;
+  showDirPreview(cwIdx, ccwIdx);
+  const isAtHq      = HQ_IDXS.includes(ri);
+  const hasAllWedges = CAT_IDS.every(c => player.wedges[c]);
+  const centerHtml   = (isAtHq && hasAllWedges)
+    ? `<button class="dir-btn center" onclick="chooseDir('center')">⬟ Verso il Centro</button>`
+    : '';
+  document.getElementById('actionPanel').innerHTML = `
+    <div class="dir-inline">
+      <div class="dir-title">🧭 Scegli direzione</div>
+      <button class="dir-btn cw"  onclick="chooseDir('cw')">↻ Orario</button>
+      <button class="dir-btn ccw" onclick="chooseDir('ccw')">↺ Antiorario</button>
+      ${centerHtml}
+    </div>`;
+}
+
+function chooseDir(dir) {
+  clearDirPreview();
+  document.getElementById('actionPanel').innerHTML = '';
+  G.pendingDir = dir;
+  if (dir === 'center') {
+    // Enter the spoke backward from the HQ ring node
+    const player = G.players[G.curIdx];
+    const ri  = parseInt(player.position.slice(1));
+    const si  = HQ_IDXS.indexOf(ri);
+    const pfx = ['AN','SP','GV','MU','SR','PK'][si];
+    player.position = pfx + (SPOKE_STEPS - 1);
+    G.stepsLeft--;
+    renderTokens();
+    if (G.stepsLeft > 0) {
+      moveSpokeBackward();
+    } else {
+      landOn(player.position);
+    }
+  } else {
+    moveOnRing();
+  }
+}
+
+function moveSpokeBackward() {
+  const player = G.players[G.curIdx];
+  const pos    = player.position;
+  const pfx    = pos.slice(0, 2);
+  const step   = parseInt(pos.slice(2));
+  setTimeout(() => {
+    if (step > 0) {
+      player.position = pfx + (step - 1);
+    } else {
+      player.position = 'C';
+    }
+    G.stepsLeft--;
+    renderTokens();
+    if (player.position === 'C') {
+      G.stepsLeft = 0; // center is terminal
+      landOn('C');
+    } else if (G.stepsLeft > 0) {
+      moveSpokeBackward();
+    } else {
+      landOn(player.position);
+    }
+  }, 520);
+}
+
+function moveOnRing() {
+  const player = G.players[G.curIdx];
+  const ri     = parseInt(player.position.slice(1));
+  setTimeout(() => {
+    const nextRi  = G.pendingDir === 'cw' ? (ri+1) % RING_N : (ri-1+RING_N) % RING_N;
+    player.position = `R${nextRi}`;
+    G.stepsLeft--;
+    renderTokens();
+    if (G.stepsLeft > 0) {
+      moveOnRing();
+    } else {
+      landOn(player.position);
+    }
+  }, 480);
+}
+
+function landOn(pos) {
+  const player = G.players[G.curIdx];
+  const node   = NODES[pos];
+  if (!node) { endTurn(); return; }
+
+  // Center landing — check if all wedges → start streak
+  if (pos === 'C') {
+    const allWedges = CAT_IDS.every(c => player.wedges[c]);
+    if (allWedges) {
+      startStreak();
+    } else {
+      endTurn();
+    }
+    return;
+  }
+
+  if (!node.cat) { endTurn(); return; }
+
+  if (node.type === 'hq' || node.type === 'path' || node.type === 'ring') {
+    askQuestion(node.cat, false, node.type === 'hq');
+  } else if (node.type === 'bonus') {
+    askQuestion(node.cat, true, false);
+  } else {
+    endTurn();
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   DOMANDE
+═══════════════════════════════════════════════════ */
+let _qAnswered = false;
+let _timerInterval = null;
+
+function askQuestion(catId, isBonus, isHq) {
+  setPhase('question');
+  const player = G.players[G.curIdx];
+  const q      = getTrivialQuestion(catId, G.usedQ[G.curIdx] || [], G.turnCount);
+  if (!q) { endTurn(); return; }
+
+  G.usedQ[G.curIdx] = [...(G.usedQ[G.curIdx] || []), q.id];
+  _qAnswered = false;
+
+  const cat   = CATS[catId];
+  const modal = document.getElementById('questionModal');
+  document.getElementById('qCat').innerHTML  = `<span style="color:${cat.color}">${cat.emoji} ${cat.label}</span>${isHq ? ' — <span style="color:#c8f135">QG in palio!</span>' : isBonus ? ' — <span style="color:#fbbf24">Bonus!</span>' : ''}`;
+  document.getElementById('qText').textContent = q.text;
+
+  const opts = document.getElementById('qOpts');
+  const letters = ['A','B','C','D'];
+  opts.innerHTML = q.opts.map((o, i) => `
+    <button class="q-opt" data-letter="${letters[i]}" onclick="answerQ(${i},${q.ans},${isHq?1:0},${isBonus?1:0},'${catId}')">${o}</button>
+  `).join('');
+
+  // Timer 25s
+  let timeLeft = 25;
+  clearInterval(_timerInterval);
+  document.getElementById('qTimerFill').style.transition = 'none';
+  document.getElementById('qTimerFill').style.width = '100%';
+  setTimeout(() => {
+    document.getElementById('qTimerFill').style.transition = `width ${timeLeft}s linear`;
+    document.getElementById('qTimerFill').style.width = '0%';
+  }, 50);
+  _timerInterval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0 || _qAnswered) {
+      clearInterval(_timerInterval);
+      if (!_qAnswered) {
+        _qAnswered = true;
+        markOpts(null, q.ans, false);
+        setTimeout(() => { hide('questionModal'); endTurn(); }, 1500);
+      }
+    }
+  }, 1000);
+
+  show('questionModal');
+}
+
+function answerQ(chosen, correct, isHq, isBonus, catId) {
+  if (_qAnswered) return;
+  _qAnswered = true;
+  clearInterval(_timerInterval);
+  const ok = chosen === correct;
+  markOpts(chosen, correct, ok);
+
+  setTimeout(() => {
+    hide('questionModal');
+    if (ok) {
+      if (isHq) {
+        const player = G.players[G.curIdx];
+        if (!player.wedges[catId]) {
+          player.wedges[catId] = true;
+          renderPlayers();
+          showToast(`🎉 Spicchio ${CATS[catId].emoji} conquistato!`, 'success');
+        }
+      }
+      if (isBonus) {
+        // Bonus: tira di nuovo
+        setPhase('idle');
+        showToast('Bonus! Tira di nuovo 🎲', 'info');
+        updateTurnUI();
+      } else {
+        // Controlla vittoria
+        const player = G.players[G.curIdx];
+        const allWedges = CAT_IDS.every(c => player.wedges[c]);
+        if (allWedges && player.position === 'C') {
+          startStreak();
+        } else {
+          // RISPOSTA CORRETTA → il turno continua, lo stesso giocatore lancia di nuovo
+          setPhase('idle');
+          showToast('✅ Risposta giusta! Lancia ancora 🎲', 'success');
+          updateTurnUI();
+        }
+      }
+    } else {
+      // RISPOSTA SBAGLIATA → fine turno, giocatore successivo
+      endTurn();
+    }
+  }, 1400);
+}
+
+function markOpts(chosen, correct, ok) {
+  document.querySelectorAll('#qOpts .q-opt').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    if (chosen !== null && i === chosen && !ok) btn.classList.add('wrong');
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   STREAK FINALE
+═══════════════════════════════════════════════════ */
+function startStreak() {
+  G.phase = 'streak';
+  G.streakCount = 0;
+  const cats = [...CAT_IDS].sort(() => Math.random()-0.5);
+  G.streakQueue = cats.concat([...CAT_IDS].sort(() => Math.random()-0.5));
+  nextStreakQ();
+}
+
+function nextStreakQ() {
+  const player = G.players[G.curIdx];
+  const cat    = G.streakQueue[G.streakCount] || CAT_IDS[G.streakCount % CAT_IDS.length];
+  const q      = getTrivialQuestion(cat, G.usedQ[G.curIdx] || [], G.turnCount);
+  if (!q) { endTurn(); return; }
+
+  G.usedQ[G.curIdx] = [...(G.usedQ[G.curIdx] || []), q.id];
+  _qAnswered = false;
+
+  // Bar
+  const bar = document.getElementById('streakBar');
+  bar.innerHTML = Array.from({length:5},(_,i) => `
+    <div class="streak-pip ${i < G.streakCount ? 'done' : ''}"></div>
+  `).join('');
+
+  const catObj = CATS[cat];
+  document.getElementById('sQCat').innerHTML = `<span style="color:${catObj.color}">${catObj.emoji} ${catObj.label}</span>`;
+  document.getElementById('sQText').textContent = q.text;
+
+  const opts = document.getElementById('sQOpts');
+  const sLetters = ['A','B','C','D'];
+  opts.innerHTML = q.opts.map((o, i) => `
+    <button class="q-opt" data-letter="${sLetters[i]}" onclick="answerStreak(${i},${q.ans})">${o}</button>
+  `).join('');
+
+  // Timer
+  let tl = 20;
+  clearInterval(_timerInterval);
+  document.getElementById('sTimerFill').style.transition = 'none';
+  document.getElementById('sTimerFill').style.width = '100%';
+  setTimeout(() => {
+    document.getElementById('sTimerFill').style.transition = `width ${tl}s linear`;
+    document.getElementById('sTimerFill').style.width = '0%';
+  }, 50);
+  _timerInterval = setInterval(() => {
+    tl--;
+    if (tl <= 0 || _qAnswered) {
+      clearInterval(_timerInterval);
+      if (!_qAnswered) {
+        _qAnswered = true;
+        document.querySelectorAll('#sQOpts .q-opt').forEach((b,i) => {
+          b.disabled = true;
+          if (i === q.ans) b.classList.add('correct');
+        });
+        setTimeout(() => { G.streakCount = 0; nextStreakQ(); }, 1400);
+      }
+    }
+  }, 1000);
+
+  show('streakModal');
+}
+
+function answerStreak(chosen, correct) {
+  if (_qAnswered) return;
+  _qAnswered = true;
+  clearInterval(_timerInterval);
+  const ok = chosen === correct;
+  document.querySelectorAll('#sQOpts .q-opt').forEach((b,i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+    if (i === chosen && !ok) b.classList.add('wrong');
+  });
+
+  setTimeout(() => {
+    if (ok) {
+      G.streakCount++;
+      if (G.streakCount >= 5) {
+        // VITTORIA!
+        hide('streakModal');
+        triggerWin();
+      } else {
+        nextStreakQ();
+      }
+    } else {
+      showToast('Risposta errata! Riparti da 0 🔄', 'error');
+      G.streakCount = 0;
+      setTimeout(() => {
+        hide('streakModal');
+        endTurn();
+      }, 800);
+    }
+  }, 1200);
+}
+
+/* ═══════════════════════════════════════════════════
+   FINE TURNO / VITTORIA
+═══════════════════════════════════════════════════ */
+function endTurn() {
+  G.turnCount++;
+  G.pendingDir = null;
+  G.curIdx = (G.curIdx + 1) % G.players.length;
+  renderPlayers();
+  updateTurnUI();
+  setPhase('idle');
+}
+
+function triggerWin() {
+  const winner = G.players[G.curIdx];
+  document.getElementById('winName').textContent = `🏆 Vince ${winner.name}!`;
+  document.getElementById('winSub').textContent  = `In ${G.turnCount} turni. Grande partita!`;
+  show('winModal');
+
+  // Salva in leaderboard
+  const user = Auth.currentUser();
+  Leaderboard.submit('trivial', {
+    nickname: user ? user.nickname : winner.name,
+    avatar:   user ? user.avatar  : winner.emoji,
+    value:    G.turnCount,
+    meta:     { players: G.players.length }
+  });
+  if (user) Auth.addXP(200);
+
+  // Recenti
+  const recent = JSON.parse(localStorage.getItem('pd_recent') || '[]');
+  recent.unshift({ game:'Trivial Otaku', score:`${G.turnCount} turni`, date: Date.now() });
+  localStorage.setItem('pd_recent', JSON.stringify(recent.slice(0,8)));
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER UI
+═══════════════════════════════════════════════════ */
+function renderPlayers() {
+  const cont = document.getElementById('playersList');
+  cont.innerHTML = G.players.map((p, i) => {
+    const isActive = i === G.curIdx;
+    const wedgeHtml = CAT_IDS.map(c => {
+      const earned = p.wedges[c];
+      const style  = earned
+        ? `background:${CATS[c].color};border-color:${CATS[c].color};color:${CATS[c].color}`
+        : '';
+      const content = earned ? CATS[c].emoji : '';
+      return `<div class="wedge ${earned?'earned':''}" style="${style}" title="${CATS[c].label}">${content}</div>`;
+    }).join('');
+    return `
+      <div class="player-card ${isActive?'active':''}" style="--player-color:${p.color}">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></div>
+          <div class="player-name" style="${isActive?'color:'+p.color:''}">${p.name}</div>
+        </div>
+        <div class="player-pos">${nodeLabel(p.position)}</div>
+        <div class="wedges-row">${wedgeHtml}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function nodeLabel(id) {
+  if (id === 'C') return 'Centro';
+  if (id[0] === 'R') {
+    const n = NODES[id];
+    if (!n) return id;
+    const prefix = n.type === 'hq' ? 'QG ' : n.type === 'bonus' ? 'Bonus ' : '';
+    return `${prefix}${CATS[n.cat]?.emoji} ${CATS[n.cat]?.label}`;
+  }
+  const prefix = id.slice(0,2);
+  const step   = parseInt(id.slice(2)) + 1;
+  const si     = ['AN','SP','GV','MU','SR','PK'].indexOf(prefix);
+  const cat    = CAT_IDS[si];
+  return `Sentiero ${CATS[cat]?.emoji} tappa ${step}`;
+}
+
+function updateTurnUI() {
+  const p = G.players[G.curIdx];
+  if (!p) return;
+  document.getElementById('turnName').textContent = p.name;
+  document.getElementById('turnName').style.color = p.color;
+  if (G.diceVal) renderDice(G.diceVal);
+  else renderDicePlaceholder();
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILS MODALE
+═══════════════════════════════════════════════════ */
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+function hideAllModals() {
+  ['setupModal','questionModal','streakModal','spokeModal','winModal'].forEach(hide);
+  clearDirPreview();
+  document.getElementById('actionPanel').innerHTML = '';
+}
+
+/* ═══════════════════════════════════════════════════
+   THEME
+═══════════════════════════════════════════════════ */
+function initTheme() {
+  const saved = localStorage.getItem('pd_theme') || 'dark';
+  document.body.dataset.theme = saved;
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+}
+
+function toggleTheme() {
+  const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.body.dataset.theme = next;
+  localStorage.setItem('pd_theme', next);
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
+  if (G.diceVal) renderDice(G.diceVal);
+  else renderDicePlaceholder();
+}
+
+/* ═══════════════════════════════════════════════════
+   SVG DICE
+═══════════════════════════════════════════════════ */
+const DICE_DOTS = {
+  1: [[50,50]],
+  2: [[32,32],[68,68]],
+  3: [[32,32],[50,50],[68,68]],
+  4: [[32,32],[68,32],[32,68],[68,68]],
+  5: [[32,32],[68,32],[50,50],[32,68],[68,68]],
+  6: [[32,26],[68,26],[32,50],[68,50],[32,74],[68,74]]
+};
+
+function _buildDiceBase(svg, idSuffix) {
+  const isDark = document.body.dataset.theme !== 'light';
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+
+  // Defs: gradient + drop-shadow
+  const defs = document.createElementNS(ns, 'defs');
+  const gid  = 'dg' + idSuffix;
+  const fid  = 'df' + idSuffix;
+
+  const grad = document.createElementNS(ns, 'linearGradient');
+  grad.setAttribute('id', gid);
+  grad.setAttribute('x1','0%'); grad.setAttribute('y1','0%');
+  grad.setAttribute('x2','100%'); grad.setAttribute('y2','100%');
+  const s1 = document.createElementNS(ns, 'stop');
+  s1.setAttribute('offset','0%');
+  s1.setAttribute('stop-color', isDark ? '#2d2545' : '#ede9f8');
+  const s2 = document.createElementNS(ns, 'stop');
+  s2.setAttribute('offset','100%');
+  s2.setAttribute('stop-color', isDark ? '#1a1230' : '#d8d3f5');
+  grad.appendChild(s1); grad.appendChild(s2);
+
+  const filt = document.createElementNS(ns, 'filter');
+  filt.setAttribute('id', fid);
+  const ds = document.createElementNS(ns, 'feDropShadow');
+  ds.setAttribute('dx','0'); ds.setAttribute('dy','3'); ds.setAttribute('stdDeviation','4');
+  ds.setAttribute('flood-color', isDark ? 'rgba(0,0,0,.7)' : 'rgba(0,0,0,.2)');
+  filt.appendChild(ds);
+
+  defs.appendChild(grad); defs.appendChild(filt);
+  svg.appendChild(defs);
+
+  // Rounded rect body
+  const rect = document.createElementNS(ns, 'rect');
+  rect.setAttribute('x','6'); rect.setAttribute('y','5');
+  rect.setAttribute('width','88'); rect.setAttribute('height','88');
+  rect.setAttribute('rx','18'); rect.setAttribute('ry','18');
+  rect.setAttribute('fill', `url(#${gid})`);
+  rect.setAttribute('stroke', isDark ? 'rgba(124,58,237,.65)' : 'rgba(124,58,237,.4)');
+  rect.setAttribute('stroke-width','2');
+  rect.setAttribute('filter', `url(#${fid})`);
+  svg.appendChild(rect);
+
+  return isDark;
+}
+
+function renderDice(value) {
+  const svg = document.getElementById('diceSvg');
+  if (!svg) return;
+  const isDark = _buildDiceBase(svg, 'r');
+  const ns = 'http://www.w3.org/2000/svg';
+  const dotColor = isDark ? '#c4b5fd' : '#7c3aed';
+  (DICE_DOTS[value] || []).forEach(([px, py]) => {
+    // Map 0-100 percentage to rect coords (rect: x=6, w=88 → 6..94; y=5, h=88 → 5..93)
+    const cx = 6 + (px / 100) * 88;
+    const cy = 5 + (py / 100) * 88;
+    const c = document.createElementNS(ns, 'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy);
+    c.setAttribute('r', '9');
+    c.setAttribute('fill', dotColor);
+    c.setAttribute('style', `filter:drop-shadow(0 0 4px ${dotColor}88)`);
+    svg.appendChild(c);
+  });
+}
+
+function renderDicePlaceholder() {
+  const svg = document.getElementById('diceSvg');
+  if (!svg) return;
+  const isDark = _buildDiceBase(svg, 'p');
+  const ns = 'http://www.w3.org/2000/svg';
+  // Dashed overlay to indicate "click to roll"
+  const dash = document.createElementNS(ns, 'rect');
+  dash.setAttribute('x','6'); dash.setAttribute('y','5');
+  dash.setAttribute('width','88'); dash.setAttribute('height','88');
+  dash.setAttribute('rx','18'); dash.setAttribute('ry','18');
+  dash.setAttribute('fill','none');
+  dash.setAttribute('stroke', isDark ? 'rgba(196,181,253,.35)' : 'rgba(124,58,237,.25)');
+  dash.setAttribute('stroke-width','2');
+  dash.setAttribute('stroke-dasharray','6,5');
+  svg.appendChild(dash);
+  // Center question mark
+  const txt = document.createElementNS(ns, 'text');
+  txt.setAttribute('x','50'); txt.setAttribute('y','60');
+  txt.setAttribute('text-anchor','middle');
+  txt.setAttribute('font-size','34'); txt.setAttribute('font-weight','900');
+  txt.setAttribute('fill', isDark ? 'rgba(196,181,253,.45)' : 'rgba(124,58,237,.35)');
+  txt.textContent = '?';
+  svg.appendChild(txt);
+}
+
+function handleDiceClick() {
+  const area = document.getElementById('diceArea');
+  if (!area || area.classList.contains('disabled')) return;
+  rollDice();
+}
+
+/* ═══════════════════════════════════════════════════
+   DIRECTION BOARD PREVIEW
+═══════════════════════════════════════════════════ */
+function showDirPreview(cwIdx, ccwIdx) {
+  clearDirPreview();
+  const svg = document.getElementById('boardSvg');
+  if (!svg) return;
+  const ns = 'http://www.w3.org/2000/svg';
+
+  function addMarker(ri, color, label) {
+    const pos = nodePos(`R${ri}`);
+    const g = document.createElementNS(ns, 'g');
+    g.classList.add('dir-preview');
+
+    // Pulsing fill circle
+    const fill = document.createElementNS(ns, 'circle');
+    fill.setAttribute('cx', pos.x); fill.setAttribute('cy', pos.y);
+    fill.setAttribute('r', '18');
+    fill.setAttribute('fill', color);
+    fill.setAttribute('opacity', '.4');
+    fill.style.animation = 'dirPulse 1.1s ease-in-out infinite';
+    g.appendChild(fill);
+
+    // Border ring
+    const ring = document.createElementNS(ns, 'circle');
+    ring.setAttribute('cx', pos.x); ring.setAttribute('cy', pos.y);
+    ring.setAttribute('r', '18');
+    ring.setAttribute('fill', 'none');
+    ring.setAttribute('stroke', color);
+    ring.setAttribute('stroke-width', '2.5');
+    ring.setAttribute('opacity', '.85');
+    ring.style.animation = 'dirPulse 1.1s ease-in-out infinite';
+    g.appendChild(ring);
+
+    // Direction label
+    const txt = document.createElementNS(ns, 'text');
+    txt.setAttribute('x', pos.x); txt.setAttribute('y', pos.y + 6);
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('font-size', '14');
+    txt.setAttribute('font-weight', '900');
+    txt.setAttribute('fill', color);
+    txt.setAttribute('pointer-events', 'none');
+    txt.textContent = label;
+    g.appendChild(txt);
+
+    svg.appendChild(g);
+  }
+
+  addMarker(cwIdx, '#a78bfa', '↻');
+  if (ccwIdx !== cwIdx) addMarker(ccwIdx, '#fb923c', '↺');
+}
+
+function clearDirPreview() {
+  document.querySelectorAll('.dir-preview').forEach(e => e.remove());
+}
+
+/* ── Init: mostra setup ── */
+window.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  renderDicePlaceholder();
+  showSetup();
+});
+</script>
+</body>
+</html>

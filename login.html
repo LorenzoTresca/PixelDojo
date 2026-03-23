@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelDojo — Accedi / Registrati</title>
+  <style>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Design System
+   Tokens, componenti condivisi, layout globale
+═══════════════════════════════════════════════════════════ */
+
+:root {
+  --ink:    #1a1f2e;
+  --ink2:   #4a5068;
+  --ink3:   #8892a4;
+  --surf:   #ffffff;
+  --surf2:  #f4f5f8;
+  --surf3:  #eef0f5;
+  --neon:   #7c3aed;
+  --neon2:  #6025c9;
+  --volt:   #c8f135;
+  --volt2:  #a8d020;
+  --fire:   #ff5722;
+  --fire2:  #e64a19;
+  --ice:    #0ea5e9;
+  --gold:   #f59e0b;
+  --mint:   #10b981;
+  --border: rgba(26,31,46,0.1);
+  --r:      10px;
+  --r2:     16px;
+  --r3:     24px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-neon: 0 8px 32px rgba(124,58,237,0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink:    #e8eaf2;
+    --ink2:   #9ba3b8;
+    --ink3:   #5c6478;
+    --surf:   #1c2030;
+    --surf2:  #242840;
+    --surf3:  #2e3350;
+    --border: rgba(232,234,242,0.08);
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--surf2);
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+input, select { font-family: inherit; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════════ */
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 10px 24px;
+  background: var(--surf);
+  border-bottom: 0.5px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 8px;
+}
+.nav-logo {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-right: 12px;
+  white-space: nowrap;
+}
+.nav-logo span { color: var(--neon); }
+.nav-links { display: flex; gap: 2px; flex: 1; }
+.nav-link {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+  transition: all .15s;
+  cursor: pointer;
+}
+.nav-link:hover, .nav-link.active {
+  background: rgba(124,58,237,.1);
+  color: var(--neon);
+}
+.nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.nav-coins {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(245,158,11,.08);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+}
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(124,58,237,.15);
+  color: var(--neon);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--r);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn-primary  { background: var(--neon); color: #fff; }
+.btn-primary:hover { background: var(--neon2); transform: translateY(-1px); box-shadow: var(--shadow-neon); }
+.btn-volt     { background: var(--volt); color: #1a1f2e; }
+.btn-volt:hover { background: var(--volt2); transform: translateY(-1px); }
+.btn-ghost    { background: transparent; color: var(--ink); border: 0.5px solid var(--border); }
+.btn-ghost:hover { background: var(--surf2); }
+.btn-danger   { background: var(--fire); color: #fff; }
+.btn-danger:hover { background: var(--fire2); }
+.btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+.btn-lg { padding: 14px 28px; font-size: 16px; border-radius: var(--r2); }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   TAGS / BADGES
+═══════════════════════════════════════════════════════════ */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tag-neon  { background: rgba(124,58,237,.12); color: var(--neon); }
+.tag-fire  { background: rgba(255,87,34,.12);  color: var(--fire); }
+.tag-ice   { background: rgba(14,165,233,.12); color: var(--ice); }
+.tag-gold  { background: rgba(245,158,11,.12); color: var(--gold); }
+.tag-mint  { background: rgba(16,185,129,.12); color: var(--mint); }
+.tag-gray  { background: var(--surf3); color: var(--ink2); }
+.tag-volt  { background: rgba(200,241,53,.15); color: #7a9300; }
+
+.badge-new {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: var(--volt);
+  color: #1a1f2e;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+  letter-spacing: .04em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GAME CARD
+═══════════════════════════════════════════════════════════ */
+.game-card {
+  background: var(--surf);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+  transition: all .2s;
+  cursor: pointer;
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.game-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--neon);
+  box-shadow: 0 12px 32px rgba(124,58,237,.15);
+}
+.card-thumb {
+  width: 100%;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+.card-body  { padding: 14px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.card-meta  { font-size: 12px; color: var(--ink3); margin-bottom: 10px; line-height: 1.4; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; }
+.diff-pip   { display: inline-flex; gap: 3px; }
+.pip        { width: 6px; height: 6px; border-radius: 50%; background: var(--surf3); }
+.pip.on     { background: var(--fire); }
+
+/* ═══════════════════════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════════════════════ */
+.lb-list { display: flex; flex-direction: column; gap: 4px; }
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surf);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r);
+  transition: background .15s;
+}
+.lb-item:hover { background: var(--surf2); }
+.lb-rank       { font-size: 13px; font-weight: 600; min-width: 24px; color: var(--ink3); }
+.lb-rank.gold   { color: var(--gold); }
+.lb-rank.silver { color: #94a3b8; }
+.lb-rank.bronze { color: #cd7c4b; }
+.lb-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  flex-shrink: 0;
+}
+.lb-name  { flex: 1; font-size: 13px; font-weight: 500; color: var(--ink); }
+.lb-score { font-size: 13px; font-weight: 700; color: var(--neon); }
+.lb-delta { font-size: 11px; margin-left: 6px; }
+.lb-delta.up { color: var(--mint); }
+.lb-delta.dn { color: var(--fire); }
+
+/* ═══════════════════════════════════════════════════════════
+   XP / PLAYER PANEL
+═══════════════════════════════════════════════════════════ */
+.xp-bar {
+  height: 5px;
+  background: var(--surf3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.xp-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--neon), var(--volt));
+  transition: width .4s;
+}
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.stat-box  {
+  background: var(--surf);
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+  border: 0.5px solid var(--border);
+}
+.stat-val { font-size: 18px; font-weight: 700; color: var(--ink); }
+.stat-lbl { font-size: 10px; color: var(--ink3); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION HELPERS
+═══════════════════════════════════════════════════════════ */
+.section-hd {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-hd a {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--neon);
+  text-decoration: none;
+}
+.section-hd a:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════════════════
+   FORM INPUTS
+═══════════════════════════════════════════════════════════ */
+.inp {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--r);
+  border: 0.5px solid var(--border);
+  background: var(--surf2);
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s;
+}
+.inp:focus { border-color: var(--neon); box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+.inp::placeholder { color: var(--ink3); }
+.form-label { font-size: 12px; font-weight: 600; color: var(--ink2); margin-bottom: 6px; display: block; }
+.form-group { margin-bottom: 16px; }
+.form-error { font-size: 12px; color: var(--fire); margin-top: 4px; }
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-box {
+  background: var(--surf);
+  border-radius: var(--r3);
+  border: 0.5px solid var(--border);
+  padding: 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  animation: modalIn .2s ease;
+}
+.modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.modal-sub {
+  font-size: 13px;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)  translateY(0); }
+}
+.hidden { display: none !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   HERO BAND
+═══════════════════════════════════════════════════════════ */
+.hero-band {
+  background: linear-gradient(135deg, #0e0a22 0%, #1e0a4a 50%, #0a1a3a 100%);
+  padding: 32px 24px;
+}
+.feat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(200,241,53,.15);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--volt);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CATEGORY BOX
+═══════════════════════════════════════════════════════════ */
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cat-box {
+  border-radius: 9px;
+  padding: 12px 8px;
+  text-align: center;
+  background: var(--surf2);
+  border: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+}
+.cat-box:hover { border-color: var(--neon); background: rgba(124,58,237,.05); }
+.cat-icon { font-size: 22px; margin-bottom: 4px; }
+.cat-name { font-size: 11px; font-weight: 600; color: var(--ink2); }
+
+/* ═══════════════════════════════════════════════════════════
+   TOASTS / ALERTS
+═══════════════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 12px 18px;
+  border-radius: var(--r2);
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: toastIn .25s ease;
+  max-width: 320px;
+}
+.toast-success { background: var(--mint); }
+.toast-error   { background: var(--fire); }
+.toast-info    { background: var(--neon); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════ */
+.text-neon  { color: var(--neon); }
+.text-volt  { color: var(--volt); }
+.text-fire  { color: var(--fire); }
+.text-gold  { color: var(--gold); }
+.text-mint  { color: var(--mint); }
+.text-ink3  { color: var(--ink3); }
+.fw-700     { font-weight: 700; }
+.fw-800     { font-weight: 800; }
+.fs-12      { font-size: 12px; }
+.fs-11      { font-size: 11px; }
+.mt-4       { margin-top: 4px; }
+.mt-8       { margin-top: 8px; }
+.mt-12      { margin-top: 12px; }
+.mt-16      { margin-top: 16px; }
+.mb-4       { margin-bottom: 4px; }
+.mb-8       { margin-bottom: 8px; }
+.mb-12      { margin-bottom: 12px; }
+.gap-8      { gap: 8px; }
+.flex       { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.w-full     { width: 100%; }
+
+</style>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:linear-gradient(135deg,#0e0a22,#1e0a4a,#0a1a3a); }
+    .login-wrap { width:100%; max-width:420px; padding:20px; }
+    .login-box { background:var(--surf); border:0.5px solid var(--border); border-radius:var(--r3); padding:36px 32px; }
+    .login-logo { font-size:22px; font-weight:800; color:var(--ink); margin-bottom:6px; }
+    .login-logo span { color:var(--neon); }
+    .login-sub { font-size:13px; color:var(--ink3); margin-bottom:28px; }
+    .tab-row { display:flex; gap:4px; margin-bottom:24px; border-bottom:0.5px solid var(--border); padding-bottom:0; }
+    .tab-btn { flex:1; padding:10px; text-align:center; font-size:14px; font-weight:600; color:var(--ink3); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; margin-bottom:-1px; transition:.15s; }
+    .tab-btn.active { color:var(--neon); border-bottom-color:var(--neon); }
+    .divider { display:flex; align-items:center; gap:10px; margin:20px 0; color:var(--ink3); font-size:12px; }
+    .divider::before, .divider::after { content:''; flex:1; height:0.5px; background:var(--border); }
+    .btn-google { width:100%; justify-content:center; background:var(--surf2); color:var(--ink); border:0.5px solid var(--border); gap:10px; }
+    .btn-google:hover { background:var(--surf3); }
+  </style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">Pixel<span>Dojo</span></div>
+    <div class="login-sub">Accedi per salvare i tuoi punteggi e scalare la classifica.</div>
+
+    <!-- Tabs -->
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabAccedi"     onclick="showTab('login')">Accedi</button>
+      <button class="tab-btn"        id="tabRegistrati" onclick="showTab('register')">Registrati</button>
+    </div>
+
+    <!-- Form LOGIN -->
+    <div id="formLogin">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="inp" id="loginEmail" placeholder="la-tua@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="inp" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+        <div class="form-error hidden" id="loginError"></div>
+      </div>
+      <button class="btn btn-primary w-full" style="justify-content:center" onclick="doLogin()">Accedi</button>
+    </div>
+
+    <!-- Form REGISTRATI -->
+    <div id="formRegister" class="hidden">
+      <div class="form-group">
+        <label class="form-label">Nickname (visibile in classifica)</label>
+        <input type="text" class="inp" id="regNick" placeholder="es. MasterKirby42" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="inp" id="regEmail" placeholder="la-tua@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password (min. 6 caratteri)</label>
+        <input type="password" class="inp" id="regPassword" placeholder="••••••••" autocomplete="new-password">
+        <div class="form-error hidden" id="regError"></div>
+      </div>
+      <button class="btn btn-volt w-full" style="justify-content:center" onclick="doRegister()">Crea account</button>
+    </div>
+
+    <div class="divider">oppure</div>
+    <button class="btn btn-google" onclick="showToast('Google Login disponibile con Firebase — coming soon!','info')">
+      <span style="font-size:18px">G</span> Continua con Google
+    </button>
+
+    <p style="text-align:center;margin-top:20px;font-size:12px;color:var(--ink3)">
+      <a href="index.html" style="color:var(--neon)">← Torna alla Home</a>
+    </p>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Auth Module (localStorage, pronto per Firebase)
+═══════════════════════════════════════════════════════════ */
+
+const Auth = (() => {
+  const USERS_KEY    = 'pd_users';
+  const SESSION_KEY  = 'pd_session';
+
+  function _getUsers()  { return JSON.parse(localStorage.getItem(USERS_KEY)  || '{}'); }
+  function _saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+  function _getSession(){ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+
+  function register(email, password, nickname) {
+    email = email.trim().toLowerCase();
+    nickname = nickname.trim();
+    if (!email || !password || !nickname) return { ok:false, err:'Compila tutti i campi.' };
+    if (password.length < 6) return { ok:false, err:'Password minima 6 caratteri.' };
+    const users = _getUsers();
+    if (users[email]) return { ok:false, err:'Email già registrata.' };
+    const user = {
+      email, nickname,
+      passwordHash: btoa(password),   // placeholder — sostituire con Firebase Auth
+      createdAt: Date.now(),
+      xp: 0, level: 1,
+      avatar: nickname.slice(0,2).toUpperCase(),
+    };
+    users[email] = user;
+    _saveUsers(users);
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ email, nickname, xp: user.xp, level: user.level, avatar: user.avatar }));
+    return { ok:true, user };
+  }
+
+  function login(email, password) {
+    email = email.trim().toLowerCase();
+    const users = _getUsers();
+    const user  = users[email];
+    if (!user) return { ok:false, err:'Email non trovata.' };
+    if (user.passwordHash !== btoa(password)) return { ok:false, err:'Password errata.' };
+    const session = { email, nickname: user.nickname, xp: user.xp, level: user.level, avatar: user.avatar };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return { ok:true, user: session };
+  }
+
+  function logout() {
+    localStorage.removeItem(SESSION_KEY);
+    window.location.href = 'login.html';
+  }
+
+  function currentUser() { return _getSession(); }
+
+  function isLoggedIn() { return !!_getSession(); }
+
+  function addXP(amount) {
+    const session = _getSession();
+    if (!session) return;
+    const users = _getUsers();
+    const user  = users[session.email];
+    if (!user) return;
+    user.xp += amount;
+    user.level = Math.floor(user.xp / 1000) + 1;
+    _saveUsers(users);
+    session.xp    = user.xp;
+    session.level = user.level;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return { xp: user.xp, level: user.level };
+  }
+
+  function requireLogin() {
+    if (!isLoggedIn()) {
+      window.location.href = 'login.html';
+      return null;
+    }
+    return currentUser();
+  }
+
+  return { register, login, logout, currentUser, isLoggedIn, addXP, requireLogin };
+})();
+
+
+/* ── Helpers UI condivisi ── */
+function showToast(msg, type = 'info') {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function renderNavUser() {
+  const user = Auth.currentUser();
+  const navRight = document.querySelector('.nav-right');
+  if (!navRight) return;
+
+  if (user) {
+    navRight.innerHTML = `
+      <div class="nav-coins">★ ${user.xp} XP</div>
+      <div class="nav-avatar" title="${user.nickname}">${user.avatar}</div>
+      <button class="btn btn-ghost btn-sm" onclick="Auth.logout()">Esci</button>
+    `;
+  } else {
+    navRight.innerHTML = `
+      <a class="btn btn-ghost btn-sm" href="login.html">Accedi</a>
+      <a class="btn btn-volt btn-sm" href="login.html#register">Registrati</a>
+    `;
+  }
+}
+
+</script>
+<script>
+  /* Redirect se già loggato */
+  if (Auth.isLoggedIn()) window.location.href = 'index.html';
+
+  /* Tab da hash */
+  if (window.location.hash === '#register') showTab('register');
+
+  function showTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('formLogin').classList.toggle('hidden',    !isLogin);
+    document.getElementById('formRegister').classList.toggle('hidden', isLogin);
+    document.getElementById('tabAccedi').classList.toggle('active',    isLogin);
+    document.getElementById('tabRegistrati').classList.toggle('active', !isLogin);
+  }
+
+  function doLogin() {
+    const email    = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errEl    = document.getElementById('loginError');
+    errEl.classList.add('hidden');
+    const res = Auth.login(email, password);
+    if (res.ok) {
+      showToast('Bentornato, ' + res.user.nickname + '!', 'success');
+      setTimeout(() => window.location.href = 'index.html', 800);
+    } else {
+      errEl.textContent = res.err;
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  function doRegister() {
+    const nick     = document.getElementById('regNick').value;
+    const email    = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+    const errEl    = document.getElementById('regError');
+    errEl.classList.add('hidden');
+    const res = Auth.register(email, password, nick);
+    if (res.ok) {
+      showToast('Account creato! Benvenuto su PixelDojo 🎉', 'success');
+      setTimeout(() => window.location.href = 'index.html', 1000);
+    } else {
+      errEl.textContent = res.err;
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  /* Enter key support */
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const isLogin = !document.getElementById('formLogin').classList.contains('hidden');
+    if (isLogin) doLogin(); else doRegister();
+  });
+</script>
+</body>
+</html>

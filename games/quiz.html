@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelDojo — Quiz Flash</title>
+  <style>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Design System
+   Tokens, componenti condivisi, layout globale
+═══════════════════════════════════════════════════════════ */
+
+:root {
+  --ink:    #1a1f2e;
+  --ink2:   #4a5068;
+  --ink3:   #8892a4;
+  --surf:   #ffffff;
+  --surf2:  #f4f5f8;
+  --surf3:  #eef0f5;
+  --neon:   #7c3aed;
+  --neon2:  #6025c9;
+  --volt:   #c8f135;
+  --volt2:  #a8d020;
+  --fire:   #ff5722;
+  --fire2:  #e64a19;
+  --ice:    #0ea5e9;
+  --gold:   #f59e0b;
+  --mint:   #10b981;
+  --border: rgba(26,31,46,0.1);
+  --r:      10px;
+  --r2:     16px;
+  --r3:     24px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-neon: 0 8px 32px rgba(124,58,237,0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink:    #e8eaf2;
+    --ink2:   #9ba3b8;
+    --ink3:   #5c6478;
+    --surf:   #1c2030;
+    --surf2:  #242840;
+    --surf3:  #2e3350;
+    --border: rgba(232,234,242,0.08);
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--surf2);
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+input, select { font-family: inherit; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════════ */
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 10px 24px;
+  background: var(--surf);
+  border-bottom: 0.5px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 8px;
+}
+.nav-logo {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-right: 12px;
+  white-space: nowrap;
+}
+.nav-logo span { color: var(--neon); }
+.nav-links { display: flex; gap: 2px; flex: 1; }
+.nav-link {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+  transition: all .15s;
+  cursor: pointer;
+}
+.nav-link:hover, .nav-link.active {
+  background: rgba(124,58,237,.1);
+  color: var(--neon);
+}
+.nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.nav-coins {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(245,158,11,.08);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+}
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(124,58,237,.15);
+  color: var(--neon);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--r);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn-primary  { background: var(--neon); color: #fff; }
+.btn-primary:hover { background: var(--neon2); transform: translateY(-1px); box-shadow: var(--shadow-neon); }
+.btn-volt     { background: var(--volt); color: #1a1f2e; }
+.btn-volt:hover { background: var(--volt2); transform: translateY(-1px); }
+.btn-ghost    { background: transparent; color: var(--ink); border: 0.5px solid var(--border); }
+.btn-ghost:hover { background: var(--surf2); }
+.btn-danger   { background: var(--fire); color: #fff; }
+.btn-danger:hover { background: var(--fire2); }
+.btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+.btn-lg { padding: 14px 28px; font-size: 16px; border-radius: var(--r2); }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   TAGS / BADGES
+═══════════════════════════════════════════════════════════ */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tag-neon  { background: rgba(124,58,237,.12); color: var(--neon); }
+.tag-fire  { background: rgba(255,87,34,.12);  color: var(--fire); }
+.tag-ice   { background: rgba(14,165,233,.12); color: var(--ice); }
+.tag-gold  { background: rgba(245,158,11,.12); color: var(--gold); }
+.tag-mint  { background: rgba(16,185,129,.12); color: var(--mint); }
+.tag-gray  { background: var(--surf3); color: var(--ink2); }
+.tag-volt  { background: rgba(200,241,53,.15); color: #7a9300; }
+
+.badge-new {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: var(--volt);
+  color: #1a1f2e;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+  letter-spacing: .04em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GAME CARD
+═══════════════════════════════════════════════════════════ */
+.game-card {
+  background: var(--surf);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+  transition: all .2s;
+  cursor: pointer;
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.game-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--neon);
+  box-shadow: 0 12px 32px rgba(124,58,237,.15);
+}
+.card-thumb {
+  width: 100%;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+.card-body  { padding: 14px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.card-meta  { font-size: 12px; color: var(--ink3); margin-bottom: 10px; line-height: 1.4; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; }
+.diff-pip   { display: inline-flex; gap: 3px; }
+.pip        { width: 6px; height: 6px; border-radius: 50%; background: var(--surf3); }
+.pip.on     { background: var(--fire); }
+
+/* ═══════════════════════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════════════════════ */
+.lb-list { display: flex; flex-direction: column; gap: 4px; }
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surf);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r);
+  transition: background .15s;
+}
+.lb-item:hover { background: var(--surf2); }
+.lb-rank       { font-size: 13px; font-weight: 600; min-width: 24px; color: var(--ink3); }
+.lb-rank.gold   { color: var(--gold); }
+.lb-rank.silver { color: #94a3b8; }
+.lb-rank.bronze { color: #cd7c4b; }
+.lb-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  flex-shrink: 0;
+}
+.lb-name  { flex: 1; font-size: 13px; font-weight: 500; color: var(--ink); }
+.lb-score { font-size: 13px; font-weight: 700; color: var(--neon); }
+.lb-delta { font-size: 11px; margin-left: 6px; }
+.lb-delta.up { color: var(--mint); }
+.lb-delta.dn { color: var(--fire); }
+
+/* ═══════════════════════════════════════════════════════════
+   XP / PLAYER PANEL
+═══════════════════════════════════════════════════════════ */
+.xp-bar {
+  height: 5px;
+  background: var(--surf3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.xp-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--neon), var(--volt));
+  transition: width .4s;
+}
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.stat-box  {
+  background: var(--surf);
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+  border: 0.5px solid var(--border);
+}
+.stat-val { font-size: 18px; font-weight: 700; color: var(--ink); }
+.stat-lbl { font-size: 10px; color: var(--ink3); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION HELPERS
+═══════════════════════════════════════════════════════════ */
+.section-hd {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-hd a {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--neon);
+  text-decoration: none;
+}
+.section-hd a:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════════════════
+   FORM INPUTS
+═══════════════════════════════════════════════════════════ */
+.inp {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--r);
+  border: 0.5px solid var(--border);
+  background: var(--surf2);
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s;
+}
+.inp:focus { border-color: var(--neon); box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+.inp::placeholder { color: var(--ink3); }
+.form-label { font-size: 12px; font-weight: 600; color: var(--ink2); margin-bottom: 6px; display: block; }
+.form-group { margin-bottom: 16px; }
+.form-error { font-size: 12px; color: var(--fire); margin-top: 4px; }
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-box {
+  background: var(--surf);
+  border-radius: var(--r3);
+  border: 0.5px solid var(--border);
+  padding: 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  animation: modalIn .2s ease;
+}
+.modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.modal-sub {
+  font-size: 13px;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)  translateY(0); }
+}
+.hidden { display: none !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   HERO BAND
+═══════════════════════════════════════════════════════════ */
+.hero-band {
+  background: linear-gradient(135deg, #0e0a22 0%, #1e0a4a 50%, #0a1a3a 100%);
+  padding: 32px 24px;
+}
+.feat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(200,241,53,.15);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--volt);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CATEGORY BOX
+═══════════════════════════════════════════════════════════ */
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cat-box {
+  border-radius: 9px;
+  padding: 12px 8px;
+  text-align: center;
+  background: var(--surf2);
+  border: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+}
+.cat-box:hover { border-color: var(--neon); background: rgba(124,58,237,.05); }
+.cat-icon { font-size: 22px; margin-bottom: 4px; }
+.cat-name { font-size: 11px; font-weight: 600; color: var(--ink2); }
+
+/* ═══════════════════════════════════════════════════════════
+   TOASTS / ALERTS
+═══════════════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 12px 18px;
+  border-radius: var(--r2);
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: toastIn .25s ease;
+  max-width: 320px;
+}
+.toast-success { background: var(--mint); }
+.toast-error   { background: var(--fire); }
+.toast-info    { background: var(--neon); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════ */
+.text-neon  { color: var(--neon); }
+.text-volt  { color: var(--volt); }
+.text-fire  { color: var(--fire); }
+.text-gold  { color: var(--gold); }
+.text-mint  { color: var(--mint); }
+.text-ink3  { color: var(--ink3); }
+.fw-700     { font-weight: 700; }
+.fw-800     { font-weight: 800; }
+.fs-12      { font-size: 12px; }
+.fs-11      { font-size: 11px; }
+.mt-4       { margin-top: 4px; }
+.mt-8       { margin-top: 8px; }
+.mt-12      { margin-top: 12px; }
+.mt-16      { margin-top: 16px; }
+.mb-4       { margin-bottom: 4px; }
+.mb-8       { margin-bottom: 8px; }
+.mb-12      { margin-bottom: 12px; }
+.gap-8      { gap: 8px; }
+.flex       { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.w-full     { width: 100%; }
+
+</style>
+  <style>
+    body { background:#0e0a22; color:#e8eaf2; min-height:100vh; }
+    .navbar { background:#12102a; border-bottom:1px solid rgba(255,255,255,.08); }
+    .navbar .nav-logo span { color:#c8f135; }
+
+    .quiz-wrap { max-width:600px; margin:0 auto; padding:32px 20px; }
+
+    /* Schermata selezione tema */
+    .theme-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px; }
+    .theme-card {
+      background:rgba(255,255,255,.05);
+      border:1.5px solid rgba(255,255,255,.1);
+      border-radius:16px; padding:24px;
+      cursor:pointer; transition:.2s; text-align:center;
+    }
+    .theme-card:hover { border-color:rgba(255,255,255,.3); transform:translateY(-3px); }
+    .theme-emoji { font-size:48px; margin-bottom:12px; }
+    .theme-name  { font-size:16px; font-weight:700; color:#e8eaf2; margin-bottom:6px; }
+    .theme-desc  { font-size:12px; color:rgba(255,255,255,.45); line-height:1.4; }
+    .theme-count { font-size:11px; margin-top:8px; }
+
+    /* Schermata quiz */
+    .quiz-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .quiz-progress { font-size:13px; color:rgba(255,255,255,.5); }
+    .quiz-score-display { font-size:16px; font-weight:700; color:#c8f135; }
+    .timer-bar { height:6px; background:rgba(255,255,255,.1); border-radius:3px; overflow:hidden; margin-bottom:24px; }
+    .timer-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#c8f135,#10b981); transition:width 1s linear; }
+    .q-num   { font-size:12px; color:rgba(255,255,255,.4); text-transform:uppercase; letter-spacing:.07em; margin-bottom:8px; }
+    .q-text  { font-size:20px; font-weight:700; color:#e8eaf2; line-height:1.4; margin-bottom:24px; }
+    .opts    { display:flex; flex-direction:column; gap:10px; }
+    .opt-btn {
+      padding:14px 18px; border-radius:12px;
+      background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.1);
+      font-size:15px; color:#e8eaf2; cursor:pointer; transition:.15s; text-align:left;
+    }
+    .opt-btn:hover:not(:disabled) { background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.25); }
+    .opt-btn.correct  { background:rgba(16,185,129,.25);  border-color:#10b981; }
+    .opt-btn.wrong    { background:rgba(255,87,34,.25);   border-color:#ff5722; }
+    .opt-btn:disabled { cursor:not-allowed; }
+
+    /* Feedback flash */
+    .feedback { text-align:center; padding:16px; font-size:16px; font-weight:700; min-height:50px; }
+    .feedback.ok  { color:#10b981; }
+    .feedback.err { color:#ff5722; }
+
+    /* Schermata risultato */
+    .result-wrap { text-align:center; padding:40px 0; }
+    .result-emoji { font-size:72px; margin-bottom:16px; }
+    .result-title { font-size:28px; font-weight:800; color:#e8eaf2; margin-bottom:8px; }
+    .result-score { font-size:48px; font-weight:800; color:#c8f135; margin:16px 0; }
+    .result-sub   { font-size:14px; color:rgba(255,255,255,.5); margin-bottom:32px; }
+    .result-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:24px 0; }
+    .rs-box { background:rgba(255,255,255,.06); border-radius:12px; padding:14px; }
+    .rs-val { font-size:22px; font-weight:700; color:#e8eaf2; }
+    .rs-lbl { font-size:11px; color:rgba(255,255,255,.4); margin-top:4px; }
+
+    .nickname-form { margin:20px 0; display:flex; gap:10px; }
+    .nickname-form input { flex:1; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); color:#e8eaf2; border-radius:10px; padding:12px 16px; font-size:14px; }
+    .nickname-form input::placeholder { color:rgba(255,255,255,.35); }
+
+    @media(max-width:500px){ .theme-grid{grid-template-columns:1fr;} .result-stats{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" style="display:flex;align-items:center;padding:0 16px;gap:8px;height:48px">
+  <a class="nav-logo" href="../index.html" style="font-size:15px;font-weight:800;color:#e8eaf2;text-decoration:none">Pixel<span>Dojo</span></a>
+  <span id="navSubtitle" style="color:rgba(255,255,255,.3);font-size:12px">/ Quiz Flash</span>
+  <div style="margin-left:auto">
+    <a href="../index.html" style="font-size:12px;color:rgba(255,255,255,.5);text-decoration:none">← Home</a>
+  </div>
+</nav>
+
+<div class="quiz-wrap">
+
+  <!-- ══ SELEZIONE TEMA ══ -->
+  <div id="screenTheme">
+    <div style="font-size:22px;font-weight:800;color:#e8eaf2;margin-bottom:6px">🎯 Quiz Flash</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.45)">Scegli un tema e metti alla prova la tua conoscenza!</div>
+    <div class="theme-grid" id="themeGrid">
+      <!-- popolato da JS -->
+    </div>
+  </div>
+
+  <!-- ══ GIOCO ══ -->
+  <div id="screenGame" class="hidden">
+    <div class="quiz-header">
+      <div id="catBadge" class="tag">⚡ Pokémon</div>
+      <div class="quiz-score-display">★ <span id="scoreDisplay">0</span></div>
+    </div>
+    <div class="quiz-progress">Domanda <span id="qNum">1</span> di <span id="qTotal">10</span></div>
+    <div class="timer-bar" style="margin-top:10px"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+    <div class="q-text" id="gameQText"></div>
+    <div class="opts"  id="gameOpts"></div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <!-- ══ RISULTATO ══ -->
+  <div id="screenResult" class="hidden">
+    <div class="result-wrap">
+      <div class="result-emoji" id="resultEmoji">🏆</div>
+      <div class="result-title" id="resultTitle">Ottimo!</div>
+      <div class="result-score" id="resultScore">850</div>
+      <div class="result-sub" id="resultSub">punti</div>
+      <div class="result-stats">
+        <div class="rs-box"><div class="rs-val" id="rsCorrect">0</div><div class="rs-lbl">Corrette</div></div>
+        <div class="rs-box"><div class="rs-val" id="rsWrong">0</div><div class="rs-lbl">Errate</div></div>
+        <div class="rs-box"><div class="rs-val" id="rsTime">0s</div><div class="rs-lbl">Tempo medio</div></div>
+      </div>
+
+      <!-- Salva punteggio -->
+      <div id="saveSection">
+        <div style="font-size:14px;color:rgba(255,255,255,.6);margin-bottom:10px">Salva il tuo punteggio in classifica:</div>
+        <div class="nickname-form" id="nicknameForm">
+          <input type="text" id="nicknameInput" placeholder="Il tuo nickname" maxlength="20">
+          <button class="btn btn-volt" onclick="saveScore()">Salva 🏆</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="retryTheme()">Rigioca</button>
+        <button class="btn btn-ghost" style="color:#e8eaf2;border-color:rgba(255,255,255,.2)" onclick="showThemeSelect()">Cambia tema</button>
+        <a class="btn btn-ghost" href="../classifica.html" style="color:#e8eaf2;border-color:rgba(255,255,255,.2)">Classifica</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- quiz-wrap -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Auth Module (localStorage, pronto per Firebase)
+═══════════════════════════════════════════════════════════ */
+
+const Auth = (() => {
+  const USERS_KEY    = 'pd_users';
+  const SESSION_KEY  = 'pd_session';
+
+  function _getUsers()  { return JSON.parse(localStorage.getItem(USERS_KEY)  || '{}'); }
+  function _saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+  function _getSession(){ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+
+  function register(email, password, nickname) {
+    email = email.trim().toLowerCase();
+    nickname = nickname.trim();
+    if (!email || !password || !nickname) return { ok:false, err:'Compila tutti i campi.' };
+    if (password.length < 6) return { ok:false, err:'Password minima 6 caratteri.' };
+    const users = _getUsers();
+    if (users[email]) return { ok:false, err:'Email già registrata.' };
+    const user = {
+      email, nickname,
+      passwordHash: btoa(password),   // placeholder — sostituire con Firebase Auth
+      createdAt: Date.now(),
+      xp: 0, level: 1,
+      avatar: nickname.slice(0,2).toUpperCase(),
+    };
+    users[email] = user;
+    _saveUsers(users);
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ email, nickname, xp: user.xp, level: user.level, avatar: user.avatar }));
+    return { ok:true, user };
+  }
+
+  function login(email, password) {
+    email = email.trim().toLowerCase();
+    const users = _getUsers();
+    const user  = users[email];
+    if (!user) return { ok:false, err:'Email non trovata.' };
+    if (user.passwordHash !== btoa(password)) return { ok:false, err:'Password errata.' };
+    const session = { email, nickname: user.nickname, xp: user.xp, level: user.level, avatar: user.avatar };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return { ok:true, user: session };
+  }
+
+  function logout() {
+    localStorage.removeItem(SESSION_KEY);
+    window.location.href = '../login.html';
+  }
+
+  function currentUser() { return _getSession(); }
+
+  function isLoggedIn() { return !!_getSession(); }
+
+  function addXP(amount) {
+    const session = _getSession();
+    if (!session) return;
+    const users = _getUsers();
+    const user  = users[session.email];
+    if (!user) return;
+    user.xp += amount;
+    user.level = Math.floor(user.xp / 1000) + 1;
+    _saveUsers(users);
+    session.xp    = user.xp;
+    session.level = user.level;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return { xp: user.xp, level: user.level };
+  }
+
+  function requireLogin() {
+    if (!isLoggedIn()) {
+      window.location.href = '../login.html';
+      return null;
+    }
+    return currentUser();
+  }
+
+  return { register, login, logout, currentUser, isLoggedIn, addXP, requireLogin };
+})();
+
+
+/* ── Helpers UI condivisi ── */
+function showToast(msg, type = 'info') {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function renderNavUser() {
+  const user = Auth.currentUser();
+  const navRight = document.querySelector('.nav-right');
+  if (!navRight) return;
+
+  if (user) {
+    navRight.innerHTML = `
+      <div class="nav-coins">★ ${user.xp} XP</div>
+      <div class="nav-avatar" title="${user.nickname}">${user.avatar}</div>
+      <button class="btn btn-ghost btn-sm" onclick="Auth.logout()">Esci</button>
+    `;
+  } else {
+    navRight.innerHTML = `
+      <a class="btn btn-ghost btn-sm" href="../login.html">Accedi</a>
+      <a class="btn btn-volt btn-sm" href="../login.html#register">Registrati</a>
+    `;
+  }
+}
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Leaderboard Module (localStorage → Firebase ready)
+═══════════════════════════════════════════════════════════ */
+
+const Leaderboard = (() => {
+  const KEY = 'pd_leaderboard';
+
+  const GAMES = {
+    trivial:        { name:'Trivial Otaku',      emoji:'🎌', metric:'turns',  label:'turni',   lowerIsBetter: true  },
+    quiz_pokemon:   { name:'Pokémon Expert',     emoji:'⚡', metric:'score',  label:'punti',   lowerIsBetter: false },
+    quiz_generale:  { name:'Cultura Generale',   emoji:'🌍', metric:'score',  label:'punti',   lowerIsBetter: false },
+  };
+
+  function _getData()    { return JSON.parse(localStorage.getItem(KEY) || '{}'); }
+  function _saveData(d)  { localStorage.setItem(KEY, JSON.stringify(d)); }
+
+  /* Aggiunge un risultato; mantiene top 10 per gioco */
+  function submit(gameId, entry) {
+    // entry: { nickname, avatar, value, meta? }
+    const data   = _getData();
+    if (!data[gameId]) data[gameId] = [];
+    const board  = data[gameId];
+
+    // Rimuoviamo eventuale record precedente stesso utente (teniamo il migliore)
+    const existing = board.findIndex(e => e.nickname === entry.nickname);
+    if (existing !== -1) {
+      const old = board[existing];
+      const game = GAMES[gameId];
+      const isBetter = game.lowerIsBetter
+        ? entry.value < old.value
+        : entry.value > old.value;
+      if (!isBetter) { _saveData(data); return; }
+      board.splice(existing, 1);
+    }
+
+    board.push({ ...entry, date: Date.now() });
+
+    // Sort
+    const game = GAMES[gameId];
+    board.sort((a, b) => game.lowerIsBetter ? a.value - b.value : b.value - a.value);
+
+    // Top 10
+    data[gameId] = board.slice(0, 10);
+    _saveData(data);
+  }
+
+  function getBoard(gameId) {
+    const data = _getData();
+    return data[gameId] || [];
+  }
+
+  function getAllBoards() {
+    const data = _getData();
+    return Object.fromEntries(
+      Object.keys(GAMES).map(id => [id, data[id] || []])
+    );
+  }
+
+  function getGameInfo(gameId) { return GAMES[gameId] || null; }
+  function getAllGames()        { return GAMES; }
+
+  /* Rendering HTML di una leaderboard */
+  function renderBoard(gameId, container) {
+    const board = getBoard(gameId);
+    const game  = GAMES[gameId];
+    if (!game) return;
+
+    const rankClass = ['gold','silver','bronze'];
+    if (!board.length) {
+      container.innerHTML = `<div style="color:var(--ink3);font-size:13px;padding:20px;text-align:center;">Nessun punteggio ancora — sii il primo!</div>`;
+      return;
+    }
+
+    container.innerHTML = board.map((e, i) => `
+      <div class="lb-item">
+        <div class="lb-rank ${rankClass[i] || ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</div>
+        <div class="lb-avatar" style="background:${avatarColor(e.nickname)};color:#fff">${e.avatar || e.nickname.slice(0,2).toUpperCase()}</div>
+        <div class="lb-name">${escapeHtml(e.nickname)}</div>
+        <div class="lb-score">${e.value} <span style="font-size:11px;color:var(--ink3)">${game.label}</span></div>
+      </div>
+    `).join('');
+  }
+
+  function avatarColor(str) {
+    const colors = ['#7c3aed','#ff5722','#0ea5e9','#f59e0b','#10b981','#e91e63','#9c27b0','#3f51b5'];
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+    return colors[Math.abs(h) % colors.length];
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  return { submit, getBoard, getAllBoards, getGameInfo, getAllGames, renderBoard, avatarColor };
+})();
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PIXELDOJO — Domande Quiz Flash
+   2 temi × 50 domande = 100 totali
+   timer: 20s per domanda
+═══════════════════════════════════════════════════════════ */
+
+const QUIZ_THEMES = {
+
+  /* ── POKÉMON EXPERT ─────────────────────────────────────── */
+  pokemon: {
+    id: "pokemon",
+    name: "Pokémon Expert",
+    emoji: "⚡",
+    color: "#f59e0b",
+    bg: "linear-gradient(135deg,#2d1f00,#4a3200)",
+    description: "Metti alla prova la tua conoscenza del mondo Pokémon!",
+    questions: [
+      { text:"Quanti Pokémon totali esistono fino alla Gen 9 (Paldea)?", opts:["905","1008","1025","900"], ans:1 },
+      { text:"Quale Pokémon ha la statistica Attacco Speciale più alta tra i non-leggendari?", opts:["Alakazam","Espeon","Gengar","Alakazam Mega"], ans:3 },
+      { text:"Come si chiama la mossa che infligge danno pari ai PS mancanti?", opts:["Giramento","Rimbalzo","Inversione","Sfogliaceo"], ans:2 },
+      { text:"Quale tipo non è NULLA di nessun tipo?", opts:["Normale","Elettro","Acciaio","Drago"], ans:3 },
+      { text:"In quale gioco appare per la prima volta il concetto di 'Affetto' (Amicizia)?", opts:["Oro/Argento","Rosso/Blu","Giallo","Cristallo"], ans:0 },
+      { text:"Quale Pokémon ha la mossa esclusiva Spaccaterra?", opts:["Groudon","Quagsire","Rhyperior","Groudon (solo lui)"], ans:0 },
+      { text:"Quante mosse può tenere in memoria un Pokémon?", opts:["3","4","5","6"], ans:1 },
+      { text:"Come si chiama la regione di Pokémon Legends: Arceus?", opts:["Sinnoh","Hisui","Unova","Alola"], ans:1 },
+      { text:"Quale Pokémon si evolve usando un 'Dragon Scale' tramite scambio?", opts:["Seadra","Horsea","Dratini","Bagon"], ans:0 },
+      { text:"In quale tipo è Sylveon?", opts:["Normale","Psico","Fata","Luce"], ans:2 },
+      { text:"Quante statistiche base ha ogni Pokémon?", opts:["4","5","6","7"], ans:2 },
+      { text:"Quale Pokémon ha la mossa 'Dichiarazione d'Amore' esclusiva?", opts:["Luvdisc","Togekiss","Clefable","Sylveon"], ans:0 },
+      { text:"In quale regione si trova la città di Lavender Town (Lavandonia)?", opts:["Kanto","Johto","Hoenn","Sinnoh"], ans:0 },
+      { text:"Quale Pokémon è noto per avere la più alta statistica di Difesa?", opts:["Shuckle","Steelix","Bastiodon","Aggron"], ans:0 },
+      { text:"Come si chiama l'operazione del Team Plasma in Pokémon Nero/Bianco?", opts:["Operazione Freeze","Liberazione dei Pokémon","Operation Zero","Piano N"], ans:1 },
+      { text:"Quale Pokémon di tipo Acciaio è immune al tipo Veleno?", opts:["Tutti gli Acciaio","Solo Magnezone","Solo Skarmory","Solo Steelix"], ans:0 },
+      { text:"In quale anno è uscito Pokémon Rosso e Blu in Giappone?", opts:["1994","1995","1996","1997"], ans:2 },
+      { text:"Quale mossa abbassa la propria Accuratezza del 50%?", opts:["Tiro Melmoso","Cecità","Sabbia agli Occhi","Onda Sonora"], ans:1 },
+      { text:"Quante evoluzioni ha Eevee in totale (fino a Gen 8)?", opts:["6","7","8","9"], ans:2 },
+      { text:"Quale tipo di PokéBall ha il tasso di cattura più alto in assoluto?", opts:["Master Ball","Ultra Ball","Poké Ball","Great Ball"], ans:0 },
+      { text:"Come si chiama la mossa di tipo Drago esclusiva di Rayquaza?", opts:["Drago Meteorico","Ascesa Drago","Volo del Drago","Cometa Drago"], ans:0 },
+      { text:"In quale generazione è introdotto il concetto di Pokémon Alfa?", opts:["6a","7a","8a","Legends: Arceus"], ans:3 },
+      { text:"Quale Pokémon è composto da un gruppo di Pokémon più piccoli?", opts:["Exeggutor","Dugtrio","Magneton","Weezing"], ans:2 },
+      { text:"Quale tipo resiste a se stesso?", opts:["Acciaio","Drago","Fantasma","Erba"], ans:1 },
+      { text:"Come si chiama il professor Pokémon della regione di Sinnoh?", opts:["Prof. Oak","Prof. Birch","Prof. Rowan","Prof. Juniper"], ans:2 },
+      { text:"Quale Pokémon ha la statistica Velocità più alta?", opts:["Jolteon","Ninjask","Deoxys Forma Velocità","Electrode"], ans:2 },
+      { text:"In quale gioco è possibile catturare tutti i 151 Pokémon originali?", opts:["Rosso/Blu","Giallo","Let's Go Pikachu/Eevee","Tutti e tre"], ans:3 },
+      { text:"Quale mossa Ground infligge danno in due turni?", opts:["Terremoto","Grandine di Sabbia","Fossoscavo","Pietra Tombale"], ans:2 },
+      { text:"Quale Pokémon è l'unico di tipo Normale/Volo in Gen 1?", opts:["Pidgey","Spearow","Doduo","Farfetch'd"], ans:0 },
+      { text:"Come si chiama il punto di incontro con i Pokémon leggendari in Let's Go?", opts:["Cerulean Cave","Power Plant","Victory Road","Rock Tunnel"], ans:0 },
+      { text:"In Pokémon Go, cosa si usa per evolvere la maggior parte dei Pokémon?", opts:["Pietre","Caramelle","Scintille","Monete"], ans:1 },
+      { text:"Quale Pokémon ha la forma Mega con il valore di statistiche base più alto?", opts:["Mega Mewtwo X","Mega Mewtwo Y","Mega Rayquaza","Mega Salamence"], ans:2 },
+      { text:"In quale generazione appaiono per la prima volta i Pokémon di tipo Acciaio?", opts:["1a","2a","3a","4a"], ans:1 },
+      { text:"Quale professor Pokémon è nominato come un albero?", opts:["Prof. Oak (Quercia)","Prof. Elm (Olmo)","Prof. Birch (Betulla)","Tutti e tre"], ans:3 },
+      { text:"Come si chiama la fusione tra Kyurem e Zekrom?", opts:["Kyurem Nero","Kyurem Bianco","Black Kyurem","Zekurem"], ans:0 },
+      { text:"Quale Pokémon Leggendario rappresenta lo spazio?", opts:["Lugia","Dialga","Palkia","Giratina"], ans:2 },
+      { text:"In Pokémon, come si chiama il sistema di scambio online?", opts:["GTS","Global Trade","Wonder Trade","PokéTrade"], ans:0 },
+      { text:"Quale Pokémon ha la Pokedex entry 'Il Pokémon non ha cuore'?", opts:["Porygon","Magnemite","Beldum","Electrode"], ans:2 },
+      { text:"In quale generazione appaiono per la prima volta le Teracristal?", opts:["7a","8a","9a","Non esistono"], ans:2 },
+      { text:"Quale mossa Rock ha una precisione del 50%?", opts:["Rock Slide","Stone Edge","Rock Blast","Stealth Rock"], ans:1 },
+      { text:"Come si chiama la meccanica di combattimento introdotta in Sole/Luna?", opts:["Mega Evolution","Z-Move","Dynamax","Terastallize"], ans:1 },
+      { text:"Quale Pokémon leggendario rappresenta il sogno?", opts:["Darkrai","Cresselia","Lunala","Jirachi"], ans:0 },
+      { text:"In quale città si trova la Pokémon League di Kanto?", opts:["Pallet Town","Viridian City","Indigo Plateau","Cerulean City"], ans:2 },
+      { text:"Quale tipo è Mewtwo?", opts:["Psico","Psico/Veleno","Normale","Psico/Normale"], ans:0 },
+      { text:"Come si chiama la mossa che permette di fare 2-5 attacchi nello stesso turno?", opts:["Multi-Colpo","Tempesta di Pugni","Rock Blast","Bullet Seed"], ans:0 },
+      { text:"Quale Pokémon evolve in Gyarados?", opts:["Tentacruel","Horsea","Magikarp","Seaking"], ans:2 },
+      { text:"In quale gioco appaiono per la prima volta le Contest?", opts:["Oro/Argento","Rubino/Zaffiro","Diamante/Perla","X/Y"], ans:1 },
+      { text:"Quale Pokémon è immune ai danni da attrito (Sandstorm/Hail) per la sua abilità?", opts:["Sandslash (Sand Veil)","Cacnea (Sand Veil)","Entrambi","Tutti con Sand Veil"], ans:3 },
+      { text:"Come si chiama l'antagonista principale di Pokémon Spada/Scudo?", opts:["Chairman Rose","Oleana","Macro Cosmos","Sordward"], ans:0 },
+      { text:"Quante medaglie di palestra ci sono in Galar (Spada/Scudo)?", opts:["6","7","8","9"], ans:2 },
+    ]
+  },
+
+  /* ── CULTURA GENERALE ───────────────────────────────────── */
+  generale: {
+    id: "generale",
+    name: "Cultura Generale",
+    emoji: "🌍",
+    color: "#0ea5e9",
+    bg: "linear-gradient(135deg,#001a2d,#002d4a)",
+    description: "Storia, scienza, geografia e molto altro!",
+    questions: [
+      { text:"Quale è la capitale dell'Australia?", opts:["Sydney","Melbourne","Canberra","Brisbane"], ans:2 },
+      { text:"Chi ha dipinto la Gioconda?", opts:["Michelangelo","Raffaello","Leonardo da Vinci","Botticelli"], ans:2 },
+      { text:"In quale anno è caduto il Muro di Berlino?", opts:["1987","1988","1989","1990"], ans:2 },
+      { text:"Quale elemento chimico ha simbolo 'Au'?", opts:["Argento","Rame","Oro","Alluminio"], ans:2 },
+      { text:"Quanti pianeti ha il Sistema Solare?", opts:["7","8","9","10"], ans:1 },
+      { text:"Chi ha scritto 'La Divina Commedia'?", opts:["Petrarca","Boccaccio","Dante Alighieri","Ariosto"], ans:2 },
+      { text:"Quale è il paese più grande del mondo per superficie?", opts:["Canada","Cina","USA","Russia"], ans:3 },
+      { text:"In quale anno è iniziata la Prima Guerra Mondiale?", opts:["1912","1914","1916","1918"], ans:1 },
+      { text:"Qual è il monte più alto del mondo?", opts:["K2","Mont Blanc","Everest","Kilimanjaro"], ans:2 },
+      { text:"Chi ha inventato il telefono?", opts:["Edison","Tesla","Bell","Marconi"], ans:2 },
+      { text:"Quale pianeta è noto come il Pianeta Rosso?", opts:["Venere","Saturno","Marte","Giove"], ans:2 },
+      { text:"In quale città si trova il Colosseo?", opts:["Napoli","Firenze","Roma","Milano"], ans:2 },
+      { text:"Quanti continenti ci sono sulla Terra?", opts:["5","6","7","8"], ans:2 },
+      { text:"Quale è il simbolo chimico del ferro?", opts:["Fe","Fr","Fi","Fo"], ans:0 },
+      { text:"Chi ha scritto 'Il Principe'?", opts:["Dante","Machiavelli","Boccaccio","Vico"], ans:1 },
+      { text:"In quale anno è atterrato il primo uomo sulla Luna?", opts:["1965","1967","1969","1971"], ans:2 },
+      { text:"Quale è la lingua più parlata nel mondo?", opts:["Inglese","Spagnolo","Mandarino","Hindi"], ans:2 },
+      { text:"Chi ha dipinto la Cappella Sistina?", opts:["Leonardo","Raffaello","Michelangelo","Caravaggio"], ans:2 },
+      { text:"Quale è la valuta del Giappone?", opts:["Yuan","Won","Yen","Baht"], ans:2 },
+      { text:"In quale anno è scoppiata la Seconda Guerra Mondiale?", opts:["1937","1938","1939","1940"], ans:2 },
+      { text:"Quale è il fiume più lungo del mondo?", opts:["Nilo","Amazzonia","Mississippi","Yangtze"], ans:1 },
+      { text:"Chi ha formulato la teoria della relatività?", opts:["Newton","Bohr","Einstein","Planck"], ans:2 },
+      { text:"Quanti elementi ci sono nella tavola periodica moderna?", opts:["108","118","128","138"], ans:1 },
+      { text:"Quale è la capitale della Cina?", opts:["Shanghai","Hong Kong","Pechino","Nanchino"], ans:2 },
+      { text:"Chi ha scritto 'I Promessi Sposi'?", opts:["Pirandello","Verga","Manzoni","D'Annunzio"], ans:2 },
+      { text:"In quale oceano si trova l'Islanda?", opts:["Pacifico","Indiano","Atlantico","Artico"], ans:2 },
+      { text:"Quale è la moneta comune europea?", opts:["Marco","Franco","Euro","Corona"], ans:2 },
+      { text:"Chi ha fondato la Apple nel 1976?", opts:["Bill Gates","Mark Zuckerberg","Steve Jobs e Wozniak","Jeff Bezos"], ans:2 },
+      { text:"In quale paese si trova Machu Picchu?", opts:["Brasile","Colombia","Perù","Bolivia"], ans:2 },
+      { text:"Quale è la particella con carica negativa nell'atomo?", opts:["Protone","Neutrone","Elettrone","Positrone"], ans:2 },
+      { text:"Chi ha scritto 'Odissea'?", opts:["Virgilio","Omero","Sofocle","Platone"], ans:1 },
+      { text:"In quale paese si trova il Taj Mahal?", opts:["Pakistan","Bangladesh","India","Nepal"], ans:2 },
+      { text:"Quale è la velocità della luce in km/s (approssimativa)?", opts:["200.000","300.000","400.000","150.000"], ans:1 },
+      { text:"Chi è stato il primo presidente degli Stati Uniti?", opts:["Abraham Lincoln","Thomas Jefferson","Benjamin Franklin","George Washington"], ans:3 },
+      { text:"In quale anno è caduto l'Impero Romano d'Occidente?", opts:["410","453","476","500"], ans:2 },
+      { text:"Quale è il paese più popoloso del mondo?", opts:["USA","India","Cina","Brasile"], ans:1 },
+      { text:"Chi ha inventato la penicillina?", opts:["Pasteur","Lister","Fleming","Koch"], ans:2 },
+      { text:"In quale paese si trova il Partenone?", opts:["Italia","Turchia","Grecia","Spagna"], ans:2 },
+      { text:"Quale è l'elemento più leggero della tavola periodica?", opts:["Elio","Litio","Idrogeno","Boro"], ans:2 },
+      { text:"Chi ha scritto 'Don Chisciotte'?", opts:["Lope de Vega","Cervantes","Quevedo","Gongora"], ans:1 },
+      { text:"In quale continente si trova il deserto del Sahara?", opts:["Asia","America","Africa","Australia"], ans:2 },
+      { text:"Quale è la capitale del Brasile?", opts:["Rio de Janeiro","San Paolo","Brasilia","Salvador"], ans:2 },
+      { text:"Quante ore ci sono in una settimana?", opts:["148","168","172","186"], ans:1 },
+      { text:"Chi ha dipinto 'La Notte Stellata'?", opts:["Monet","Renoir","Van Gogh","Gauguin"], ans:2 },
+      { text:"In quale paese si trova la Torre di Pisa?", opts:["Francia","Spagna","Italia","Portogallo"], ans:2 },
+      { text:"Quale è il simbolo chimico dell'acqua?", opts:["HO","H2O","H3O","OH"], ans:1 },
+      { text:"Chi ha scritto 'Amleto'?", opts:["Marlowe","Jonson","Shakespeare","Webster"], ans:2 },
+      { text:"In quale anno è finita la Prima Guerra Mondiale?", opts:["1916","1917","1918","1919"], ans:2 },
+      { text:"Quale è il pianeta più grande del Sistema Solare?", opts:["Saturno","Urano","Nettuno","Giove"], ans:3 },
+      { text:"Chi ha inventato la stampa a caratteri mobili in Occidente?", opts:["Da Vinci","Gutenberg","Franklin","Newton"], ans:1 },
+    ]
+  },
+};
+
+function getQuizThemeList() {
+  return Object.values(QUIZ_THEMES).map(t => ({
+    id: t.id, name: t.name, emoji: t.emoji, color: t.color,
+    description: t.description, count: t.questions.length
+  }));
+}
+
+function getQuizQuestions(themeId, count = 10) {
+  const theme = QUIZ_THEMES[themeId];
+  if (!theme) return [];
+  const shuffled = [...theme.questions].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let Q = {
+  themeId:  null,
+  questions: [],
+  idx:       0,
+  score:     0,
+  correct:   0,
+  wrong:     0,
+  times:     [],
+  qStart:    0,
+  answered:  false,
+  timerInterval: null,
+  timeLeft:  20,
+};
+
+const TOTAL_Q = 10;
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  // Auto-fill nickname from session
+  const user = Auth.currentUser();
+  if (user) {
+    const inp = document.getElementById('nicknameInput');
+    if (inp) inp.value = user.nickname;
+  }
+
+  // Check URL param
+  const params  = new URLSearchParams(window.location.search);
+  const themeId = params.get('theme');
+  if (themeId && QUIZ_THEMES[themeId]) {
+    startQuiz(themeId);
+  } else {
+    showThemeSelect();
+  }
+});
+
+/* ═══════════════════════════════════════════
+   SCHERMATE
+═══════════════════════════════════════════ */
+function showScreen(id) {
+  ['screenTheme','screenGame','screenResult'].forEach(s => {
+    document.getElementById(s).classList.toggle('hidden', s !== id);
+  });
+}
+
+function showThemeSelect() {
+  buildThemeGrid();
+  showScreen('screenTheme');
+  document.getElementById('navSubtitle').textContent = '/ Quiz Flash';
+}
+
+function buildThemeGrid() {
+  const grid = document.getElementById('themeGrid');
+  grid.innerHTML = Object.values(QUIZ_THEMES).map(t => `
+    <div class="theme-card" onclick="startQuiz('${t.id}')"
+         style="border-color:${t.color}30">
+      <div class="theme-emoji">${t.emoji}</div>
+      <div class="theme-name">${t.name}</div>
+      <div class="theme-desc">${t.description}</div>
+      <div class="theme-count">
+        <span class="tag" style="background:${t.color}20;color:${t.color}">${t.questions.length} domande disponibili</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════
+   GIOCO
+═══════════════════════════════════════════ */
+function startQuiz(themeId) {
+  Q.themeId   = themeId;
+  Q.questions = getQuizQuestions(themeId, TOTAL_Q);
+  Q.idx       = 0;
+  Q.score     = 0;
+  Q.correct   = 0;
+  Q.wrong     = 0;
+  Q.times     = [];
+  Q.answered  = false;
+
+  const theme = QUIZ_THEMES[themeId];
+  document.getElementById('navSubtitle').textContent = `/ ${theme.name}`;
+  document.getElementById('catBadge').textContent    = `${theme.emoji} ${theme.name}`;
+  document.getElementById('catBadge').style.background = theme.color + '20';
+  document.getElementById('catBadge').style.color      = theme.color;
+  document.getElementById('qTotal').textContent = Q.questions.length;
+  document.getElementById('saveSection').style.display = '';
+
+  showScreen('screenGame');
+  renderQuestion();
+}
+
+function retryTheme() { startQuiz(Q.themeId); }
+
+function renderQuestion() {
+  const q  = Q.questions[Q.idx];
+  if (!q) { endQuiz(); return; }
+
+  Q.answered = false;
+  Q.qStart   = Date.now();
+
+  document.getElementById('qNum').textContent  = Q.idx + 1;
+  document.getElementById('scoreDisplay').textContent = Q.score;
+  document.getElementById('gameQText').textContent    = q.text;
+  document.getElementById('feedback').classList.add('hidden');
+
+  const opts = document.getElementById('gameOpts');
+  opts.innerHTML = q.opts.map((o, i) => `
+    <button class="opt-btn" onclick="answerQuiz(${i},${q.ans})">${o}</button>
+  `).join('');
+
+  startTimer();
+}
+
+function startTimer() {
+  Q.timeLeft = 20;
+  clearInterval(Q.timerInterval);
+  const fill = document.getElementById('timerFill');
+  fill.style.transition = 'none';
+  fill.style.width = '100%';
+  setTimeout(() => {
+    fill.style.transition = `width ${Q.timeLeft}s linear`;
+    fill.style.width = '0%';
+  }, 50);
+
+  Q.timerInterval = setInterval(() => {
+    Q.timeLeft--;
+    if (Q.timeLeft <= 0 && !Q.answered) {
+      clearInterval(Q.timerInterval);
+      timeOut();
+    }
+  }, 1000);
+}
+
+function timeOut() {
+  Q.answered = true;
+  Q.wrong++;
+  Q.times.push(20);
+  const q    = Q.questions[Q.idx];
+  document.querySelectorAll('.opt-btn').forEach((b,i) => {
+    b.disabled = true;
+    if (i === q.ans) b.classList.add('correct');
+  });
+  showFeedback(false, 'Tempo scaduto! ⏱');
+  setTimeout(nextQ, 1600);
+}
+
+function answerQuiz(chosen, correct) {
+  if (Q.answered) return;
+  Q.answered = true;
+  clearInterval(Q.timerInterval);
+
+  const elapsed = Math.round((Date.now() - Q.qStart) / 1000);
+  Q.times.push(elapsed);
+
+  const ok = chosen === correct;
+  document.querySelectorAll('.opt-btn').forEach((b,i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+    if (i === chosen && !ok) b.classList.add('wrong');
+  });
+
+  if (ok) {
+    // Punteggio: base 100 + bonus velocità (fino a 50 bonus per risposta <5s)
+    const speedBonus = Math.max(0, Math.round((20 - elapsed) / 20 * 50));
+    const pts = 100 + speedBonus;
+    Q.score  += pts;
+    Q.correct++;
+    showFeedback(true, `+${pts} punti! ${elapsed < 5 ? '🔥 Super veloce!' : ''}`);
+  } else {
+    Q.wrong++;
+    showFeedback(false, '❌ Risposta errata');
+  }
+
+  setTimeout(nextQ, 1500);
+}
+
+function showFeedback(ok, msg) {
+  const fb = document.getElementById('feedback');
+  fb.textContent = msg;
+  fb.className   = `feedback ${ok ? 'ok' : 'err'}`;
+  fb.classList.remove('hidden');
+}
+
+function nextQ() {
+  Q.idx++;
+  if (Q.idx >= Q.questions.length) {
+    endQuiz();
+  } else {
+    renderQuestion();
+  }
+}
+
+/* ═══════════════════════════════════════════
+   RISULTATO
+═══════════════════════════════════════════ */
+function endQuiz() {
+  clearInterval(Q.timerInterval);
+  const pct   = Math.round(Q.correct / Q.questions.length * 100);
+  const avg   = Q.times.length ? Math.round(Q.times.reduce((a,b)=>a+b,0) / Q.times.length) : 0;
+
+  const { emoji, title } =
+    pct >= 90 ? { emoji:'🏆', title:'Eccezionale!' } :
+    pct >= 70 ? { emoji:'⭐', title:'Ottimo!' }       :
+    pct >= 50 ? { emoji:'👍', title:'Bene!' }         :
+                { emoji:'💪', title:'Ci riprovi?'  };
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultScore').textContent = Q.score;
+  document.getElementById('resultSub').textContent   = `punti su ${Q.questions.length * 150} max`;
+  document.getElementById('rsCorrect').textContent   = Q.correct;
+  document.getElementById('rsWrong').textContent     = Q.wrong;
+  document.getElementById('rsTime').textContent      = avg + 's';
+
+  // Pre-fill nickname
+  const user = Auth.currentUser();
+  if (user) {
+    document.getElementById('nicknameInput').value = user.nickname;
+  }
+
+  showScreen('screenResult');
+
+  // XP
+  if (user) Auth.addXP(Math.floor(Q.score / 10));
+}
+
+function saveScore() {
+  const nick = document.getElementById('nicknameInput').value.trim();
+  if (!nick) { showToast('Inserisci un nickname!','error'); return; }
+
+  const user    = Auth.currentUser();
+  const gameId  = `quiz_${Q.themeId}`;
+  Leaderboard.submit(gameId, {
+    nickname: nick,
+    avatar:   user ? user.avatar : nick.slice(0,2).toUpperCase(),
+    value:    Q.score,
+  });
+
+  showToast('Punteggio salvato! 🏆','success');
+  document.getElementById('saveSection').style.display = 'none';
+
+  // Recenti
+  const theme = QUIZ_THEMES[Q.themeId];
+  const recent = JSON.parse(localStorage.getItem('pd_recent') || '[]');
+  recent.unshift({ game: theme.name, score: `${Q.score} pt`, date: Date.now() });
+  localStorage.setItem('pd_recent', JSON.stringify(recent.slice(0,8)));
+}
+</script>
+</body>
+</html>
