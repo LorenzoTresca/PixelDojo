@@ -912,7 +912,7 @@ input, select { font-family: inherit; }
 <div class="modal-overlay hidden" id="streakModal">
   <div class="modal-box" style="border-color:rgba(232,121,249,.5);box-shadow:0 0 60px rgba(232,121,249,.3),0 24px 64px rgba(0,0,0,.6)">
     <div class="modal-title">🔥 Sfida Finale!</div>
-    <div class="modal-sub">Rispondi a 5 domande consecutive per vincere. Un errore azzera la streak!</div>
+    <div class="modal-sub">Rispondi a 6 domande consecutive (una per categoria) per vincere. Un errore azzera la streak!</div>
     <div class="streak-bar" id="streakBar"></div>
     <div class="q-cat" id="sQCat"></div>
     <div class="q-timer-bar"><div class="q-timer-fill" id="sTimerFill" style="width:100%"></div></div>
@@ -1911,7 +1911,7 @@ function setPhase(ph) {
     dir:      'Scegli direzione',
     spoke:    'Scegli un sentiero',
     question: 'Rispondi alla domanda!',
-    streak:   'Fase finale — 5 risposte!',
+    streak:   'Fase finale — 6 risposte!',
     win:      '',
   };
   document.getElementById('phaseMsg').textContent = msgs[ph] || '';
@@ -2286,7 +2286,7 @@ function nextStreakQ() {
 
   // Bar
   const bar = document.getElementById('streakBar');
-  bar.innerHTML = Array.from({length:5},(_,i) => `
+  bar.innerHTML = Array.from({length:6},(_,i) => `
     <div class="streak-pip ${i < G.streakCount ? 'done' : ''}"></div>
   `).join('');
 
@@ -2341,7 +2341,7 @@ function answerStreak(chosen, correct) {
   setTimeout(() => {
     if (ok) {
       G.streakCount++;
-      if (G.streakCount >= 5) {
+      if (G.streakCount >= 6) {
         // VITTORIA!
         hide('streakModal');
         triggerWin();

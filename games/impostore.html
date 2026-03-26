@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Impostore — PixelDojo</title>
+  <link rel="icon" href="../favicon.ico">
+  <style>
+    :root {
+      --ink:#e8e0ff; --ink2:#b8aee0; --ink3:#7a6fa8;
+      --surf:#0d0b1a; --surf2:#1a1630; --surf3:#241e3d;
+      --neon:#a78bfa; --fire:#f97316; --ice:#38bdf8;
+      --gold:#fbbf24; --success:#22c55e; --danger:#ef4444;
+      --border:rgba(167,139,250,.15); --radius:12px;
+      --shadow:0 4px 24px rgba(0,0,0,.4);
+    }
+    body[data-theme="light"] {
+      --ink:#1a1340; --ink2:#4a3f7a; --ink3:#8a7fb8;
+      --surf:#f0eeff; --surf2:#e8e4f8; --surf3:#ddd8f0;
+      --neon:#7c3aed; --fire:#ea580c; --ice:#0284c7;
+      --gold:#d97706; --border:rgba(124,58,237,.15);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--surf);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+    .nav{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .nav-logo{font-size:14px;font-weight:700;color:var(--neon);text-decoration:none}
+    .nav-theme{background:var(--surf3);border:1px solid var(--border);color:var(--ink2);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:14px}
+    .card{width:100%;max-width:520px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:16px}
+    .card-title{font-size:18px;font-weight:700;margin-bottom:6px}
+    .card-sub{font-size:13px;color:var(--ink3);margin-bottom:18px;line-height:1.5}
+    .field{margin-bottom:14px}
+    .field label{font-size:11px;color:var(--ink3);display:block;margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .field input{width:100%;padding:12px 14px;background:var(--surf3);border:1px solid var(--border);border-radius:8px;color:var(--ink);font-size:15px;outline:none;transition:border-color .2s}
+    .field input:focus{border-color:var(--neon)}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .1s;width:100%}
+    .btn:active{transform:scale(.97)}
+    .btn-primary{background:var(--neon);color:#fff}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--ink2)}
+    .btn-sm{padding:8px 14px;font-size:13px;width:auto;display:inline-flex}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    /* Divider */
+    .or-div{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--ink3);font-size:12px}
+    .or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--border)}
+    /* Home section boxes */
+    .home-section{border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:0}
+    .home-section-title{font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+    .sec-label{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:8px}
+    .player-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .player-row{display:flex;align-items:center;gap:10px;background:var(--surf3);border-radius:8px;padding:10px 14px;border:2px solid transparent}
+    .player-row.is-me{border-color:var(--neon)}
+    .avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
+    .player-name{font-size:14px;font-weight:600;flex:1}
+    .badge{font-size:10px;color:var(--ink3);background:var(--surf2);padding:2px 8px;border-radius:10px}
+    .badge.host{color:var(--gold)}
+    .room-code-box{background:var(--surf3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;margin-bottom:16px}
+    .room-code-label{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+    .room-code-val{font-size:30px;font-weight:800;letter-spacing:.2em;color:var(--neon);font-family:monospace}
+    .settings-block{background:var(--surf3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px}
+    .settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+    .settings-row:last-child{border:none;padding-bottom:0}
+    .settings-row:first-child{padding-top:0}
+    .settings-label{font-size:13px;color:var(--ink2);font-weight:600}
+    .settings-desc{font-size:11px;color:var(--ink3);margin-top:2px}
+    .stepper{display:flex;align-items:center;gap:10px}
+    .stepper-btn{width:28px;height:28px;border-radius:6px;background:var(--surf2);border:1px solid var(--border);color:var(--ink);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .stepper-btn:disabled{opacity:.3;cursor:default}
+    .stepper-val{font-size:16px;font-weight:700;min-width:22px;text-align:center}
+    .wait-box{text-align:center;padding:18px;color:var(--ink3);background:var(--surf3);border-radius:10px;font-size:13px;border:1px dashed var(--border)}
+    .wait-spin{font-size:20px;margin-bottom:8px;animation:spin 1.5s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .phase-header{text-align:center;margin-bottom:20px}
+    .phase-emoji{font-size:40px;margin-bottom:8px}
+    .phase-title{font-size:20px;font-weight:800}
+    .phase-sub{font-size:13px;color:var(--ink3);margin-top:4px;line-height:1.5}
+    .word-box{text-align:center;padding:28px 16px}
+    .word-emoji-big{font-size:44px;margin-bottom:10px}
+    .word-label{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+    .word-big{font-size:52px;font-weight:800;color:var(--neon);letter-spacing:.02em}
+    .imp-box{text-align:center;padding:28px 16px;background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(239,68,68,.03));border:1px solid rgba(239,68,68,.25);border-radius:12px;margin:4px 0 16px}
+    .imp-icon{font-size:48px;margin-bottom:12px}
+    .imp-title{font-size:20px;font-weight:800;color:var(--danger);margin-bottom:8px}
+    .imp-desc{font-size:13px;color:var(--ink3);line-height:1.6}
+    /* Guess box */
+    .guess-box{padding:20px;background:linear-gradient(135deg,rgba(249,115,22,.08),rgba(249,115,22,.03));border:1px solid rgba(249,115,22,.3);border-radius:12px;margin-bottom:16px;text-align:center}
+    .guess-box .g-icon{font-size:44px;margin-bottom:10px}
+    .guess-box .g-title{font-size:18px;font-weight:800;color:var(--fire);margin-bottom:6px}
+    .guess-box .g-desc{font-size:13px;color:var(--ink3);line-height:1.5}
+    .guess-result-row{display:flex;align-items:center;gap:10px;background:var(--surf3);border-radius:8px;padding:10px 14px;margin-bottom:8px;border:2px solid transparent}
+    .guess-result-row.correct{border-color:var(--success);background:rgba(34,197,94,.06)}
+    .guess-result-row.wrong{border-color:var(--danger);background:rgba(239,68,68,.06)}
+    .info-box{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink3);margin-bottom:14px;line-height:1.5}
+    .ready-bar{height:4px;background:var(--surf3);border-radius:4px;margin-bottom:8px;overflow:hidden}
+    .ready-bar-fill{height:100%;background:var(--neon);border-radius:4px;transition:width .4s}
+    .vote-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+    .vote-option{display:flex;align-items:center;gap:12px;background:var(--surf3);border:2px solid transparent;border-radius:10px;padding:12px 16px;cursor:pointer;transition:border-color .15s,background .15s}
+    .vote-option:hover:not(.self):not(.locked){border-color:var(--border)}
+    .vote-option.selected{border-color:var(--neon);background:rgba(167,139,250,.08)}
+    .vote-option.self{opacity:.35;cursor:default}
+    .vote-option.locked{cursor:default}
+    .vote-name{flex:1;font-size:15px;font-weight:600}
+    .reveal-word-section{text-align:center;margin-bottom:20px}
+    .reveal-word-label{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+    .reveal-word-main{font-size:42px;font-weight:800;color:var(--neon)}
+    .reveal-word-sim{font-size:14px;color:var(--ink3);margin-top:4px}
+    .reveal-players{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .reveal-row{display:flex;align-items:center;gap:10px;background:var(--surf3);border-radius:8px;padding:10px 14px;border:2px solid transparent}
+    .reveal-row.impostore{border-color:var(--danger);background:rgba(239,68,68,.05)}
+    .reveal-row.infiltrato{border-color:var(--fire);background:rgba(249,115,22,.05)}
+    .role-tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;white-space:nowrap}
+    .role-tag.normale{background:rgba(56,189,248,.1);color:var(--ice)}
+    .role-tag.impostore{background:rgba(239,68,68,.12);color:var(--danger)}
+    .role-tag.infiltrato{background:rgba(249,115,22,.12);color:var(--fire)}
+    .delta{font-weight:800;font-size:14px}
+    .delta.pos{color:var(--success)}
+    .delta.neg{color:var(--danger)}
+    .tally-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+    .tally-row:last-child{border:none}
+    .tally-name{flex:1;font-size:13px;font-weight:600}
+    .tally-voters{font-size:11px;color:var(--ink3)}
+    .outcome-box{text-align:center;font-size:15px;font-weight:700;padding:14px;border-radius:10px;margin-bottom:16px}
+    .lb-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .lb-row{display:flex;align-items:center;gap:10px;background:var(--surf3);border-radius:8px;padding:10px 14px}
+    .lb-rank{font-size:20px;width:30px;text-align:center;flex-shrink:0}
+    .lb-name{flex:1;font-size:14px;font-weight:600}
+    .lb-score{font-weight:800;color:var(--neon);font-size:16px}
+    .screen{display:none;flex-direction:column;align-items:center;width:100%}
+    .screen.active{display:flex}
+    #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surf3);border:1px solid var(--border);border-radius:8px;padding:10px 18px;font-size:13px;color:var(--ink);transition:transform .3s;z-index:200;white-space:nowrap;box-shadow:var(--shadow)}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+    /* Chat discussione */
+    .disc-messages{max-height:260px;overflow-y:auto;background:var(--surf3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth}
+    .disc-msg{display:flex;gap:8px;align-items:flex-start}
+    .disc-msg-bubble{background:var(--surf2);border-radius:8px;padding:6px 10px;max-width:85%;border:1px solid var(--border)}
+    .disc-msg-name{font-size:11px;font-weight:700;margin-bottom:2px}
+    .disc-msg-text{font-size:13px;line-height:1.4;word-break:break-word;color:var(--ink)}
+    .disc-msg.is-me .disc-msg-bubble{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25)}
+    .disc-input-row{display:flex;gap:8px;margin-bottom:4px}
+    .disc-input-row input{flex:1;padding:10px 12px;background:var(--surf3);border:1px solid var(--border);border-radius:8px;color:var(--ink);font-size:14px;outline:none;transition:border-color .2s}
+    .disc-input-row input:focus{border-color:var(--neon)}
+    .disc-send-btn{padding:10px 16px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--neon);color:#fff;white-space:nowrap;flex-shrink:0}
+  </style>
+</head>
+<body data-theme="dark">
+<div id="toast"></div>
+
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">← PixelDojo</a>
+  <button class="nav-theme" onclick="toggleTheme()" id="themeBtn">☀️</button>
+</nav>
+
+<!-- ═══ HOME ═══ -->
+<div id="sc-home" class="screen active">
+  <div class="card">
+    <div class="card-title">🎭 Impostore</div>
+    <div class="card-sub">Tutti ricevono la stessa parola segreta… tranne l'impostore (non sa nulla) e l'infiltrato (ha una parola simile ma non lo sa). Date indizi, discutete e votate chi è sospetto!</div>
+
+    <!-- CREA STANZA -->
+    <div class="home-section" style="margin-bottom:0">
+      <div class="home-section-title">➕ Crea una nuova stanza</div>
+      <div class="field">
+        <label>Il tuo nome</label>
+        <input id="nickCreateInput" type="text" maxlength="16" placeholder="Es. Lorenzo" autocomplete="off"/>
+      </div>
+      <button class="btn btn-primary" onclick="createRoom()">+ Crea stanza</button>
+    </div>
+
+    <div class="or-div">oppure</div>
+
+    <!-- ENTRA IN STANZA -->
+    <div class="home-section">
+      <div class="home-section-title">🚪 Entra in una stanza esistente</div>
+      <div class="field">
+        <label>Il tuo nome</label>
+        <input id="nickJoinInput" type="text" maxlength="16" placeholder="Es. Marco" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>Codice stanza</label>
+        <input id="codeInput" type="text" maxlength="6" placeholder="ABCDE" style="text-transform:uppercase;letter-spacing:.12em;font-family:monospace" autocomplete="off"/>
+      </div>
+      <button class="btn btn-outline" onclick="joinRoom()">Entra nella stanza →</button>
+    </div>
+  </div>
+  <div class="info-box" style="max-width:520px;width:100%">
+    💡 <strong>Ruoli:</strong> i <strong>Normali</strong> vedono la parola · l'<strong>Impostore</strong> non vede niente · l'<strong>Infiltrato</strong> vede una parola simile ma non sa che è diversa. Se scoperti possono provare a indovinare la parola per guadagnare punti!
+  </div>
+</div>
+
+<!-- ═══ LOBBY ═══ -->
+<div id="sc-lobby" class="screen">
+  <div class="card">
+    <div class="room-code-box">
+      <div class="room-code-label">Codice stanza</div>
+      <div class="room-code-val" id="lobbyCode">—</div>
+    </div>
+    <div class="sec-label">Giocatori (<span id="lobbyCount">0</span>)</div>
+    <div class="player-list" id="lobbyList"></div>
+    <!-- HOST -->
+    <div id="lobbyHostSection" style="display:none">
+      <div class="sec-label" style="margin-top:4px">Impostazioni</div>
+      <div class="settings-block">
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">🕵️ Impostori</div>
+            <div class="settings-desc">Non conoscono la parola</div>
+          </div>
+          <div class="stepper">
+            <button class="stepper-btn" id="impDec" onclick="adjustSetting('impostori',-1)">−</button>
+            <span class="stepper-val" id="impVal">1</span>
+            <button class="stepper-btn" id="impInc" onclick="adjustSetting('impostori',+1)">+</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">🥸 Infiltrati</div>
+            <div class="settings-desc">Hanno una parola simile — non lo sanno</div>
+          </div>
+          <div class="stepper">
+            <button class="stepper-btn" id="infDec" onclick="adjustSetting('infiltrati',-1)">−</button>
+            <span class="stepper-val" id="infVal">0</span>
+            <button class="stepper-btn" id="infInc" onclick="adjustSetting('infiltrati',+1)">+</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="startBtn" onclick="hostStartGame()" disabled>▶ Avvia partita</button>
+    </div>
+    <!-- GUEST -->
+    <div id="lobbyGuestSection" style="display:none">
+      <div class="wait-box">
+        <div class="wait-spin">⏳</div>
+        <div>In attesa che l'host avvii la partita…</div>
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-outline" style="max-width:520px;width:100%" onclick="leaveRoom()">← Abbandona stanza</button>
+</div>
+
+<!-- ═══ WORD (privata) ═══ -->
+<div id="sc-word" class="screen">
+  <div class="card">
+    <div class="phase-header">
+      <div class="phase-emoji">🔒</div>
+      <div class="phase-title">La tua parola</div>
+      <div class="phase-sub">Guardala bene, poi nascondi lo schermo!</div>
+    </div>
+    <!-- Normale / Infiltrato -->
+    <div id="wordNormalBox">
+      <div class="word-box">
+        <div class="word-emoji-big" id="wordEmoji"></div>
+        <div class="word-label">La parola è</div>
+        <div class="word-big" id="wordText">—</div>
+      </div>
+      <div class="info-box">💡 Dai indizi sulla tua parola senza rivelarla. Cerca di smascherare l'impostore!</div>
+    </div>
+    <!-- Impostore -->
+    <div id="wordImpBox" style="display:none">
+      <div class="imp-box">
+        <div class="imp-icon">🕵️</div>
+        <div class="imp-title">Sei l'Impostore!</div>
+        <div class="imp-desc">Non conosci la parola segreta. Ascolta gli indizi degli altri, cerca di capirla e mimetizzati senza farti scoprire!</div>
+      </div>
+    </div>
+    <div id="wordReadyBtn">
+      <button class="btn btn-primary" onclick="markReady()">✓ Ho visto, sono pronto</button>
+    </div>
+    <div id="wordWaitBox" style="display:none">
+      <div class="ready-bar"><div class="ready-bar-fill" id="readyBarFill" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--ink3);text-align:center" id="readyCountText"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DISCUSSION ═══ -->
+<div id="sc-discussion" class="screen">
+  <div class="card">
+    <div class="phase-header">
+      <div class="phase-emoji">💬</div>
+      <div class="phase-title">Discussione</div>
+      <div class="phase-sub">Segui l'ordine di risposta qui sotto — tutti devono scrivere almeno un messaggio prima di passare alle votazioni!</div>
+    </div>
+    <div class="sec-label">Ordine di intervento</div>
+    <div class="player-list" id="discList"></div>
+    <!-- Barra progresso "ha parlato" -->
+    <div style="margin-bottom:14px">
+      <div class="ready-bar"><div class="ready-bar-fill" id="discSpokeBarFill" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--ink3);text-align:center;margin-top:4px" id="discSpokeText"></div>
+    </div>
+    <!-- Chat -->
+    <div class="sec-label">Chat 💬</div>
+    <div class="disc-messages" id="discMessages">
+      <div style="text-align:center;font-size:12px;color:var(--ink3);padding:8px">Nessun messaggio ancora — inizia tu!</div>
+    </div>
+    <div class="disc-input-row">
+      <input id="discMsgInput" type="text" maxlength="200" placeholder="Scrivi il tuo indizio o commento…"
+             onkeydown="if(event.key==='Enter')sendDiscussionMessage()"/>
+      <button class="disc-send-btn" onclick="sendDiscussionMessage()">Invia ➤</button>
+    </div>
+    <!-- HOST -->
+    <div id="discHostBtn" style="display:none;margin-top:10px">
+      <button class="btn btn-primary" id="discGoVotingBtn" onclick="hostGoVoting()">🗳️ Vai alle votazioni</button>
+      <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:6px" id="discHostHint"></div>
+    </div>
+    <!-- GUEST -->
+    <div id="discGuestWait" style="display:none;margin-top:10px">
+      <div class="wait-box">
+        <div class="wait-spin" id="discGuestSpin">💬</div>
+        <div id="discGuestWaitMsg">In attesa che tutti scrivano un messaggio…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VOTING ═══ -->
+<div id="sc-voting" class="screen">
+  <div class="card">
+    <div class="phase-header">
+      <div class="phase-emoji">🗳️</div>
+      <div class="phase-title">Votazione</div>
+      <div class="phase-sub">Chi pensi sia l'impostore?</div>
+    </div>
+    <div class="vote-grid" id="voteGrid"></div>
+    <button class="btn btn-primary" id="voteConfirmBtn" onclick="submitVote()" disabled>Conferma voto</button>
+    <div id="voteHostPanel" style="display:none;margin-top:12px">
+      <div style="font-size:12px;color:var(--ink3);text-align:center;margin-bottom:8px" id="voteCountText"></div>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:4px" onclick="forceReveal()">⚡ Forza reveal (host)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GUESS (indovinello per chi è stato scoperto) ═══ -->
+<div id="sc-guess" class="screen">
+  <div class="card">
+    <div class="phase-header">
+      <div class="phase-emoji">🤔</div>
+      <div class="phase-title">Ultima chance!</div>
+      <div class="phase-sub" id="guessPhaseSubtitle"></div>
+    </div>
+
+    <!-- Sezione per CHI deve indovinare -->
+    <div id="guessMySection" style="display:none">
+      <div class="guess-box">
+        <div class="g-icon">🎯</div>
+        <div class="g-title">Indovina la parola!</div>
+        <div class="g-desc">Sei stato scoperto, ma puoi ancora guadagnare punti. Scrivi la parola segreta che pensi stessero descrivendo.</div>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>La tua risposta</label>
+        <input id="guessInput" type="text" maxlength="30" placeholder="Scrivi la parola…" autocomplete="off"
+               onkeydown="if(event.key==='Enter')submitGuess()"/>
+      </div>
+      <button class="btn btn-primary" id="guessSubmitBtn" onclick="submitGuess()">✓ Conferma risposta</button>
+    </div>
+
+    <!-- Sezione per chi ASPETTA -->
+    <div id="guessWaitSection" style="display:none">
+      <div class="wait-box">
+        <div class="wait-spin">🎯</div>
+        <div style="margin-bottom:12px" id="guessWaitText">Chi è stato scoperto sta cercando di indovinare la parola…</div>
+        <div id="guessPendingList"></div>
+      </div>
+    </div>
+
+    <!-- HOST: forza reveal -->
+    <div id="guessHostPanel" style="display:none;margin-top:12px">
+      <div style="font-size:12px;color:var(--ink3);text-align:center;margin-bottom:8px" id="guessCountText"></div>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:4px" onclick="forceGuessReveal()">⚡ Salta indovinello (host)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REVEAL ═══ -->
+<div id="sc-reveal" class="screen">
+  <div class="card">
+    <div class="phase-header">
+      <div class="phase-emoji">🎭</div>
+      <div class="phase-title">Reveal!</div>
+    </div>
+    <div class="reveal-word-section">
+      <div class="reveal-word-label">La parola segreta era</div>
+      <div class="reveal-word-main" id="revWordMain">—</div>
+      <div class="reveal-word-sim" id="revWordSim"></div>
+    </div>
+
+    <!-- Risultati indovinello (se presenti) -->
+    <div id="revGuessSection" style="display:none;margin-bottom:16px">
+      <div class="sec-label">Indovinello</div>
+      <div id="revGuessResults"></div>
+    </div>
+
+    <div class="sec-label">Ruoli</div>
+    <div class="reveal-players" id="revPlayers"></div>
+    <div class="sec-label">Voti</div>
+    <div id="revTally" style="margin-bottom:14px"></div>
+    <div class="outcome-box" id="revOutcome"></div>
+    <!-- HOST -->
+    <div id="revHostBtns" style="display:none;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" onclick="hostNextRound()">▶ Prossimo round</button>
+      <button class="btn btn-outline" onclick="hostEndGame()">🏁 Fine partita</button>
+    </div>
+    <!-- GUEST -->
+    <div id="revGuestWait" style="display:none">
+      <div class="wait-box"><div class="wait-spin">⏳</div><div>In attesa dell'host…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ END ═══ -->
+<div id="sc-end" class="screen">
+  <div class="card">
+    <div class="phase-header">
+      <div class="phase-emoji">🏆</div>
+      <div class="phase-title">Fine partita!</div>
+      <div class="phase-sub">Classifica finale</div>
+    </div>
+    <div class="lb-list" id="endLb"></div>
+    <div id="endHostBtn" style="display:none">
+      <button class="btn btn-primary" onclick="hostNewGame()">↩ Nuova partita (stesso gruppo)</button>
+    </div>
+    <div id="endGuestWait" style="display:none">
+      <div class="wait-box"><div class="wait-spin">⏳</div><div>In attesa dell'host…</div></div>
+    </div>
+  </div>
+  <button class="btn btn-outline" style="max-width:520px;width:100%;margin-top:0" onclick="goHome()">← Torna alla home</button>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   PAROLE DATABASE — 45 coppie
+══════════════════════════════════════ */
+const PAROLE = [
+  {id:'pizza',        normale:'Pizza',        infiltrato:'Calzone',      emoji:'🍕'},
+  {id:'cane',         normale:'Cane',         infiltrato:'Lupo',         emoji:'🐕'},
+  {id:'mare',         normale:'Mare',         infiltrato:'Lago',         emoji:'🌊'},
+  {id:'calcio',       normale:'Calcio',       infiltrato:'Rugby',        emoji:'⚽'},
+  {id:'chitarra',     normale:'Chitarra',     infiltrato:'Basso',        emoji:'🎸'},
+  {id:'treno',        normale:'Treno',        infiltrato:'Tram',         emoji:'🚆'},
+  {id:'castello',     normale:'Castello',     infiltrato:'Fortezza',     emoji:'🏰'},
+  {id:'astronauta',   normale:'Astronauta',   infiltrato:'Cosmonauta',   emoji:'🚀'},
+  {id:'vampiro',      normale:'Vampiro',      infiltrato:'Zombie',       emoji:'🧛'},
+  {id:'sushi',        normale:'Sushi',        infiltrato:'Ramen',        emoji:'🍱'},
+  {id:'neve',         normale:'Neve',         infiltrato:'Grandine',     emoji:'❄️'},
+  {id:'leone',        normale:'Leone',        infiltrato:'Tigre',        emoji:'🦁'},
+  {id:'pianoforte',   normale:'Pianoforte',   infiltrato:'Organo',       emoji:'🎹'},
+  {id:'cinema',       normale:'Cinema',       infiltrato:'Teatro',       emoji:'🎬'},
+  {id:'moto',         normale:'Moto',         infiltrato:'Scooter',      emoji:'🏍️'},
+  {id:'birra',        normale:'Birra',        infiltrato:'Sidro',        emoji:'🍺'},
+  {id:'rosa',         normale:'Rosa',         infiltrato:'Tulipano',     emoji:'🌹'},
+  {id:'basket',       normale:'Basket',       infiltrato:'Pallavolo',    emoji:'🏀'},
+  {id:'delfino',      normale:'Delfino',      infiltrato:'Balena',       emoji:'🐬'},
+  {id:'deserto',      normale:'Deserto',      infiltrato:'Savana',       emoji:'🏜️'},
+  {id:'medico',       normale:'Medico',       infiltrato:'Infermiere',   emoji:'👨‍⚕️'},
+  {id:'re',           normale:'Re',           infiltrato:'Imperatore',   emoji:'👑'},
+  {id:'pane',         normale:'Pane',         infiltrato:'Focaccia',     emoji:'🍞'},
+  {id:'gorilla',      normale:'Gorilla',      infiltrato:'Scimpanzé',    emoji:'🦍'},
+  {id:'aereo',        normale:'Aereo',        infiltrato:'Elicottero',   emoji:'✈️'},
+  {id:'estate',       normale:'Estate',       infiltrato:'Primavera',    emoji:'☀️'},
+  {id:'libro',        normale:'Libro',        infiltrato:'Rivista',      emoji:'📚'},
+  {id:'oro',          normale:'Oro',          infiltrato:'Argento',      emoji:'🥇'},
+  {id:'vulcano',      normale:'Vulcano',      infiltrato:'Geyser',       emoji:'🌋'},
+  {id:'pirata',       normale:'Pirata',       infiltrato:'Corsaro',      emoji:'🏴‍☠️'},
+  {id:'ninja',        normale:'Ninja',        infiltrato:'Samurai',      emoji:'🥷'},
+  {id:'taxi',         normale:'Taxi',         infiltrato:'Autobus',      emoji:'🚕'},
+  {id:'farfalla',     normale:'Farfalla',     infiltrato:'Falena',       emoji:'🦋'},
+  {id:'fragola',      normale:'Fragola',      infiltrato:'Lampone',      emoji:'🍓'},
+  {id:'montagna',     normale:'Montagna',     infiltrato:'Collina',      emoji:'⛰️'},
+  {id:'caffe',        normale:'Caffè',        infiltrato:'Tè',           emoji:'☕'},
+  {id:'fotografo',    normale:'Fotografo',    infiltrato:'Regista',      emoji:'📷'},
+  {id:'fantascienza', normale:'Fantascienza', infiltrato:'Fantasy',      emoji:'🛸'},
+  {id:'carnevale',    normale:'Carnevale',    infiltrato:'Capodanno',    emoji:'🎭'},
+  {id:'polpo',        normale:'Polpo',        infiltrato:'Calamaro',     emoji:'🐙'},
+  {id:'palestra',     normale:'Palestra',     infiltrato:'Piscina',      emoji:'🏋️'},
+  {id:'gelato',       normale:'Gelato',       infiltrato:'Sorbetto',     emoji:'🍦'},
+  {id:'fulmine',      normale:'Fulmine',      infiltrato:'Terremoto',    emoji:'⚡'},
+  {id:'giungla',      normale:'Giungla',      infiltrato:'Foresta',      emoji:'🌿'},
+  {id:'orologio',     normale:'Orologio',     infiltrato:'Sveglia',      emoji:'⏰'},
+];
+
+const COLORS = ['#a78bfa','#f97316','#22c55e','#38bdf8','#fbbf24','#f472b6','#84cc16','#e879f9','#fb923c','#34d399'];
+
+/* ══════════════════════════════════════
+   STATO GLOBALE
+══════════════════════════════════════ */
+let G = {
+  playerId:null, roomCode:null, isHost:false, nickname:null,
+  room:null,
+  myVote:null, voteConfirmed:false, readyConfirmed:false, guessConfirmed:false,
+  _localRound:0, _localVoteSeq:0,
+};
+let _bc = null;
+
+/* ══════════════════════════════════════
+   TRANSPORT
+══════════════════════════════════════ */
+function initTransport(code) {
+  if (_bc) _bc.close();
+  _bc = new BroadcastChannel('pd_imp_' + code);
+  _bc.onmessage = ({data}) => {
+    const {type, from, payload} = data;
+    if (type === 'STATE') {
+      if (!G.isHost) { G.room = payload; resetLocalIfNewRound(); renderScreen(); }
+    } else if (type === 'ACTION' && G.isHost && from !== G.playerId) {
+      applyAction(from, payload);
+    } else if (type === 'REQ_STATE' && G.isHost) {
+      _bc.postMessage({type:'STATE', from:G.playerId, payload:G.room});
+    }
+  };
+}
+
+function hostWrite(room) {
+  G.room = room;
+  localStorage.setItem('pd_imp_' + G.roomCode, JSON.stringify(room));
+  if (_bc) _bc.postMessage({type:'STATE', from:G.playerId, payload:room});
+  resetLocalIfNewRound();
+  renderScreen();
+}
+
+function playerSend(action) {
+  if (G.isHost) applyAction(G.playerId, action);
+  else if (_bc) _bc.postMessage({type:'ACTION', from:G.playerId, payload:action});
+}
+
+function resetLocalIfNewRound() {
+  if (!G.room) return;
+  const newRound = G.room.round !== G._localRound;
+  const newVoteSeq = (G.room.voteSeq || 0) !== G._localVoteSeq;
+  if (newRound) {
+    G._localRound   = G.room.round;
+    G._localVoteSeq = G.room.voteSeq || 0;
+    G.myVote = null; G.voteConfirmed = false;
+    G.readyConfirmed = false; G.guessConfirmed = false;
+    // Resetta DOM del campo indovinello per il nuovo round
+    const gi = document.getElementById('guessInput');
+    const gb = document.getElementById('guessSubmitBtn');
+    if (gi) { gi.value = ''; gi.disabled = false; }
+    if (gb) { gb.disabled = false; gb.textContent = '✓ Conferma risposta'; }
+  } else if (newVoteSeq) {
+    // Revoto: resetta solo il voto locale
+    G._localVoteSeq = G.room.voteSeq || 0;
+    G.myVote = null; G.voteConfirmed = false;
+  }
+}
+
+/* ══════════════════════════════════════
+   CREATE / JOIN
+══════════════════════════════════════ */
+function genCode() { return Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random()*23)]).join(''); }
+function genId()   { return Math.random().toString(36).slice(2,10); }
+
+function getNickCreate() {
+  const n = document.getElementById('nickCreateInput').value.trim();
+  if (!n) { toast('Inserisci il tuo nome per creare la stanza!'); return null; }
+  return n;
+}
+function getNickJoin() {
+  const n = document.getElementById('nickJoinInput').value.trim();
+  if (!n) { toast('Inserisci il tuo nome per entrare nella stanza!'); return null; }
+  return n;
+}
+
+function createRoom() {
+  const nick = getNickCreate(); if (!nick) return;
+  G.playerId = sessionStorage.getItem('pd_pid') || genId();
+  sessionStorage.setItem('pd_pid', G.playerId);
+  G.nickname = nick; G.roomCode = genCode(); G.isHost = true;
+  const room = {
+    phase:'lobby', round:0, wordId:null,
+    readyPlayers:[], votes:{}, scores:{[G.playerId]:0},
+    revealData:null, settings:{impostori:1, infiltrati:0},
+    usedWords:[], turnOrder:[], roles:{},
+    guessData:null, messages:[],
+    voteSeq:0, tieIds:null, discOrder:null,
+    players:{[G.playerId]:{id:G.playerId, nickname:nick, isHost:true, online:true, color:COLORS[0]}},
+  };
+  initTransport(G.roomCode);
+  hostWrite(room);
+  showScreen('lobby');
+}
+
+function joinRoom() {
+  const nick = getNickJoin(); if (!nick) return;
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  if (code.length < 3) { toast('Inserisci un codice valido!'); return; }
+  G.playerId = sessionStorage.getItem('pd_pid') || genId();
+  sessionStorage.setItem('pd_pid', G.playerId);
+  G.nickname = nick; G.roomCode = code; G.isHost = false;
+  const stored = localStorage.getItem('pd_imp_' + code);
+  initTransport(code);
+  if (stored) {
+    G.room = JSON.parse(stored);
+    playerSend({type:'JOIN', nickname:nick});
+    showScreen('lobby');
+  } else {
+    _bc.postMessage({type:'REQ_STATE', from:G.playerId, payload:null});
+    setTimeout(() => {
+      if (!G.room) { toast('Stanza non trovata. Controlla il codice.'); return; }
+      playerSend({type:'JOIN', nickname:nick});
+      showScreen('lobby');
+    }, 900);
+  }
+}
+
+function leaveRoom() {
+  playerSend({type:'LEAVE'});
+  if (_bc) { _bc.close(); _bc = null; }
+  const pid = G.playerId;
+  G = {playerId:pid, roomCode:null, isHost:false, nickname:null, room:null, myVote:null, voteConfirmed:false, readyConfirmed:false, guessConfirmed:false, _localRound:0, _localVoteSeq:0};
+  showScreen('home');
+}
+function goHome() { leaveRoom(); }
+
+/* ══════════════════════════════════════
+   HOST ACTIONS
+══════════════════════════════════════ */
+function adjustSetting(key, delta) {
+  if (!G.isHost || !G.room) return;
+  const r = deep(G.room);
+  const n = Object.keys(r.players).length;
+  r.settings[key] = Math.max(0, r.settings[key] + delta);
+  if (r.settings.impostori + r.settings.infiltrati >= n - 1) {
+    r.settings[key] -= delta;
+    toast('Ci devono essere almeno 2 giocatori normali!'); return;
+  }
+  hostWrite(r);
+}
+
+function hostStartGame() {
+  if (!G.isHost || !G.room) return;
+  const r = deep(G.room);
+  const n = Object.keys(r.players).length;
+  if (n < 3) { toast('Servono almeno 3 giocatori!'); return; }
+  if (r.settings.impostori + r.settings.infiltrati >= n - 1) { toast('Troppi ruoli speciali per i giocatori presenti!'); return; }
+  startRound(r);
+}
+
+function startRound(r) {
+  const avail = PAROLE.filter(p => !r.usedWords.includes(p.id));
+  const pool  = avail.length ? avail : PAROLE;
+  if (!avail.length) r.usedWords = [];
+  const pair  = pool[Math.floor(Math.random() * pool.length)];
+  r.wordId    = pair.id;
+  r.usedWords = [...r.usedWords, pair.id];
+
+  const ids      = Object.keys(r.players);
+  const shuffled = [...ids].sort(() => Math.random() - .5);
+  const roles    = {};
+  shuffled.forEach((id, i) => {
+    if (i < r.settings.impostori) roles[id] = 'impostore';
+    else if (i < r.settings.impostori + r.settings.infiltrati) roles[id] = 'infiltrato';
+    else roles[id] = 'normale';
+  });
+  r.roles      = roles;
+  r.turnOrder  = shuffled;
+  r.phase      = 'word';
+  r.round      = (r.round || 0) + 1;
+  r.readyPlayers = [];
+  r.votes      = {};
+  r.revealData = null;
+  r.guessData  = null;
+  r.messages   = [];
+  r.voteSeq    = 0;
+  r.tieIds     = null;
+  r.discOrder  = null;
+  hostWrite(r);
+}
+
+function hostGoVoting() {
+  if (!G.isHost || !G.room) return;
+  const r = G.room;
+  const discOrder = r.discOrder || Object.keys(r.players);
+  const spokeSet  = new Set((r.messages || []).map(m => m.pid));
+  const allSpoke  = discOrder.every(id => spokeSet.has(id));
+  if (!allSpoke) { toast('Aspetta che tutti scrivano almeno un messaggio!'); return; }
+  const nr = deep(r); nr.phase = 'voting'; nr.votes = {};
+  hostWrite(nr);
+}
+
+function forceReveal() {
+  if (!G.isHost || !G.room) return;
+  if (!Object.keys(G.room.votes).length) { toast('Nessun voto ancora!'); return; }
+  doReveal(deep(G.room));
+}
+
+function forceGuessReveal() {
+  if (!G.isHost || !G.room || G.room.phase !== 'guess') return;
+  finalizeGuesses(deep(G.room));
+}
+
+function hostNextRound() { if (G.isHost && G.room) startRound(deep(G.room)); }
+function hostEndGame()   { if (G.isHost && G.room) { const r=deep(G.room); r.phase='end'; hostWrite(r); } }
+function hostNewGame()   {
+  if (!G.isHost || !G.room) return;
+  const r = deep(G.room);
+  Object.keys(r.scores).forEach(id => r.scores[id] = 0);
+  r.round = 0; r.usedWords = []; r.phase = 'lobby';
+  hostWrite(r);
+}
+
+/* ══════════════════════════════════════
+   REVEAL LOGIC
+══════════════════════════════════════ */
+function doReveal(r) {
+  const pair   = PAROLE.find(p => p.id === r.wordId);
+  const {votes, roles, players} = r;
+  const wasRevote = !!r.tieIds; // eravamo in un rivoto?
+
+  const tally = {};
+  Object.entries(votes).forEach(([voter, target]) => {
+    (tally[target] = tally[target] || []).push(voter);
+  });
+
+  let maxV = 0;
+  Object.values(tally).forEach(arr => { if (arr.length > maxV) maxV = arr.length; });
+  const topTargets = Object.keys(tally).filter(id => tally[id].length === maxV);
+
+  // ── Gestione pareggio ──
+  if (topTargets.length > 1 && !wasRevote) {
+    // Primo pareggio: forziamo rivoto tra i pareggianti
+    r.tieIds  = topTargets;
+    r.voteSeq = (r.voteSeq || 0) + 1;
+    r.votes   = {};
+    r.phase   = 'voting';
+    hostWrite(r);
+    return;
+  }
+
+  // Se eravamo in un rivoto E c'è ancora pareggio → nessuno trovato, speciali sopravvivono
+  // Altrimenti se un solo top target → potenziale scoperta
+  const foundSpecial = (topTargets.length === 1)
+    ? topTargets.filter(id => roles[id] === 'impostore' || roles[id] === 'infiltrato')
+    : [];
+
+  r.tieIds = null; // chiude il ciclo di rivoto
+
+  const impostoriIds  = Object.keys(roles).filter(id => roles[id] === 'impostore');
+  const infiltratiIds = Object.keys(roles).filter(id => roles[id] === 'infiltrato');
+
+  const deltas = {};
+  Object.keys(players).forEach(id => { deltas[id] = 0; });
+
+  if (foundSpecial.length > 0) {
+    // Punti a tutti i votanti corretti
+    Object.entries(votes).forEach(([voter, target]) => {
+      if (foundSpecial.includes(target))
+        deltas[voter] += roles[target] === 'impostore' ? 3 : 2;
+    });
+    // Bonus unanimità
+    foundSpecial.forEach(sid => {
+      const normalIds = Object.keys(players).filter(id => roles[id] === 'normale');
+      if (normalIds.length > 1 && normalIds.every(id => (tally[sid]||[]).includes(id)))
+        normalIds.forEach(id => { deltas[id] += 1; });
+    });
+  } else {
+    // Speciali sopravvivono
+    impostoriIds.forEach(id => { deltas[id] += 4; });
+    infiltratiIds.forEach(id => { deltas[id] += 3; });
+  }
+
+  // Applica delta base
+  Object.entries(deltas).forEach(([id, d]) => { r.scores[id] = (r.scores[id]||0) + d; });
+
+  r.revealData = {
+    wordNormale:pair.normale, wordInfiltrato:pair.infiltrato, wordEmoji:pair.emoji,
+    foundSpecial, tally, deltas, impostoriIds, infiltratiIds,
+    guessResults: {}, guessBonuses: {},
+    wasRevote,
+  };
+
+  if (foundSpecial.length > 0) {
+    r.phase    = 'guess';
+    r.guessData = { guesserIds: foundSpecial, guesses: {} };
+  } else {
+    r.phase = 'reveal';
+  }
+  hostWrite(r);
+}
+
+/* ══════════════════════════════════════
+   GUESS LOGIC
+══════════════════════════════════════ */
+function finalizeGuesses(r) {
+  const pair    = PAROLE.find(p => p.id === r.wordId);
+  const correct = pair.normale.toLowerCase().trim();
+  const results = {};
+  const bonuses = {};
+
+  (r.guessData.guesserIds || []).forEach(id => {
+    const guess = ((r.guessData.guesses || {})[id] || '').toLowerCase().trim();
+    const ok = guess !== '' && guess === correct;
+    results[id] = ok;
+    // Impostore: +2 se indovina; Infiltrato: +1 (aveva un indizio)
+    const bonus = ok ? (r.roles[id] === 'impostore' ? 2 : 1) : 0;
+    bonuses[id] = bonus;
+    r.scores[id] = (r.scores[id] || 0) + bonus;
+
+    // Se l'impostore indovina la parola, i giocatori che lo hanno scoperto
+    // prendono solo 1 punto invece di 3 (riduzione di 2).
+    // Se l'infiltrato indovina, i giocatori mantengono i 2 punti originali (nessuna modifica).
+    if (ok && r.roles[id] === 'impostore') {
+      const reduction = 2; // da 3 → 1
+      Object.entries(r.votes || {}).forEach(([voterId, targetId]) => {
+        if (targetId === id) {
+          r.scores[voterId] = (r.scores[voterId] || 0) - reduction;
+          if (r.revealData && r.revealData.deltas) {
+            r.revealData.deltas[voterId] = (r.revealData.deltas[voterId] || 0) - reduction;
+          }
+        }
+      });
+    }
+  });
+
+  if (r.revealData) {
+    r.revealData.guessResults = results;
+    r.revealData.guessBonuses = bonuses;
+  }
+  r.phase = 'reveal';
+  hostWrite(r);
+}
+
+/* ══════════════════════════════════════
+   APPLY ACTION (host only)
+══════════════════════════════════════ */
+function applyAction(fromId, action) {
+  if (!G.isHost || !G.room) return;
+  const r = deep(G.room);
+
+  if (action.type === 'JOIN') {
+    if (r.phase !== 'lobby') return;
+    const idx = Object.keys(r.players).length % COLORS.length;
+    r.players[fromId] = {id:fromId, nickname:action.nickname, isHost:false, online:true, color:COLORS[idx]};
+    r.scores[fromId]  = r.scores[fromId] ?? 0;
+    hostWrite(r);
+
+  } else if (action.type === 'MARK_READY') {
+    if (r.phase !== 'word') return;
+    if (!r.readyPlayers.includes(fromId)) r.readyPlayers.push(fromId);
+    if (r.readyPlayers.length >= Object.keys(r.players).length) {
+      r.phase = 'discussion';
+      // Ordine casuale di intervento specifico per la discussione
+      r.discOrder = [...Object.keys(r.players)].sort(() => Math.random() - .5);
+    }
+    hostWrite(r);
+
+  } else if (action.type === 'VOTE') {
+    if (r.phase !== 'voting') return;
+    // In fase di rivoto accettiamo solo voti verso i candidati pareggianti
+    if (r.tieIds && !r.tieIds.includes(action.targetId)) return;
+    r.votes[fromId] = action.targetId;
+    if (Object.keys(r.votes).length >= Object.keys(r.players).length) { doReveal(r); return; }
+    hostWrite(r);
+
+  } else if (action.type === 'SUBMIT_GUESS') {
+    if (r.phase !== 'guess' || !r.guessData) return;
+    if (!(r.guessData.guesserIds || []).includes(fromId)) return; // solo i guesser
+    r.guessData.guesses = r.guessData.guesses || {};
+    r.guessData.guesses[fromId] = action.word;
+    // Tutti i guesser hanno risposto?
+    const allGuessed = r.guessData.guesserIds.every(id => r.guessData.guesses[id] !== undefined);
+    if (allGuessed) { finalizeGuesses(r); return; }
+    hostWrite(r);
+
+  } else if (action.type === 'SEND_MESSAGE') {
+    if (r.phase !== 'discussion') return;
+    const p = r.players[fromId]; if (!p) return;
+    if (!r.messages) r.messages = [];
+    r.messages.push({
+      pid: fromId,
+      nickname: p.nickname,
+      color: p.color,
+      text: String(action.text || '').slice(0, 200),
+    });
+    hostWrite(r);
+
+  } else if (action.type === 'LEAVE') {
+    delete r.players[fromId]; delete r.scores[fromId];
+    r.readyPlayers = (r.readyPlayers||[]).filter(id => id !== fromId);
+    delete r.votes[fromId];
+    if (r.guessData) {
+      r.guessData.guesserIds = (r.guessData.guesserIds||[]).filter(id => id !== fromId);
+      const allGuessed = r.guessData.guesserIds.length > 0 &&
+        r.guessData.guesserIds.every(id => (r.guessData.guesses||{})[id] !== undefined);
+      if (allGuessed) { finalizeGuesses(r); return; }
+    }
+    hostWrite(r);
+  }
+}
+
+/* ══════════════════════════════════════
+   PLAYER ACTIONS
+══════════════════════════════════════ */
+function markReady() {
+  G.readyConfirmed = true;
+  document.getElementById('wordReadyBtn').style.display = 'none';
+  document.getElementById('wordWaitBox').style.display  = 'block';
+  playerSend({type:'MARK_READY'});
+}
+
+function sendDiscussionMessage() {
+  const input = document.getElementById('discMsgInput');
+  const text = (input.value || '').trim();
+  if (!text) return;
+  input.value = '';
+  playerSend({type: 'SEND_MESSAGE', text});
+}
+
+function submitVote() {
+  if (!G.myVote || G.voteConfirmed) return;
+  G.voteConfirmed = true;
+  const btn = document.getElementById('voteConfirmBtn');
+  btn.disabled = true; btn.textContent = '✓ Voto inviato!';
+  playerSend({type:'VOTE', targetId:G.myVote});
+  renderVoting();
+}
+
+function submitGuess() {
+  if (G.guessConfirmed) return;
+  const word = document.getElementById('guessInput').value.trim();
+  if (!word) { toast('Scrivi una parola prima di confermare!'); return; }
+  G.guessConfirmed = true;
+  document.getElementById('guessSubmitBtn').disabled = true;
+  document.getElementById('guessSubmitBtn').textContent = '✓ Risposta inviata!';
+  document.getElementById('guessInput').disabled = true;
+  playerSend({type:'SUBMIT_GUESS', word});
+}
+
+/* ══════════════════════════════════════
+   RENDER ENGINE
+══════════════════════════════════════ */
+function renderScreen() {
+  if (!G.room) return;
+  const p = G.room.phase;
+  if      (p==='lobby')      { showScreen('lobby');      renderLobby(); }
+  else if (p==='word')       { showScreen('word');       renderWord(); }
+  else if (p==='discussion') { showScreen('discussion'); renderDiscussion(); }
+  else if (p==='voting')     { showScreen('voting');     renderVoting(); }
+  else if (p==='guess')      { showScreen('guess');      renderGuess(); }
+  else if (p==='reveal')     { showScreen('reveal');     renderReveal(); }
+  else if (p==='end')        { showScreen('end');        renderEnd(); }
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('sc-' + name).classList.add('active');
+}
+
+/* ── LOBBY ── */
+function renderLobby() {
+  if (!G.room) return;
+  const r = G.room;
+  document.getElementById('lobbyCode').textContent  = G.roomCode || '—';
+  const players = Object.values(r.players);
+  document.getElementById('lobbyCount').textContent = players.length;
+  document.getElementById('lobbyList').innerHTML = players.map(p => `
+    <div class="player-row ${p.id===G.playerId?'is-me':''}">
+      <div class="avatar" style="background:${p.color}22;color:${p.color}">${p.nickname[0].toUpperCase()}</div>
+      <div class="player-name">${esc(p.nickname)} ${p.id===G.playerId?'<span style="font-size:11px;color:var(--ink3)">(tu)</span>':''}</div>
+      <span class="badge ${p.isHost?'host':''}">${p.isHost?'👑 host':'giocatore'}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('lobbyHostSection').style.display  = G.isHost ? 'block' : 'none';
+  document.getElementById('lobbyGuestSection').style.display = G.isHost ? 'none'  : 'block';
+
+  if (G.isHost) {
+    document.getElementById('impVal').textContent = r.settings.impostori;
+    document.getElementById('infVal').textContent = r.settings.infiltrati;
+    const n = players.length, tot = r.settings.impostori + r.settings.infiltrati, max = Math.max(0, n-2);
+    document.getElementById('impDec').disabled = r.settings.impostori <= 0;
+    document.getElementById('infDec').disabled = r.settings.infiltrati <= 0;
+    document.getElementById('impInc').disabled = tot >= max;
+    document.getElementById('infInc').disabled = tot >= max;
+    document.getElementById('startBtn').disabled = n < 3;
+  }
+}
+
+/* ── WORD ── */
+function renderWord() {
+  if (!G.room) return;
+  const r = G.room;
+  const myRole = r.roles[G.playerId];
+  const pair   = PAROLE.find(p => p.id === r.wordId);
+  const isImp  = myRole === 'impostore';
+
+  document.getElementById('wordNormalBox').style.display = isImp ? 'none'  : 'block';
+  document.getElementById('wordImpBox').style.display    = isImp ? 'block' : 'none';
+
+  if (!isImp && pair) {
+    document.getElementById('wordEmoji').textContent = pair.emoji;
+    // Infiltrato vede la sua parola esattamente come un normale — non sa che è diversa
+    document.getElementById('wordText').textContent  = myRole === 'infiltrato' ? pair.infiltrato : pair.normale;
+  }
+
+  if (G.readyConfirmed) {
+    document.getElementById('wordReadyBtn').style.display = 'none';
+    document.getElementById('wordWaitBox').style.display  = 'block';
+    const total = Object.keys(r.players).length;
+    const ready = r.readyPlayers.length;
+    document.getElementById('readyBarFill').style.width  = (ready/total*100) + '%';
+    document.getElementById('readyCountText').textContent = `${ready} / ${total} pronti`;
+  } else {
+    document.getElementById('wordReadyBtn').style.display = 'block';
+    document.getElementById('wordWaitBox').style.display  = 'none';
+  }
+}
+
+/* ── DISCUSSION ── */
+function renderDiscussion() {
+  if (!G.room) return;
+  const r = G.room;
+  const discOrder = r.discOrder || r.turnOrder || Object.keys(r.players);
+  const messages  = r.messages || [];
+  const spokeSet  = new Set(messages.map(m => m.pid));
+  const total     = discOrder.length;
+  const spoke     = discOrder.filter(id => spokeSet.has(id)).length;
+  const allSpoke  = spoke === total;
+
+  // Lista giocatori con indicatore "ha parlato"
+  document.getElementById('discList').innerHTML = discOrder.map((id, i) => {
+    const p = r.players[id]; if (!p) return '';
+    const hasSp = spokeSet.has(id);
+    return `
+      <div class="player-row ${id===G.playerId?'is-me':''}">
+        <div style="font-size:13px;color:var(--ink3);width:22px;text-align:center;font-weight:700">${i+1}</div>
+        <div class="avatar" style="background:${p.color}22;color:${p.color}">${p.nickname[0].toUpperCase()}</div>
+        <div class="player-name">${esc(p.nickname)} ${id===G.playerId?'<span style="font-size:11px;color:var(--ink3)">(tu)</span>':''}</div>
+        <span style="font-size:16px;margin-left:4px" title="${hasSp?'Ha scritto':'Deve ancora scrivere'}">${hasSp?'✅':'⏳'}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Barra progresso "ha parlato"
+  document.getElementById('discSpokeBarFill').style.width = total ? (spoke/total*100)+'%' : '0%';
+  document.getElementById('discSpokeText').textContent = `${spoke} / ${total} hanno scritto`;
+
+  // Render chat messages
+  const msgBox = document.getElementById('discMessages');
+  const wasAtBottom = msgBox.scrollHeight - msgBox.scrollTop <= msgBox.clientHeight + 10;
+  msgBox.innerHTML = messages.length ? messages.map(m => `
+    <div class="disc-msg ${m.pid===G.playerId?'is-me':''}">
+      <div class="avatar" style="background:${m.color}22;color:${m.color};width:28px;height:28px;border-radius:50%;font-size:11px;font-weight:700;flex-shrink:0;display:flex;align-items:center;justify-content:center">${m.nickname[0].toUpperCase()}</div>
+      <div class="disc-msg-bubble">
+        <div class="disc-msg-name" style="color:${m.color}">${esc(m.nickname)}</div>
+        <div class="disc-msg-text">${esc(m.text)}</div>
+      </div>
+    </div>
+  `).join('') : '<div style="text-align:center;font-size:12px;color:var(--ink3);padding:8px">Nessun messaggio ancora — inizia tu!</div>';
+  if (wasAtBottom || messages.length === 1) msgBox.scrollTop = msgBox.scrollHeight;
+
+  // Host
+  document.getElementById('discHostBtn').style.display = G.isHost ? 'block' : 'none';
+  if (G.isHost) {
+    const btn = document.getElementById('discGoVotingBtn');
+    btn.disabled = !allSpoke;
+    document.getElementById('discHostHint').textContent = allSpoke
+      ? '✅ Tutti hanno scritto — puoi avviare le votazioni!'
+      : `⏳ Aspetta che tutti scrivano (${spoke}/${total})`;
+  }
+
+  // Guest
+  document.getElementById('discGuestWait').style.display = G.isHost ? 'none' : 'block';
+  if (!G.isHost) {
+    document.getElementById('discGuestWaitMsg').textContent = allSpoke
+      ? 'Tutti hanno scritto — in attesa che l\'host avvii le votazioni…'
+      : `In attesa che tutti scrivano un messaggio… (${spoke}/${total})`;
+    document.getElementById('discGuestSpin').textContent = allSpoke ? '⏳' : '💬';
+  }
+}
+
+/* ── VOTING ── */
+function renderVoting() {
+  if (!G.room) return;
+  const r = G.room;
+  const isTie = !!(r.tieIds && r.tieIds.length > 0);
+
+  // Banner pareggio
+  let tieHtml = '';
+  if (isTie) {
+    const names = r.tieIds.map(id => r.players[id]?.nickname || '?').join(', ');
+    tieHtml = `<div class="info-box" style="margin-bottom:12px;border-color:rgba(251,191,36,.3);color:var(--gold)">⚖️ <strong>Pareggio!</strong> Rivota solo tra: <strong>${esc(names)}</strong></div>`;
+  }
+  document.getElementById('voteGrid').innerHTML = tieHtml + Object.values(r.players)
+    .filter(p => !isTie || r.tieIds.includes(p.id))
+    .map(p => {
+      const isSelf   = p.id === G.playerId;
+      const isSel    = G.myVote === p.id;
+      const isLocked = G.voteConfirmed;
+      // In rivoto l'host può comunque votare (non è escluso)
+      const cantVote = isSelf || isLocked;
+      return `
+        <div class="vote-option ${isSelf&&!isTie?'self':''} ${isSel?'selected':''} ${isLocked&&!cantVote?'locked':''}"
+             ${cantVote ? '' : `onclick="selectVote('${p.id}')"`}>
+          <div class="avatar" style="background:${p.color}22;color:${p.color};width:36px;height:36px;border-radius:50%">${p.nickname[0].toUpperCase()}</div>
+          <span class="vote-name">${esc(p.nickname)} ${isSelf&&!isTie?'(tu)':''}</span>
+          ${isSel?'<span style="font-size:18px">✓</span>':''}
+        </div>
+      `;
+    }).join('');
+
+  const btn = document.getElementById('voteConfirmBtn');
+  if (G.voteConfirmed) { btn.disabled=true; btn.textContent='✓ Voto inviato!'; }
+  else { btn.disabled=!G.myVote; btn.textContent='Conferma voto'; }
+
+  const panel = document.getElementById('voteHostPanel');
+  if (G.isHost) {
+    panel.style.display = 'block';
+    const total = Object.keys(r.players).length;
+    const voted = Object.keys(r.votes).length;
+    document.getElementById('voteCountText').textContent = `Voti ricevuti: ${voted} / ${total}`;
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function selectVote(targetId) {
+  if (G.voteConfirmed) return;
+  // In rivoto consenti solo i candidati validi
+  if (G.room?.tieIds && !G.room.tieIds.includes(targetId)) return;
+  G.myVote = targetId; renderVoting();
+}
+
+/* ── GUESS ── */
+function renderGuess() {
+  if (!G.room || !G.room.guessData) return;
+  const r  = G.room;
+  const gd = r.guessData;
+  const guesserIds = gd.guesserIds || [];
+  const amIGuesser = guesserIds.includes(G.playerId);
+
+  const guesserNames = guesserIds.map(id => r.players[id]?.nickname || '?');
+  document.getElementById('guessPhaseSubtitle').textContent =
+    `${guesserNames.join(' e ')} ${guesserNames.length > 1 ? 'sono stati scoperti' : 'è stato scoperto'} — possono provare a indovinare la parola!`;
+
+  document.getElementById('guessMySection').style.display   = amIGuesser ? 'block' : 'none';
+  document.getElementById('guessWaitSection').style.display = amIGuesser ? 'none'  : 'block';
+
+  if (!amIGuesser) {
+    // Chi ha già risposto vs chi no
+    const guesses = gd.guesses || {};
+    const pending = guesserIds.filter(id => guesses[id] === undefined);
+    document.getElementById('guessPendingList').innerHTML = guesserIds.map(id => {
+      const p = r.players[id]; if (!p) return '';
+      const done = guesses[id] !== undefined;
+      return `<div style="font-size:12px;margin:4px 0;color:${done?'var(--success)':'var(--ink3)'}">${done?'✓':'⏳'} ${esc(p.nickname)}</div>`;
+    }).join('');
+  }
+
+  if (amIGuesser) {
+    const gi = document.getElementById('guessInput');
+    const gb = document.getElementById('guessSubmitBtn');
+    if (G.guessConfirmed) {
+      gb.disabled = true; gb.textContent = '✓ Risposta inviata!';
+      gi.disabled = true;
+    } else {
+      gb.disabled = false; gb.textContent = '✓ Conferma risposta';
+      gi.disabled = false;
+    }
+  }
+
+  // Host panel
+  const panel = document.getElementById('guessHostPanel');
+  if (G.isHost) {
+    panel.style.display = 'block';
+    const total   = guesserIds.length;
+    const answered = Object.keys(gd.guesses || {}).length;
+    document.getElementById('guessCountText').textContent = `Risposte ricevute: ${answered} / ${total}`;
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+/* ── REVEAL ── */
+function renderReveal() {
+  if (!G.room || !G.room.revealData) return;
+  const r = G.room, d = r.revealData;
+
+  document.getElementById('revWordMain').textContent = `${d.wordEmoji} ${d.wordNormale}`;
+  document.getElementById('revWordSim').textContent  = r.settings.infiltrati > 0
+    ? `Parola dell'infiltrato: "${d.wordInfiltrato}"` : '';
+
+  // Sezione risultati indovinello
+  const guessResults  = d.guessResults  || {};
+  const guessBonuses  = d.guessBonuses  || {};
+  const hasGuessData  = Object.keys(guessResults).length > 0;
+  const guessSection  = document.getElementById('revGuessSection');
+  const guessResultsEl = document.getElementById('revGuessResults');
+  if (hasGuessData) {
+    guessSection.style.display = 'block';
+    guessResultsEl.innerHTML = Object.entries(guessResults).map(([id, ok]) => {
+      const p = r.players[id]; if (!p) return '';
+      const bonus = guessBonuses[id] || 0;
+      const guessedWord = (r.guessData?.guesses || {})[id] || '—';
+      return `
+        <div class="guess-result-row ${ok?'correct':'wrong'}">
+          <div class="avatar" style="background:${p.color}22;color:${p.color};width:32px;height:32px;border-radius:50%;font-size:13px">${p.nickname[0].toUpperCase()}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">${esc(p.nickname)}</div>
+            <div style="font-size:11px;color:var(--ink3)">Ha risposto: <strong>"${esc(guessedWord)}"</strong></div>
+          </div>
+          <span style="font-size:18px">${ok?'✅':'❌'}</span>
+          ${bonus > 0 ? `<span class="delta pos">+${bonus}</span>` : ''}
+        </div>
+      `;
+    }).join('');
+  } else {
+    guessSection.style.display = 'none';
+  }
+
+  // Ruoli
+  document.getElementById('revPlayers').innerHTML = Object.values(r.players).map(p => {
+    const role  = r.roles[p.id];
+    const delta = (d.deltas[p.id] || 0) + (guessBonuses[p.id] || 0);
+    const isSelf = p.id === G.playerId;
+    const wordStr = role==='infiltrato' ? d.wordInfiltrato : role==='normale' ? d.wordNormale : '—';
+    return `
+      <div class="reveal-row ${role}">
+        <div class="avatar" style="background:${p.color}22;color:${p.color};width:34px;height:34px;border-radius:50%">${p.nickname[0].toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600">${esc(p.nickname)} ${isSelf?'<span style="font-size:11px;color:var(--ink3)">(tu)</span>':''}</div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:2px">Parola: ${wordStr}</div>
+        </div>
+        <span class="role-tag ${role}">${roleLabel(role)}</span>
+        <span class="delta ${delta>0?'pos':delta<0?'neg':''}" style="margin-left:8px">${delta>0?'+':''}${delta}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Voti tally
+  const sorted = Object.entries(d.tally).sort((a,b) => b[1].length - a[1].length);
+  document.getElementById('revTally').innerHTML = sorted.length ? sorted.map(([tid, voterIds]) => {
+    const tp = r.players[tid]; if (!tp) return '';
+    return `
+      <div class="tally-row">
+        <div class="avatar" style="background:${tp.color}22;color:${tp.color};width:28px;height:28px;border-radius:50%;font-size:12px">${tp.nickname[0].toUpperCase()}</div>
+        <div class="tally-name">${esc(tp.nickname)}</div>
+        <div style="font-weight:700;color:var(--neon)">${voterIds.length} 🗳️</div>
+        <div class="tally-voters">${voterIds.map(vid => r.players[vid]?.nickname||'?').join(', ')}</div>
+      </div>
+    `;
+  }).join('') : '<div style="font-size:12px;color:var(--ink3)">Nessun voto</div>';
+
+  // Outcome
+  const out = document.getElementById('revOutcome');
+  if (d.foundSpecial.length > 0) {
+    const names = d.foundSpecial.map(id => r.players[id]?.nickname||'?').join(', ');
+    const anyGuessedRight = d.foundSpecial.some(id => guessResults[id]);
+    const extraMsg = anyGuessedRight ? ' Ma ha indovinato la parola! 🎯' : '';
+    out.textContent = `🎉 Trovato! ${names} smascherato!${extraMsg}`;
+    out.style.cssText = 'text-align:center;font-size:15px;font-weight:700;padding:14px;border-radius:10px;margin-bottom:16px;background:rgba(34,197,94,.1);color:var(--success);border:1px solid rgba(34,197,94,.3)';
+  } else {
+    const names = d.impostoriIds.map(id => r.players[id]?.nickname||'?').join(', ');
+    out.textContent = `😈 ${names} l'ha fatta franca!`;
+    out.style.cssText = 'text-align:center;font-size:15px;font-weight:700;padding:14px;border-radius:10px;margin-bottom:16px;background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.3)';
+  }
+
+  document.getElementById('revHostBtns').style.display  = G.isHost ? 'flex' : 'none';
+  document.getElementById('revGuestWait').style.display = G.isHost ? 'none'  : 'block';
+}
+
+/* ── END ── */
+function renderEnd() {
+  if (!G.room) return;
+  const r = G.room;
+  const sorted = Object.values(r.players).sort((a,b) => (r.scores[b.id]||0)-(r.scores[a.id]||0));
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('endLb').innerHTML = sorted.map((p,i) => `
+    <div class="lb-row">
+      <div class="lb-rank">${medals[i]||(i+1)+'.'}</div>
+      <div class="avatar" style="background:${p.color}22;color:${p.color};width:34px;height:34px;border-radius:50%">${p.nickname[0].toUpperCase()}</div>
+      <div class="lb-name">${esc(p.nickname)} ${p.id===G.playerId?'<span style="font-size:11px;color:var(--ink3)">(tu)</span>':''}</div>
+      <div class="lb-score">${r.scores[p.id]||0} pt</div>
+    </div>
+  `).join('');
+  document.getElementById('endHostBtn').style.display   = G.isHost ? 'block' : 'none';
+  document.getElementById('endGuestWait').style.display = G.isHost ? 'none'  : 'block';
+}
+
+/* ══════════════════════════════════════
+   UTILS
+══════════════════════════════════════ */
+function roleLabel(role) {
+  return role==='impostore' ? '🕵️ Impostore' : role==='infiltrato' ? '🥸 Infiltrato' : '✅ Normale';
+}
+function deep(o) { return JSON.parse(JSON.stringify(o)); }
+function esc(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+let _toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_toastT); _toastT = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function toggleTheme() {
+  const b = document.body, dark = b.dataset.theme !== 'light';
+  b.dataset.theme = dark ? 'light' : 'dark';
+  localStorage.setItem('pd_theme', b.dataset.theme);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+(function() {
+  const theme = localStorage.getItem('pd_theme') || 'dark';
+  document.body.dataset.theme = theme;
+  document.getElementById('themeBtn').textContent = theme==='dark' ? '🌙' : '☀️';
+  const pid = sessionStorage.getItem('pd_pid');
+  if (pid) G.playerId = pid;
+})();
+</script>
+</body>
+</html>
