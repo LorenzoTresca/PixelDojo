@@ -15,7 +15,7 @@ PixelDojo/
 └── games/
     ├── trivial.html    # Gioco Trivial Otaku (~2700 righe)
     ├── quiz.html       # Gioco Quiz Flash
-    └── impostore.html  # Gioco Impostore (multiplayer locale/remoto via BroadcastChannel)
+    └── impostore.html  # Gioco Impostore (multiplayer cross-device via BroadcastChannel + PeerJS)
 ```
 
 ---
@@ -299,18 +299,32 @@ Mostrato quando `G.phase === 'idle'`, nascosto dopo il lancio. Il click/tap su `
 
 ## `impostore.html` — Gioco Impostore
 
-Gioco multiplayer in-browser (locale o remoto su stessa rete/browser). Architettura completamente client-side: un giocatore fa da **host** e mantiene lo stato autorevole su `localStorage`; tutti gli altri sono **guest** e comunicano tramite `BroadcastChannel`.
+Gioco multiplayer in-browser cross-device. Architettura completamente client-side: un giocatore fa da **host** e mantiene lo stato autorevole su `localStorage`; tutti gli altri sono **guest** e comunicano tramite un trasporto duale.
 
-### Trasporto (`BroadcastChannel`)
+### Trasporto (duale: BroadcastChannel + PeerJS)
+
+Il trasporto usa due canali in parallelo:
+
+- **`BroadcastChannel`** (`'pd_imp_{roomCode}'`): comunicazione a bassa latenza tra tab/finestre dello **stesso browser**. Sempre attivo.
+- **PeerJS (WebRTC)**: comunicazione cross-device tra browser diversi / dispositivi diversi. L'host crea un peer con ID prevedibile `'pixeldojo-imp-{roomCode}'`; i guest si connettono a quell'ID. Richiede connessione internet (usa il server di segnalazione gratuito di PeerJS).
 
 ```js
-// Canale: 'pd_imp_{roomCode}'
+// Protocollo messaggi (identico su entrambi i canali):
 // HOST → tutti: { type:'STATE', from, payload: roomObj }
 // GUEST → HOST:  { type:'ACTION', from, payload: actionObj }
-// GUEST → HOST:  { type:'REQ_STATE', from, payload:null }   // richiesta stato iniziale
+// GUEST → HOST:  { type:'REQ_STATE', from, payload:null }   // solo via BC (stesso browser)
 ```
 
-L'host scrive sempre con `hostWrite(room)` che aggiorna `G.room`, `localStorage` e invia `STATE` sul canale. I guest inviano azioni con `playerSend(action)` che, se è l'host stesso, chiama direttamente `applyAction()`.
+Variabili globali di trasporto:
+```js
+let _bc    = null;   // BroadcastChannel
+let _peer  = null;   // istanza PeerJS
+let _conns = [];     // connessioni PeerJS aperte (host: lista guest; guest: [connHost])
+```
+
+L'host scrive sempre con `hostWrite(room)` che aggiorna `G.room`, `localStorage` e chiama `broadcastState()` (invia STATE su BC + tutte le connessioni PeerJS). I guest inviano azioni con `playerSend(action)` che, se è l'host stesso, chiama direttamente `applyAction()`; altrimenti invia via BC e via PeerJS.
+
+`initTransport(code, onReady)` accetta un callback opzionale `onReady` (solo per i guest) chiamato quando la connessione PeerJS all'host è aperta. Per il guest, l'host invia automaticamente lo STATE corrente non appena la connessione PeerJS si apre (prima ancora di ricevere il JOIN).
 
 ### Stato globale client (`G`)
 
@@ -342,8 +356,17 @@ let G = {
   voteSeq: number,        // incrementato ad ogni rivoto; usato per resettare myVote sui client
   tieIds: string[] | null,// candidati del rivoto (null = nessun pareggio in corso)
   scores: { [playerId]: number },
-  revealData: object | null,
-  guessData: object | null,
+  revealData: {            // popolato da doReveal; deltas aggiornati da finalizeGuesses
+    wordNormale, wordInfiltrato, wordEmoji,
+    foundSpecial: string[],   // playerIds degli speciali scoperti
+    tally: { [targetId]: [voterIds] },
+    deltas: { [playerId]: number },  // delta punteggio finale per ogni giocatore
+    impostoriIds, infiltratiIds,
+    normalIds: string[],      // playerIds dei giocatori normali (usato per bonus unanimità)
+    guessResults: { [id]: boolean }, guessBonuses: { [id]: number },
+    wasRevote: boolean,
+  } | null,
+  guessData: { guesserIds: string[], guesses: { [id]: string } } | null,
   settings: { impostori: number, infiltrati: number },
   usedWords: string[],
   turnOrder: string[],    // ordine casuale usato per assegnare i ruoli
@@ -379,16 +402,21 @@ let G = {
 
 ### Logica punteggio
 
-**Votazione normale (nessun pareggio):**
-- Voter che scopre un impostore: **+3 pt** ciascuno
-- Voter che scopre un infiltrato: **+2 pt** ciascuno
-- Bonus unanimità (tutti i normali votano lo stesso speciale): **+1 pt** per ogni normale
-- Impostore sopravvive (non scoperto): **+4 pt**
+**Importante — flusso in due fasi:** quando uno speciale viene scoperto, `doReveal` NON assegna subito i punti ai voter. Li assegna solo `finalizeGuesses` dopo aver conosciuto l'esito dell'indovinello. Questo garantisce che il bonus unanimità venga applicato correttamente solo nei casi in cui non interferisce con la riduzione dei punti.
+
+**Speciali non scoperti (sopravvivono):**
+- Impostore sopravvive: **+4 pt**
 - Infiltrato sopravvive: **+3 pt**
 
-**Indovinello post-scoperta:**
-- Impostore indovina la parola: **+2 pt** bonus; i suoi voter vengono ridotti da 3 → **1 pt** (−2)
-- Infiltrato indovina la parola: **+1 pt** bonus; i suoi voter mantengono i **2 pt** originali
+**Impostore scoperto e poi indovino:**
+- Impostore sbaglia la parola: voter **+3 pt** ciascuno + bonus unanimità se tutti i normali hanno votato lo stesso
+- Impostore indovina la parola: voter **+1 pt** ciascuno (nessun bonus unanimità); impostore **+2 pt** bonus
+
+**Infiltrato scoperto:**
+- Voter **+2 pt** ciascuno (sempre, indipendentemente dall'indovinello) + bonus unanimità se tutti i normali hanno votato lo stesso
+- Infiltrato indovina la parola: infiltrato **+1 pt** bonus; voter mantengono i 2 pt
+
+**Bonus unanimità:** si applica solo quando tutti i giocatori normali (≥ 2) hanno votato lo stesso speciale, E lo speciale non ha indovinato la parola (per l'impostore). Si applica anche per l'infiltrato indipendentemente dall'esito dell'indovinello.
 
 **Pareggio nelle votazioni:**
 - Al primo pareggio: `doReveal` salva i candidati in `r.tieIds`, azzera `r.votes`, incrementa `r.voteSeq` e rimanda alla fase `'voting'` (rivoto solo tra i pareggianti)
@@ -405,13 +433,17 @@ let G = {
 | Funzione | Descrizione |
 |---|---|
 | `createRoom()` | Crea stanza, sceglie codice, inizializza stato, chiama `hostWrite()` |
-| `joinRoom()` | Entra in stanza esistente via codice, invia `JOIN` |
-| `hostWrite(room)` | Salva stato su `G.room` + `localStorage` + BroadcastChannel |
-| `playerSend(action)` | Invia azione all'host (o chiama direttamente `applyAction` se è host) |
+| `joinRoom()` | Entra in stanza esistente via codice; per stesso browser usa BC fallback (150ms), per cross-device aspetta il callback PeerJS |
+| `leaveRoom()` | Invia LEAVE, chiude BC e PeerJS, resetta `G`, torna alla home |
+| `initTransport(code, onReady)` | Apre BroadcastChannel + PeerJS; `onReady` (solo guest) è chiamato quando la connessione PeerJS all'host è pronta |
+| `handleMsg(data)` | Dispatcher messaggi in entrata: STATE aggiorna `G.room`, ACTION viene passata a `applyAction`, REQ_STATE risponde via BC |
+| `broadcastState()` | Invia `G.room` come STATE su BroadcastChannel e su tutte le connessioni PeerJS aperte |
+| `hostWrite(room)` | Salva stato su `G.room` + `localStorage`, poi chiama `broadcastState()` + `resetLocalIfNewRound()` + `renderScreen()` |
+| `playerSend(action)` | Se host: chiama `applyAction` direttamente. Se guest: invia ACTION via BC + connessione PeerJS |
 | `applyAction(fromId, action)` | Router azioni lato host; modifica `r` e chiama `hostWrite` |
 | `startRound(r)` | Pesca parola, assegna ruoli, resetta tutti i campi di round, incrementa `r.round` |
-| `doReveal(r)` | Conta voti, rileva pareggi (→ rivoto) o scoperta, calcola delta, decide fase successiva |
-| `finalizeGuesses(r)` | Valuta le risposte dell'indovinello, applica bonus/penalità e transita a `'reveal'` |
+| `doReveal(r)` | Conta voti, rileva pareggi (→ rivoto) o scoperta; se `foundSpecial` rinvia il calcolo punti voter a `finalizeGuesses` |
+| `finalizeGuesses(r)` | Valuta le risposte dell'indovinello; assegna i punti ai voter (deferred da `doReveal`) in base all'esito; applica bonus unanimità |
 | `hostGoVoting()` | Transita a `'voting'` solo se tutti hanno scritto in chat |
 | `resetLocalIfNewRound()` | Resetta `myVote`, `voteConfirmed`, `guessConfirmed` al cambio round; resetta anche il DOM del campo indovinello; gestisce anche il cambio `voteSeq` per i rivoti |
 | `renderScreen()` | Dispatcher: chiama il render corretto in base a `G.room.phase` |
@@ -439,8 +471,9 @@ I messaggi vengono azzerati (`r.messages = []`) all'inizio di ogni nuovo round i
 
 - **Nessun build tool.** Aprire i file direttamente nel browser. Non serve `npm install` o compilazione.
 - **Nessun framework JS.** Tutto è vanilla DOM API.
-- **CSS e JS inline.** Ogni file HTML è completamente self-contained — nessun import esterno tranne Google Fonts.
+- **CSS e JS inline.** Ogni file HTML è quasi completamente self-contained. `impostore.html` fa eccezione: carica la libreria PeerJS da CDN (`https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js`) per il multiplayer cross-device.
 - **SVG programmatico.** Il tabellone è costruito con `document.createElementNS` via `svgEl(tag, attrs)`.
 - **Auth client-side.** Non c'è backend — `login.html` usa solo `localStorage`. Non adatto alla produzione senza un server reale.
+- **PeerJS (impostore.html).** Usa il server di segnalazione pubblico gratuito di PeerJS (`0.peerjs.com`). Richiede connessione internet per l'handshake iniziale. I peer ID degli host hanno formato `'pixeldojo-imp-{roomCode}'`. In caso di conflitto di ID (stanza già aperta con lo stesso codice), PeerJS emette `'unavailable-id'` — gestito con un warning in console.
 - **Quiz/domande hardcoded.** Le domande di Trivial Otaku sono definite direttamente nel JS di `trivial.html` dentro `getTrivialQuestion()`.
 - **Git attivo.** La cartella ha un repo `.git` con branch `main` e remote `origin`.

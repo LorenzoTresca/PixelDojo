@@ -139,6 +139,7 @@
     .disc-input-row input:focus{border-color:var(--neon)}
     .disc-send-btn{padding:10px 16px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--neon);color:#fff;white-space:nowrap;flex-shrink:0}
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
 </head>
 <body data-theme="dark">
 <div id="toast"></div>
@@ -485,37 +486,109 @@ let G = {
   myVote:null, voteConfirmed:false, readyConfirmed:false, guessConfirmed:false,
   _localRound:0, _localVoteSeq:0,
 };
-let _bc = null;
+let _bc    = null;
+let _peer  = null;  // PeerJS instance (cross-device)
+let _conns = [];    // PeerJS aperte: host → lista guest; guest → [connHost]
 
 /* ══════════════════════════════════════
    TRANSPORT
 ══════════════════════════════════════ */
-function initTransport(code) {
-  if (_bc) _bc.close();
+function handleMsg(data) {
+  const {type, from, payload} = data;
+  if (type === 'STATE') {
+    if (!G.isHost) { G.room = payload; resetLocalIfNewRound(); renderScreen(); }
+  } else if (type === 'ACTION' && G.isHost && from !== G.playerId) {
+    applyAction(from, payload);
+  } else if (type === 'REQ_STATE' && G.isHost) {
+    // Risponde solo via BroadcastChannel (PeerJS invia STATE automaticamente on-connect)
+    if (_bc) _bc.postMessage({type:'STATE', from:G.playerId, payload:G.room});
+  }
+}
+
+function broadcastState() {
+  if (!G.room) return;
+  const msg = {type:'STATE', from:G.playerId, payload:G.room};
+  if (_bc) _bc.postMessage(msg);
+  _conns.forEach(conn => { try { if (conn.open) conn.send(msg); } catch(e) {} });
+}
+
+/* onReady (solo guest): callback chiamata quando la connessione PeerJS all'host è aperta */
+function initTransport(code, onReady) {
+  // Chiudi trasporti precedenti
+  if (_bc) { _bc.close(); _bc = null; }
+  if (_peer) { _peer.destroy(); _peer = null; }
+  _conns = [];
+
+  // ── BroadcastChannel: stesso browser / stesso dispositivo ──
   _bc = new BroadcastChannel('pd_imp_' + code);
-  _bc.onmessage = ({data}) => {
-    const {type, from, payload} = data;
-    if (type === 'STATE') {
-      if (!G.isHost) { G.room = payload; resetLocalIfNewRound(); renderScreen(); }
-    } else if (type === 'ACTION' && G.isHost && from !== G.playerId) {
-      applyAction(from, payload);
-    } else if (type === 'REQ_STATE' && G.isHost) {
-      _bc.postMessage({type:'STATE', from:G.playerId, payload:G.room});
-    }
-  };
+  _bc.onmessage = ({data}) => { handleMsg(data); };
+
+  // ── PeerJS: cross-device ──
+  const hostPeerId = 'pixeldojo-imp-' + code;
+
+  if (G.isHost) {
+    // Host: crea Peer con ID prevedibile, accetta connessioni dai guest
+    _peer = new Peer(hostPeerId, {debug:0});
+    _peer.on('open', () => { console.log('[PeerJS] host pronto:', hostPeerId); });
+    _peer.on('connection', conn => {
+      conn.on('open', () => {
+        _conns.push(conn);
+        // Invia subito lo stato corrente al nuovo guest
+        try { conn.send({type:'STATE', from:G.playerId, payload:G.room}); } catch(e) {}
+        conn.on('data', msg => { handleMsg(msg); });
+        conn.on('close', () => { _conns = _conns.filter(c => c !== conn); });
+        conn.on('error', () => { _conns = _conns.filter(c => c !== conn); });
+      });
+    });
+    _peer.on('error', err => {
+      if (err.type === 'unavailable-id') {
+        // ID già in uso: riprova con un suffisso casuale (fallback)
+        console.warn('[PeerJS host] ID già in uso, riprovo…');
+      } else {
+        console.warn('[PeerJS host] errore:', err.type);
+      }
+    });
+  } else {
+    // Guest: crea Peer con ID casuale, si connette all'host
+    _peer = new Peer({debug:0});
+    _peer.on('open', () => {
+      const conn = _peer.connect(hostPeerId, {reliable:true});
+      _conns = [conn];
+      conn.on('open', () => {
+        console.log('[PeerJS] guest connesso all\'host');
+        conn.on('data', msg => { handleMsg(msg); });
+        conn.on('close', () => { _conns = []; });
+        if (onReady) onReady();
+      });
+      conn.on('error', err => {
+        console.warn('[PeerJS guest] errore connessione:', err);
+        toast('Errore di connessione alla stanza.');
+      });
+    });
+    _peer.on('error', err => {
+      if (err.type === 'peer-unavailable') {
+        toast('Stanza non trovata. Controlla il codice.');
+      } else {
+        console.warn('[PeerJS guest] errore:', err.type);
+        toast('Errore di rete: ' + err.type);
+      }
+    });
+  }
 }
 
 function hostWrite(room) {
   G.room = room;
   localStorage.setItem('pd_imp_' + G.roomCode, JSON.stringify(room));
-  if (_bc) _bc.postMessage({type:'STATE', from:G.playerId, payload:room});
+  broadcastState();
   resetLocalIfNewRound();
   renderScreen();
 }
 
 function playerSend(action) {
-  if (G.isHost) applyAction(G.playerId, action);
-  else if (_bc) _bc.postMessage({type:'ACTION', from:G.playerId, payload:action});
+  if (G.isHost) { applyAction(G.playerId, action); return; }
+  const msg = {type:'ACTION', from:G.playerId, payload:action};
+  if (_bc) _bc.postMessage(msg);                                   // stesso browser
+  if (_conns[0] && _conns[0].open) _conns[0].send(msg);           // cross-device
 }
 
 function resetLocalIfNewRound() {
@@ -582,25 +655,35 @@ function joinRoom() {
   G.playerId = sessionStorage.getItem('pd_pid') || genId();
   sessionStorage.setItem('pd_pid', G.playerId);
   G.nickname = nick; G.roomCode = code; G.isHost = false;
+
+  // Pre-carica lo stato se il host è sullo stesso dispositivo
   const stored = localStorage.getItem('pd_imp_' + code);
-  initTransport(code);
-  if (stored) {
-    G.room = JSON.parse(stored);
+  if (stored) G.room = JSON.parse(stored);
+
+  toast('Connessione alla stanza…');
+
+  let joined = false;
+  function doJoin() {
+    if (joined) return; joined = true;
     playerSend({type:'JOIN', nickname:nick});
-    showScreen('lobby');
-  } else {
-    _bc.postMessage({type:'REQ_STATE', from:G.playerId, payload:null});
-    setTimeout(() => {
-      if (!G.room) { toast('Stanza non trovata. Controlla il codice.'); return; }
-      playerSend({type:'JOIN', nickname:nick});
-      showScreen('lobby');
-    }, 900);
+    // Per stesso browser G.room è già caricato → mostra subito lobby.
+    // Per cross-device G.room è null → lo STATE dell'host arriverà e
+    // handleMsg chiamerà renderScreen() che mostrerà la lobby correttamente.
+    if (G.room) showScreen('lobby');
   }
+
+  // PeerJS: path cross-device e cross-browser
+  initTransport(code, doJoin);
+
+  // BroadcastChannel fallback: stesso browser → usa stato localStorage e non aspettare PeerJS
+  if (stored) setTimeout(doJoin, 150);
 }
 
 function leaveRoom() {
   playerSend({type:'LEAVE'});
   if (_bc) { _bc.close(); _bc = null; }
+  if (_peer) { _peer.destroy(); _peer = null; }
+  _conns = [];
   const pid = G.playerId;
   G = {playerId:pid, roomCode:null, isHost:false, nickname:null, room:null, myVote:null, voteConfirmed:false, readyConfirmed:false, guessConfirmed:false, _localRound:0, _localVoteSeq:0};
   showScreen('home');
@@ -732,34 +815,27 @@ function doReveal(r) {
 
   const impostoriIds  = Object.keys(roles).filter(id => roles[id] === 'impostore');
   const infiltratiIds = Object.keys(roles).filter(id => roles[id] === 'infiltrato');
+  const normalIds     = Object.keys(players).filter(id => roles[id] === 'normale');
 
   const deltas = {};
   Object.keys(players).forEach(id => { deltas[id] = 0; });
 
   if (foundSpecial.length > 0) {
-    // Punti a tutti i votanti corretti
-    Object.entries(votes).forEach(([voter, target]) => {
-      if (foundSpecial.includes(target))
-        deltas[voter] += roles[target] === 'impostore' ? 3 : 2;
-    });
-    // Bonus unanimità
-    foundSpecial.forEach(sid => {
-      const normalIds = Object.keys(players).filter(id => roles[id] === 'normale');
-      if (normalIds.length > 1 && normalIds.every(id => (tally[sid]||[]).includes(id)))
-        normalIds.forEach(id => { deltas[id] += 1; });
-    });
+    // I punti ai voter vengono assegnati in finalizeGuesses, dopo aver saputo
+    // se lo speciale indovina o meno la parola (evita il bug del bonus unanimità).
+    // Non modifichiamo deltas né scores qui per i voter.
   } else {
     // Speciali sopravvivono
     impostoriIds.forEach(id => { deltas[id] += 4; });
     infiltratiIds.forEach(id => { deltas[id] += 3; });
   }
 
-  // Applica delta base
+  // Applica delta base (solo speciali sopravvissuti; voter pending se foundSpecial)
   Object.entries(deltas).forEach(([id, d]) => { r.scores[id] = (r.scores[id]||0) + d; });
 
   r.revealData = {
     wordNormale:pair.normale, wordInfiltrato:pair.infiltrato, wordEmoji:pair.emoji,
-    foundSpecial, tally, deltas, impostoriIds, infiltratiIds,
+    foundSpecial, tally, deltas, impostoriIds, infiltratiIds, normalIds,
     guessResults: {}, guessBonuses: {},
     wasRevote,
   };
@@ -781,29 +857,59 @@ function finalizeGuesses(r) {
   const correct = pair.normale.toLowerCase().trim();
   const results = {};
   const bonuses = {};
+  const rd      = r.revealData || {};
+  const tally   = rd.tally   || {};
+  const normalIds = rd.normalIds || Object.keys(r.roles).filter(id => r.roles[id] === 'normale');
 
   (r.guessData.guesserIds || []).forEach(id => {
     const guess = ((r.guessData.guesses || {})[id] || '').toLowerCase().trim();
-    const ok = guess !== '' && guess === correct;
+    const ok    = guess !== '' && guess === correct;
     results[id] = ok;
-    // Impostore: +2 se indovina; Infiltrato: +1 (aveva un indizio)
-    const bonus = ok ? (r.roles[id] === 'impostore' ? 2 : 1) : 0;
-    bonuses[id] = bonus;
-    r.scores[id] = (r.scores[id] || 0) + bonus;
 
-    // Se l'impostore indovina la parola, i giocatori che lo hanno scoperto
-    // prendono solo 1 punto invece di 3 (riduzione di 2).
-    // Se l'infiltrato indovina, i giocatori mantengono i 2 punti originali (nessuna modifica).
-    if (ok && r.roles[id] === 'impostore') {
-      const reduction = 2; // da 3 → 1
-      Object.entries(r.votes || {}).forEach(([voterId, targetId]) => {
-        if (targetId === id) {
-          r.scores[voterId] = (r.scores[voterId] || 0) - reduction;
-          if (r.revealData && r.revealData.deltas) {
-            r.revealData.deltas[voterId] = (r.revealData.deltas[voterId] || 0) - reduction;
-          }
+    // Voter che hanno votato per questo speciale
+    const voterIds = Object.entries(r.votes || {})
+      .filter(([, targetId]) => targetId === id)
+      .map(([voterId]) => voterId);
+
+    if (r.roles[id] === 'impostore') {
+      if (ok) {
+        // Impostore indovina → +2 all'impostore, voter prendono solo 1 pt (senza unanimità)
+        bonuses[id] = 2;
+        r.scores[id] = (r.scores[id] || 0) + 2;
+        voterIds.forEach(vid => {
+          r.scores[vid] = (r.scores[vid] || 0) + 1;
+          if (rd.deltas) rd.deltas[vid] = (rd.deltas[vid] || 0) + 1;
+        });
+      } else {
+        // Impostore sbaglia → voter prendono 3 pt + eventuale bonus unanimità
+        bonuses[id] = 0;
+        voterIds.forEach(vid => {
+          r.scores[vid] = (r.scores[vid] || 0) + 3;
+          if (rd.deltas) rd.deltas[vid] = (rd.deltas[vid] || 0) + 3;
+        });
+        // Bonus unanimità: tutti i normali hanno votato lo stesso impostore?
+        if (normalIds.length > 1 && normalIds.every(nid => (tally[id] || []).includes(nid))) {
+          normalIds.forEach(nid => {
+            r.scores[nid] = (r.scores[nid] || 0) + 1;
+            if (rd.deltas) rd.deltas[nid] = (rd.deltas[nid] || 0) + 1;
+          });
         }
+      }
+    } else if (r.roles[id] === 'infiltrato') {
+      // Infiltrato: voter prendono sempre 2 pt; indovinello dà +1 all'infiltrato
+      bonuses[id] = ok ? 1 : 0;
+      if (ok) r.scores[id] = (r.scores[id] || 0) + 1;
+      voterIds.forEach(vid => {
+        r.scores[vid] = (r.scores[vid] || 0) + 2;
+        if (rd.deltas) rd.deltas[vid] = (rd.deltas[vid] || 0) + 2;
       });
+      // Bonus unanimità per infiltrato
+      if (normalIds.length > 1 && normalIds.every(nid => (tally[id] || []).includes(nid))) {
+        normalIds.forEach(nid => {
+          r.scores[nid] = (r.scores[nid] || 0) + 1;
+          if (rd.deltas) rd.deltas[nid] = (rd.deltas[nid] || 0) + 1;
+        });
+      }
     }
   });
 
