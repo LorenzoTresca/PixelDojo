@@ -15,7 +15,8 @@ PixelDojo/
 └── games/
     ├── trivial.html    # Gioco Trivial Otaku (~2700 righe)
     ├── quiz.html       # Gioco Quiz Flash
-    └── impostore.html  # Gioco Impostore (multiplayer cross-device via BroadcastChannel + PeerJS)
+    ├── impostore.html  # Gioco Impostore (multiplayer cross-device via BroadcastChannel + PeerJS)
+    └── codenames.html  # Gioco Nomi in Codice (multiplayer cross-device via BroadcastChannel + PeerJS)
 ```
 
 ---
@@ -85,6 +86,7 @@ Il toggle va chiamato in `DOMContentLoaded`: `window.addEventListener('DOMConten
 | `pd_session` | JSON object | Utente loggato corrente |
 | `pd_scores` | JSON object | Punteggi per gioco `{ gameId: [ {player, score, date} ] }` |
 | `pd_imp_{CODE}` | JSON object | Stato completo della stanza Impostore (scritto dall'host, letto dai guest) |
+| `pd_cdn_{CODE}` | JSON object | Stato completo della stanza Nomi in Codice (scritto dall'host, letto dai guest) |
 
 ---
 
@@ -464,6 +466,156 @@ let G = {
 ```
 
 I messaggi vengono azzerati (`r.messages = []`) all'inizio di ogni nuovo round in `startRound()`.
+
+---
+
+---
+
+## `codenames.html` — Nomi in Codice
+
+Gioco multiplayer in-browser cross-device basato su Codenames. Architettura identica a `impostore.html`: un host mantiene lo stato autorevole su `localStorage`, i guest comunicano tramite trasporto duale BroadcastChannel + PeerJS.
+
+### Struttura del gioco
+
+Due squadre (**Rosso** e **Blu**) si sfidano su una griglia 5×5 di parole. Ogni squadra ha un **suggeritore** (vede la mappa dei colori) e uno o più **indovinatori**. Il suggeritore dà un indizio (parola + numero) e gli indovinatori votano le carte da rivelare. Chi svela tutte le proprie carte per primo vince; svelare la carta assassino causa la sconfitta immediata.
+
+### Stato globale client (`G`)
+
+```js
+let G = {
+  playerId: null,              // ID univoco per sessione (sessionStorage 'pd_pid')
+  roomCode: null,              // codice stanza 5 lettere
+  isHost: boolean,
+  nickname: null,
+  room: null,                  // copia locale dell'ultimo stato ricevuto
+  myTeam: null,                // 'rosso' | 'blu'
+  myRole: null,                // 'suggeritore' | 'indovinatore'
+  clueSubmitted: false,        // flag locale: indizio già inviato in questo turno
+  proposalVoted: false,        // flag locale: già votato la proposta corrente
+  passTurnConfirmed: false,    // flag locale: già passato il turno
+  _selectedNum: null,          // numero selezionato nel form indizio
+  _localRound: 0,              // traccia il round per reset locale
+  _localCurrentTeam: null,     // traccia il team corrente per reset locale al cambio turno
+  _lastProposedCard: undefined,// traccia la carta proposta per reset proposalVoted
+}
+```
+
+### Stato della stanza (`room`)
+
+```js
+{
+  phase: string,               // 'lobby' | 'clue' | 'guessing' | 'end'
+  round: number,
+  grid: string[],              // 25 parole dalla word list
+  colorMap: string[],          // 25 colori: 'rosso'|'blu'|'neutro'|'assassino'
+  revealed: boolean[],         // 25 flag di rivelazione
+  revealedColors: string[],    // colori rivelati (null se non rivelata)
+  currentTeam: 'rosso'|'blu',
+  firstTeam: 'rosso'|'blu',   // squadra che inizia (9 carte vs 8)
+  currentClue: { word, number } | null,
+  guessesLeft: number,         // tentativi rimasti (number+1, o 999 se indizio "∞")
+  winner: 'rosso'|'blu'|null,
+  scores: { rosso: number, blu: number },
+  proposedCard: number|null,   // indice carta proposta dagli indovinatori
+  proposalVotes: string[],     // playerIds che hanno approvato
+  proposalRejects: string[],   // playerIds che hanno rifiutato
+  host: string,                // playerId dell'host
+  players: { [id]: { id, nickname, team, role, isHost, online, color } },
+}
+```
+
+### Fasi di gioco (`room.phase`)
+
+| Fase | Descrizione |
+|---|---|
+| `'lobby'` | Sala d'attesa — scelta squadra e ruolo |
+| `'clue'` | Il suggeritore della squadra corrente inserisce indizio + numero |
+| `'guessing'` | Gli indovinatori propongono e votano le carte da rivelare |
+| `'end'` | Partita terminata — mostra vincitore e punteggi |
+
+### Azioni (`ACTION` dal guest all'host)
+
+| `action.type` | Quando | Payload extra |
+|---|---|---|
+| `JOIN` | Guest entra in lobby | `nickname` |
+| `CHOOSE_TEAM` | Fase lobby | `team: 'rosso'|'blu'` |
+| `CHOOSE_ROLE` | Fase lobby, dopo scelta squadra | `role: 'suggeritore'|'indovinatore'` |
+| `GIVE_CLUE` | Fase `clue`, solo il suggeritore di turno | `word, number` |
+| `PROPOSE_CARD` | Fase `guessing`, indovinatori di turno | `index` (0-24) |
+| `VOTE_PROPOSAL` | Fase `guessing`, dopo proposta | `approve: boolean` |
+| `CANCEL_PROPOSAL` | Fase `guessing` | — |
+| `PASS_TURN` | Fase `guessing` | — |
+| `LEAVE` | Qualsiasi | — |
+
+### Sistema di voto proposta
+
+Quando un indovinatore propone una carta, gli altri indovinatori della stessa squadra devono approvare all'unanimità. Qualsiasi rifiuto annulla la proposta. Se c'è un solo indovinatore attivo, la carta viene rivelata automaticamente senza voto. Quando un giocatore esce (`LEAVE`), l'host ricalcola se la proposta può auto-confermarsi con i rimasti.
+
+### Logica griglia
+
+```js
+generateGrid()  // restituisce { grid, colorMap, firstTeam }
+// La squadra firstTeam ha 9 carte, l'altra 8; 7 neutre, 1 assassino
+// firstTeam è scelto casualmente
+```
+
+### Trasporto
+
+Identico al pattern di `impostore.html` ma con prefisso diverso:
+- BroadcastChannel: `'pd_cdn_{roomCode}'`
+- PeerJS host ID: `'pixeldojo-cdn-{roomCode}'`
+- localStorage key: `'pd_cdn_{roomCode}'`
+
+### `resetLocalState()` — gestione stato locale al cambio turno
+
+Funzione critica chiamata da `hostWrite()` e `handleMsg()`. Gestisce tre casi:
+
+1. **Nuovo round** (`G.room.round !== G._localRound`): azzera tutto lo stato locale incluso il DOM di `#clueWordInput`, `#numSelect`, e riabilita `#clueSubmitBtn`.
+2. **Cambio turno** (`G.room.currentTeam !== G._localCurrentTeam`): azzera `clueSubmitted`, `_selectedNum`, il DOM di `#numSelect` e `#clueWordInput`, e riabilita `#clueSubmitBtn`. Questo reset è **fondamentale** per evitare che il suggeritore rimanga bloccato al secondo giro (bug: il bottone restava `disabled=true` e il campo conservava il vecchio indizio).
+3. **Cambio proposta** (`G.room.proposedCard`): azzera `proposalVoted` quando la proposta viene annullata.
+
+### Funzioni chiave di `codenames.html`
+
+| Funzione | Descrizione |
+|---|---|
+| `createRoom()` | Crea stanza, genera codice, inizializza stato lobby, avvia trasporto |
+| `joinRoom()` | Entra in stanza via codice; recupera stato da localStorage (stesso browser) o aspetta PeerJS |
+| `leaveRoom()` | Invia LEAVE, chiude trasporto, resetta G, torna alla home |
+| `initTransport(code, onReady)` | Apre BroadcastChannel + PeerJS (pattern identico a impostore) |
+| `hostWrite(room)` | Salva stato, fa broadcast, chiama `resetLocalState()` + `renderScreen()` |
+| `playerSend(action)` | Se host: chiama `applyAction` direttamente; altrimenti invia via BC + PeerJS |
+| `applyAction(fromId, action)` | Router azioni lato host |
+| `startRound(r)` | Genera griglia, assegna firstTeam, resetta stato round, incrementa round |
+| `generateGrid()` | Pesca 25 parole casuali, assegna colori (9+8+7+1), sceglie firstTeam |
+| `validateTeams(r)` | Controlla che ogni squadra abbia ≥2 giocatori e esattamente 1 suggeritore |
+| `nextTurn(r)` | Cambia squadra corrente, resetta clue e proposta, transita a `'clue'` |
+| `revealCard(r, idx)` | Rivela carta, controlla assassino/vittoria/turno esaurito |
+| `checkWin(r, team)` | Verifica se una squadra ha rivelato tutte le proprie carte |
+| `resetLocalState()` | Resetta flag locali e DOM al cambio round o cambio turno |
+| `renderScreen()` | Dispatcher: chiama il render corretto in base a `G.room.phase` |
+| `renderLobby()` | Mostra UI scelta squadra/ruolo, colonne squadre, pulsante start (solo host) |
+| `renderClue()` | Mostra griglia (con mappa colori per il suggeritore) + form indizio o attesa |
+| `renderGuessing()` | Mostra griglia cliccabile, display indizio corrente, sistema proposta/voto |
+| `renderEnd()` | Mostra vincitore, punteggi, pulsanti rivincita/nuova partita (solo host) |
+| `renderGrid(id, r, showMap, clickable, isGuessing)` | Renderizza la griglia 5×5 nel container specificato |
+| `renderScoreStrip(id, r)` | Barra punteggi con contatori carte rimaste per ogni squadra |
+| `renderHud(id, r)` | HUD con turno corrente e fase |
+| `buildNumSelect()` | Costruisce i pulsanti 1-9 + ∞ per la selezione numero indizio |
+| `submitClue()` | Valida e invia l'indizio; disabilita il bottone e imposta `clueSubmitted=true` |
+| `proposeCard(idx)` | Invia proposta carta; resetta `proposalVoted` |
+| `voteProposal(approve)` | Vota approvazione/rifiuto proposta |
+| `passTurn()` | Passa il turno (con guard `passTurnConfirmed`) |
+| `chooseTeam(team)` | Seleziona squadra, resetta ruolo |
+| `chooseRole(role)` | Seleziona ruolo (con check: max 1 suggeritore per squadra) |
+| `hostStartGame()` | Valida squadre e avvia il round |
+| `hostRematch()` | Riavvia con stesse squadre/ruoli |
+| `hostNewGame()` | Torna in lobby resettando squadre e ruoli |
+| `hostForceTurn()` | Forza il passaggio di turno (solo host, solo in fase guessing) |
+| `toggleTheme()` | Cambia tema, salva in `localStorage` |
+
+### Word list
+
+`codenames.html` contiene una word list italiana di circa 250 parole hardcoded nell'array `WORDS`. Le parole sono nomi comuni (oggetti, concetti, luoghi, animali, ecc.). `generateGrid()` ne pesca 25 casuali ogni round.
 
 ---
 

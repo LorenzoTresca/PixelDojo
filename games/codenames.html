@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nomi in Codice — PixelDojo</title>
+  <link rel="icon" href="../favicon.ico">
+  <style>
+    :root {
+      --ink:#e8e0ff; --ink2:#b8aee0; --ink3:#7a6fa8;
+      --surf:#0d0b1a; --surf2:#1a1630; --surf3:#241e3d;
+      --neon:#a78bfa; --fire:#f97316; --ice:#38bdf8;
+      --gold:#fbbf24; --success:#22c55e; --danger:#ef4444;
+      --blu:#3b82f6; --rosso:#ef4444;
+      --border:rgba(167,139,250,.15); --radius:12px;
+      --shadow:0 4px 24px rgba(0,0,0,.4);
+    }
+    body[data-theme="light"] {
+      --ink:#1a1340; --ink2:#4a3f7a; --ink3:#8a7fb8;
+      --surf:#f0eeff; --surf2:#e8e4f8; --surf3:#ddd8f0;
+      --neon:#7c3aed; --fire:#ea580c; --ice:#0284c7;
+      --gold:#d97706; --danger:#dc2626; --blu:#2563eb; --rosso:#dc2626;
+      --border:rgba(124,58,237,.15);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--surf);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+    .nav{width:100%;max-width:700px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .nav-logo{font-size:14px;font-weight:700;color:var(--neon);text-decoration:none}
+    .nav-theme{background:var(--surf3);border:1px solid var(--border);color:var(--ink2);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:14px}
+    .card{width:100%;max-width:700px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:16px}
+    .card-title{font-size:18px;font-weight:700;margin-bottom:6px}
+    .card-sub{font-size:13px;color:var(--ink3);margin-bottom:18px;line-height:1.5}
+    .field{margin-bottom:14px}
+    .field label{font-size:11px;color:var(--ink3);display:block;margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .field input{width:100%;padding:12px 14px;background:var(--surf3);border:1px solid var(--border);border-radius:8px;color:var(--ink);font-size:15px;outline:none;transition:border-color .2s}
+    .field input:focus{border-color:var(--neon)}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .1s;width:100%}
+    .btn:active{transform:scale(.97)}
+    .btn-primary{background:var(--neon);color:#fff}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--ink2)}
+    .btn-sm{padding:8px 14px;font-size:13px;width:auto;display:inline-flex}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .or-div{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--ink3);font-size:12px}
+    .or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--border)}
+    .home-section{border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:0}
+    .home-section-title{font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+    .sec-label{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:8px}
+    .player-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .player-row{display:flex;align-items:center;gap:10px;background:var(--surf3);border-radius:8px;padding:10px 14px;border:2px solid transparent}
+    .player-row.is-me{border-color:var(--neon)}
+    .avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
+    .badge{font-size:10px;color:var(--ink3);background:var(--surf2);padding:2px 8px;border-radius:10px}
+    .badge.host{color:var(--gold)}
+    .room-code-box{background:var(--surf3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;margin-bottom:16px}
+    .room-code-label{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+    .room-code-val{font-size:30px;font-weight:800;letter-spacing:.2em;color:var(--neon);font-family:monospace}
+    .wait-box{text-align:center;padding:18px;color:var(--ink3);background:var(--surf3);border-radius:10px;font-size:13px;border:1px dashed var(--border)}
+    .wait-spin{font-size:20px;margin-bottom:8px;animation:spin 1.5s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .info-box{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink3);margin-bottom:14px;line-height:1.5}
+    /* Team & role selection */
+    .team-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .team-btn{padding:14px;border-radius:10px;border:2px solid transparent;cursor:pointer;text-align:center;font-size:14px;font-weight:700;background:var(--surf3);color:var(--ink2);transition:all .15s}
+    .team-btn.rosso.active{background:rgba(239,68,68,.15);border-color:var(--rosso);color:var(--rosso)}
+    .team-btn.blu.active{background:rgba(59,130,246,.15);border-color:var(--blu);color:var(--blu)}
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .role-btn{padding:12px;border-radius:10px;border:2px solid transparent;cursor:pointer;text-align:center;font-size:13px;font-weight:700;background:var(--surf3);color:var(--ink2);transition:all .15s}
+    .role-btn.active{background:rgba(167,139,250,.12);border-color:var(--neon);color:var(--neon)}
+    /* Lobby team columns */
+    .lobby-teams{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .lobby-team-col{background:var(--surf3);border-radius:10px;padding:12px}
+    .lobby-team-col.rosso{border:1px solid rgba(239,68,68,.3)}
+    .lobby-team-col.blu{border:1px solid rgba(59,130,246,.3)}
+    .lobby-team-title{font-size:12px;font-weight:700;margin-bottom:8px;text-align:center}
+    .lobby-team-col.rosso .lobby-team-title{color:var(--rosso)}
+    .lobby-team-col.blu .lobby-team-title{color:var(--blu)}
+    .lobby-team-player{font-size:12px;padding:5px 8px;background:var(--surf2);border-radius:6px;margin-bottom:4px;display:flex;align-items:center;gap:6px;min-height:28px}
+    .lobby-team-role{font-size:11px;color:var(--ink3);margin-left:auto;flex-shrink:0}
+    /* Grid */
+    .grid-wrap{width:100%;max-width:700px;margin-bottom:14px}
+    .cn-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+    .cn-card{
+      aspect-ratio:3/2;border-radius:7px;border:2px solid transparent;
+      display:flex;align-items:center;justify-content:center;text-align:center;
+      padding:4px 6px;font-size:clamp(8px,1.6vw,12px);font-weight:700;
+      text-transform:uppercase;letter-spacing:.03em;transition:all .18s;
+      user-select:none;position:relative;overflow:hidden;line-height:1.2;
+      word-break:break-word;cursor:default
+    }
+    .cn-card.clickable{cursor:pointer}
+    .cn-card.clickable:hover{transform:scale(1.05);box-shadow:0 6px 20px rgba(0,0,0,.35)}
+    /* Map colors (suggeritore: unrevealed) */
+    .cn-card.map-rosso{background:rgba(239,68,68,.22);border-color:rgba(239,68,68,.5);color:var(--ink)}
+    .cn-card.map-blu{background:rgba(59,130,246,.22);border-color:rgba(59,130,246,.5);color:var(--ink)}
+    .cn-card.map-neutro{background:var(--surf3);border-color:var(--border);color:var(--ink2)}
+    .cn-card.map-assassino{background:rgba(10,10,20,.65);border-color:rgba(255,255,255,.08);color:#666}
+    /* Revealed colors */
+    .cn-card.rev-rosso{background:rgba(239,68,68,.75);border-color:var(--rosso);color:#fff;opacity:.75}
+    .cn-card.rev-blu{background:rgba(59,130,246,.75);border-color:var(--blu);color:#fff;opacity:.75}
+    .cn-card.rev-neutro{background:var(--surf3);border-color:var(--border);color:var(--ink3);opacity:.55;text-decoration:line-through}
+    .cn-card.rev-assassino{background:#111;border-color:#000;color:#555;opacity:.75}
+    /* Hidden cards (indovinatori, unrevealed) */
+    .cn-card.hidden{background:var(--surf2);border-color:var(--border);color:var(--ink)}
+    /* Proposed card */
+    .cn-card.proposed{animation:pulse-card .75s ease-in-out infinite;border-color:var(--gold)!important;box-shadow:0 0 0 0 rgba(251,191,36,.5)}
+    @keyframes pulse-card{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,.45)}50%{box-shadow:0 0 0 7px rgba(251,191,36,0)}}
+    /* Game HUD */
+    .game-hud{width:100%;max-width:700px;display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+    .hud-turn{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;border:2px solid transparent}
+    .hud-turn.rosso{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35);color:var(--rosso)}
+    .hud-turn.blu{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);color:var(--blu)}
+    .role-indicator{font-size:11px;padding:4px 10px;border-radius:6px;font-weight:700;background:var(--surf3);color:var(--ink2)}
+    /* Score strip */
+    .score-strip{display:flex;gap:10px;width:100%;max-width:700px;margin-bottom:12px}
+    .score-team{flex:1;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+    .score-team.rosso{border-color:rgba(239,68,68,.3)}
+    .score-team.blu{border-color:rgba(59,130,246,.3)}
+    .score-team.active-team{box-shadow:0 0 0 2px currentColor}
+    .score-count{font-size:26px;font-weight:800}
+    .score-team.rosso .score-count{color:var(--rosso)}
+    .score-team.blu .score-count{color:var(--blu)}
+    .score-label{font-size:11px;color:var(--ink3)}
+    /* Clue box */
+    .clue-box{width:100%;max-width:700px;background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .clue-word{font-size:20px;font-weight:800;color:var(--neon)}
+    .clue-num{font-size:20px;font-weight:800;color:var(--gold)}
+    .clue-small-label{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
+    /* Clue form */
+    .clue-form{background:var(--surf3);border-radius:10px;padding:16px;margin-bottom:14px}
+    .clue-input-row{display:flex;gap:10px;margin-bottom:12px}
+    .clue-input-row input{flex:1;padding:10px 12px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;color:var(--ink);font-size:15px;outline:none;transition:border-color .2s}
+    .clue-input-row input:focus{border-color:var(--neon)}
+    .num-select{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+    .num-btn{width:36px;height:36px;border-radius:7px;border:1px solid var(--border);background:var(--surf2);color:var(--ink2);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+    .num-btn:hover,.num-btn.active{background:var(--neon);color:#fff;border-color:var(--neon)}
+    /* Proposal banner */
+    .proposal-banner{width:100%;max-width:700px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:14px 18px;margin-bottom:12px}
+    .proposal-word{font-size:16px;font-weight:800;color:var(--gold);margin-bottom:4px}
+    .proposal-status{font-size:12px;color:var(--ink3);margin-bottom:10px}
+    .proposal-btns{display:flex;gap:8px;flex-wrap:wrap}
+    .proposal-btn{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;border:none;flex:1;min-width:100px}
+    .proposal-btn.yes{background:var(--success);color:#fff}
+    .proposal-btn.no{background:var(--danger);color:#fff}
+    .proposal-btn.cancel{background:var(--surf3);color:var(--ink2);border:1px solid var(--border)}
+    .proposal-btn:disabled{opacity:.4;cursor:not-allowed}
+    /* Win screen */
+    .win-box{text-align:center;padding:28px 16px;border-radius:12px;margin-bottom:16px}
+    .win-box.rosso{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)}
+    .win-box.blu{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3)}
+    .win-emoji{font-size:52px;margin-bottom:10px}
+    .win-title{font-size:24px;font-weight:800}
+    .win-box.rosso .win-title{color:var(--rosso)}
+    .win-box.blu .win-title{color:var(--blu)}
+    .win-sub{font-size:13px;color:var(--ink3);margin-top:6px}
+    /* QR */
+    .qr-wrap{text-align:center;margin-top:16px}
+    .qr-wrap .qr-label{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+    #qrCanvas{margin:0 auto;display:inline-block;padding:8px;background:#fff;border-radius:8px}
+    /* Screen toggle */
+    .screen{display:none;flex-direction:column;align-items:center;width:100%}
+    .screen.active{display:flex}
+    #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surf3);border:1px solid var(--border);border-radius:8px;padding:10px 18px;font-size:13px;color:var(--ink);transition:transform .3s;z-index:200;white-space:nowrap;box-shadow:var(--shadow);max-width:90vw;white-space:normal;text-align:center}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+    /* Responsive */
+    @media(max-width:500px){
+      .cn-card{font-size:7px;padding:3px}
+      .lobby-teams{grid-template-columns:1fr}
+      .clue-input-row{flex-direction:column}
+      .team-grid,.role-grid{grid-template-columns:1fr 1fr}
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body data-theme="dark">
+<div id="toast"></div>
+
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">← PixelDojo</a>
+  <button class="nav-theme" onclick="toggleTheme()" id="themeBtn">☀️</button>
+</nav>
+
+<!-- ═══ HOME ═══ -->
+<div id="sc-home" class="screen active">
+  <div class="card">
+    <div class="card-title">🕵️ Nomi in Codice</div>
+    <div class="card-sub">Due squadre si sfidano su 25 parole nascoste. Il Suggeritore vede la mappa segreta e dà indizi: una parola + un numero. Gli Indovinatori toccano le carte — ma attenti all'Assassino ☠️!</div>
+    <div class="home-section" style="margin-bottom:0">
+      <div class="home-section-title">➕ Crea una nuova stanza</div>
+      <div class="field">
+        <label>Il tuo nome</label>
+        <input id="nickCreateInput" type="text" maxlength="16" placeholder="Es. Lorenzo" autocomplete="off"/>
+      </div>
+      <button class="btn btn-primary" onclick="createRoom()">+ Crea stanza</button>
+    </div>
+    <div class="or-div">oppure</div>
+    <div class="home-section">
+      <div class="home-section-title">🚪 Entra in una stanza esistente</div>
+      <div class="field">
+        <label>Il tuo nome</label>
+        <input id="nickJoinInput" type="text" maxlength="16" placeholder="Es. Marco" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>Codice stanza</label>
+        <input id="codeInput" type="text" maxlength="5" placeholder="ABCDE" style="text-transform:uppercase;letter-spacing:.12em;font-family:monospace" autocomplete="off"/>
+      </div>
+      <button class="btn btn-outline" onclick="joinRoom()">Entra nella stanza →</button>
+    </div>
+  </div>
+  <div class="info-box" style="max-width:700px;width:100%">
+    💡 <strong>Ruoli:</strong> ogni squadra ha 1 <strong>Suggeritore</strong> (vede la mappa colori) e 1+ <strong>Indovinatori</strong> (toccano le carte). Gli indovinatori devono confermare collettivamente ogni carta. Chi tocca l'Assassino perde subito!
+  </div>
+</div>
+
+<!-- ═══ LOBBY ═══ -->
+<div id="sc-lobby" class="screen">
+  <div class="card">
+    <div class="room-code-box">
+      <div class="room-code-label">Codice stanza</div>
+      <div class="room-code-val" id="lobbyCode">—</div>
+    </div>
+    <div class="sec-label">Scegli la tua squadra</div>
+    <div class="team-grid">
+      <button class="team-btn rosso" id="btnTeamRosso" onclick="chooseTeam('rosso')">🔴 Squadra Rosso</button>
+      <button class="team-btn blu"   id="btnTeamBlu"   onclick="chooseTeam('blu')">🔵 Squadra Blu</button>
+    </div>
+    <div class="sec-label">Scegli il tuo ruolo</div>
+    <div class="role-grid">
+      <button class="role-btn" id="btnRoleSugg" onclick="chooseRole('suggeritore')">🧠 Suggeritore<div style="font-size:10px;color:var(--ink3);margin-top:3px;font-weight:400">Vede la mappa colori</div></button>
+      <button class="role-btn" id="btnRoleIndo" onclick="chooseRole('indovinatore')">🔍 Indovinatore<div style="font-size:10px;color:var(--ink3);margin-top:3px;font-weight:400">Tocca le carte</div></button>
+    </div>
+    <div class="sec-label">Squadre (<span id="lobbyCount">0</span> giocatori)</div>
+    <div class="lobby-teams">
+      <div class="lobby-team-col rosso">
+        <div class="lobby-team-title">🔴 Rosso</div>
+        <div id="lobbyRosso"></div>
+      </div>
+      <div class="lobby-team-col blu">
+        <div class="lobby-team-title">🔵 Blu</div>
+        <div id="lobbyBlu"></div>
+      </div>
+    </div>
+    <div id="lobbyUnassigned"></div>
+    <div id="lobbyHostSection" style="display:none">
+      <button class="btn btn-primary" id="startBtn" onclick="hostStartGame()" disabled>▶ Avvia partita</button>
+      <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:6px" id="startHint"></div>
+    </div>
+    <div id="lobbyGuestSection" style="display:none">
+      <div class="wait-box"><div class="wait-spin">⏳</div><div>In attesa che l'host avvii la partita…</div></div>
+    </div>
+    <div class="qr-wrap" id="qrWrap" style="display:none">
+      <div class="qr-label">Scansiona per entrare</div>
+      <div id="qrCanvas"></div>
+    </div>
+  </div>
+  <button class="btn btn-outline" style="max-width:700px;width:100%" onclick="leaveRoom()">← Abbandona stanza</button>
+</div>
+
+<!-- ═══ CLUE PHASE ═══ -->
+<div id="sc-clue" class="screen">
+  <div class="score-strip" id="clueScores"></div>
+  <div class="game-hud" id="clueHud"></div>
+  <div class="grid-wrap">
+    <div class="cn-grid" id="clueGrid"></div>
+  </div>
+  <div class="card" id="clueFormCard" style="display:none">
+    <div class="card-title">🧠 Dai il tuo indizio</div>
+    <div class="card-sub">Una sola parola + il numero di carte che descrive. Non puoi usare parole dalla griglia!</div>
+    <div class="clue-form">
+      <div class="clue-input-row">
+        <input type="text" id="clueWordInput" maxlength="30" placeholder="La tua parola indizio…" autocomplete="off"
+               onkeydown="if(event.key==='Enter')submitClue()"/>
+      </div>
+      <div class="sec-label" style="margin-bottom:8px">Quante carte descrive?</div>
+      <div class="num-select" id="numSelect"></div>
+    </div>
+    <button class="btn btn-primary" id="clueSubmitBtn" onclick="submitClue()">Dai indizio ➤</button>
+  </div>
+  <div class="card" id="clueWaitCard" style="display:none">
+    <div class="wait-box"><div class="wait-spin">🧠</div><div id="clueWaitText">In attesa dell'indizio…</div></div>
+  </div>
+</div>
+
+<!-- ═══ GUESSING PHASE ═══ -->
+<div id="sc-guessing" class="screen">
+  <div class="score-strip" id="guessScores"></div>
+  <div class="game-hud" id="guessHud"></div>
+  <div class="clue-box" id="clueDisplay" style="display:none">
+    <div>
+      <div class="clue-small-label">Indizio</div>
+      <div class="clue-word" id="clueDisplayWord">—</div>
+    </div>
+    <div style="width:1px;background:var(--border);align-self:stretch"></div>
+    <div>
+      <div class="clue-small-label">Numero</div>
+      <div class="clue-num" id="clueDisplayNum">—</div>
+    </div>
+    <div style="flex:1"></div>
+    <div style="text-align:right">
+      <div class="clue-small-label">Rimasti</div>
+      <div style="font-size:22px;font-weight:800;color:var(--ink)" id="guessesLeftVal">—</div>
+    </div>
+  </div>
+  <div class="proposal-banner" id="proposalBanner" style="display:none">
+    <div class="proposal-word" id="proposalWord"></div>
+    <div class="proposal-status" id="proposalStatus"></div>
+    <div class="proposal-btns" id="proposalBtns"></div>
+  </div>
+  <div class="grid-wrap">
+    <div class="cn-grid" id="guessGrid"></div>
+  </div>
+  <div class="card" id="guessPanelCard">
+    <div id="guessPanelContent"></div>
+  </div>
+</div>
+
+<!-- ═══ END ═══ -->
+<div id="sc-end" class="screen">
+  <div class="card">
+    <div id="winBox"></div>
+    <div class="score-strip" style="margin-bottom:14px">
+      <div class="score-team rosso">
+        <div class="score-count" id="endScoreRosso">0</div>
+        <div class="score-label">Vittorie Rosso</div>
+      </div>
+      <div class="score-team blu">
+        <div class="score-count" id="endScoreBlu">0</div>
+        <div class="score-label">Vittorie Blu</div>
+      </div>
+    </div>
+    <div class="sec-label" style="margin-bottom:8px">Griglia finale</div>
+    <div class="cn-grid" id="endGrid" style="margin-bottom:16px"></div>
+    <div id="endHostBtns" style="display:none;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" onclick="hostRematch()">↩ Rivincita (stesse squadre)</button>
+      <button class="btn btn-outline" onclick="hostNewGame()">🔀 Nuova partita (squadre libere)</button>
+    </div>
+    <div id="endGuestWait" style="display:none">
+      <div class="wait-box"><div class="wait-spin">⏳</div><div>In attesa dell'host…</div></div>
+    </div>
+  </div>
+  <button class="btn btn-outline" style="max-width:700px;width:100%;margin-top:0" onclick="goHome()">← Torna alla home</button>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   VOCABULARY — 400 parole italiane
+══════════════════════════════════════ */
+const VOCAB = [
+  // Oggetti
+  'libro','sedia','finestra','chiave','specchio','porta','tavolo','lampada',
+  'coltello','bottiglia','borsa','scarpa','orologio','telefono','computer',
+  'penna','carta','busta','candela','forchetta','bicchiere','vaso','tenda',
+  'tappeto','cuscino','coperta','forbici','martello','vite','chiodo','filo',
+  'ago','gancio','ancora','catena','lucchetto','cintura','cappello','guanto',
+  'sciarpa','anello','collana','moneta','mappa','bussola','telescopio',
+  'torcia','quadro','statua','lente','motore','ruota','elica','ingranaggio',
+  'pistola','spada','scudo','arco','freccia','rete','corda','scala','barca',
+  'tromba','tamburo','arpa','violino','flauto','fischio','campana','specchio',
+  // Animali
+  'volpe','aquila','serpente','orso','balena','tigre','leone','lupo','delfino',
+  'polpo','farfalla','ape','formica','ragno','scorpione','coccodrillo',
+  'ippopotamo','rinoceronte','elefante','giraffa','zebra','panda','koala',
+  'canguro','pinguino','fenicottero','pavone','gufo','corvo','pappagallo',
+  'struzzo','squalo','tonno','trota','granchio','aragosta','medusa','tartaruga',
+  'lucertola','capra','pecora','coniglio','topo','scoiattolo','riccio','lontra',
+  'castoro','cobra','pitone','falco','cigno','airone','rondine','lepre',
+  'bisonte','lince','ghepardo','orca','narvalo','mantide','libellula',
+  // Luoghi
+  'castello','porto','deserto','ponte','foresta','montagna','vulcano','isola',
+  'citta','villaggio','torre','palazzo','chiesa','tempio','piramide','stadio',
+  'aeroporto','stazione','faro','prigione','bunker','miniera','grotta','canyon',
+  'prateria','palude','tundra','giungla','savana','spiaggia','scogliera','lago',
+  'fiume','cascata','oceano','ghiacciaio','oasi','labirinto','arena','fortezza',
+  'rovine','santuario','osservatorio','laboratorio','biblioteca','museo',
+  'mercato','circo','teatro','colosseo','caverna','cratere','golfo','baia',
+  'pozzo','fossa','abisso','fiordo','delta','stretto','promontorio',
+  // Persone e professioni
+  'capitano','dottore','spia','soldato','re','regina','principe','imperatore',
+  'faraone','gladiatore','cavaliere','samurai','ninja','pirata','astronauta',
+  'detective','ladro','guerriero','sciamano','mago','alchimista','inventore',
+  'esploratore','ammiraglio','generale','agente','scienziato','chimico',
+  'fisico','biologo','storico','filosofo','poeta','scrittore','pittore',
+  'musicista','cantante','attore','acrobata','domatore','cuoco','contadino',
+  'pescatore','cacciatore','arciere','druido','vichingo','corsaro','mercante',
+  'diplomatico','sultano','druido','console','tribuno','arcivescovo',
+  // Natura
+  'neve','fulmine','radice','marea','aurora','cometa','asteroide','galassia',
+  'nebulosa','tempesta','uragano','tornado','valanga','terremoto','tsunami',
+  'alluvione','nebbia','grandine','rugiada','gelo','brina','cenere','lava',
+  'magma','cristallo','diamante','rubino','smeraldo','zaffiro','quarzo',
+  'granito','marmo','carbone','petrolio','vento','corrente','onda','ghiaccio',
+  'vapore','nuvola','arcobaleno','corallo','fiamma','brace','fossile',
+  'meteorite','polvere','sabbia','fango','muschio','alghe','polline',
+  // Concetti e astratti
+  'ombra','silenzio','tempo','confine','memoria','sogno','paura','speranza',
+  'liberta','giustizia','onore','lealta','tradimento','vendetta','destino',
+  'magia','mistero','segreto','bugia','verita','illusione','visione',
+  'profezia','enigma','codice','simbolo','traccia','indizio','alibi',
+  'colpa','innocenza','gloria','fama','leggenda','mito','melodia','ritmo',
+  'caos','ordine','equilibrio','eco','riflesso','vuoto','infinito','origine',
+  'soglia','portale','paradosso','incubo','giuramento','promessa',
+];
+
+const PLAYER_COLORS = ['#a78bfa','#f97316','#22c55e','#38bdf8','#fbbf24','#f472b6','#84cc16','#e879f9','#fb923c','#34d399'];
+
+/* ══════════════════════════════════════
+   STATO GLOBALE
+══════════════════════════════════════ */
+let G = {
+  playerId:null, roomCode:null, isHost:false, nickname:null, room:null,
+  myTeam:null, myRole:null,
+  clueSubmitted:false,
+  proposalVoted:false,
+  passTurnConfirmed:false,
+  _selectedNum:null,
+  _localRound:0,
+  _localCurrentTeam:null,
+  _lastProposedCard:undefined,
+};
+let _bc=null, _peer=null, _conns=[];
+
+/* ══════════════════════════════════════
+   TRANSPORT (pattern identico a Impostore)
+══════════════════════════════════════ */
+function handleMsg(data) {
+  const {type,from,payload}=data;
+  if (type==='STATE') {
+    if (!G.isHost) { G.room=payload; resetLocalState(); renderScreen(); }
+  } else if (type==='ACTION' && G.isHost && from!==G.playerId) {
+    applyAction(from, payload);
+  } else if (type==='REQ_STATE' && G.isHost) {
+    if (_bc) _bc.postMessage({type:'STATE',from:G.playerId,payload:G.room});
+  }
+}
+
+function broadcastState() {
+  if (!G.room) return;
+  const msg={type:'STATE',from:G.playerId,payload:G.room};
+  if (_bc) _bc.postMessage(msg);
+  _conns.forEach(conn=>{ try{if(conn.open)conn.send(msg);}catch(e){} });
+}
+
+function initTransport(code, onReady) {
+  if (_bc){_bc.close();_bc=null;}
+  if (_peer){_peer.destroy();_peer=null;}
+  _conns=[];
+  _bc=new BroadcastChannel('pd_cdn_'+code);
+  _bc.onmessage=({data})=>{handleMsg(data);};
+  const hostPeerId='pixeldojo-cdn-'+code;
+  if (G.isHost) {
+    _peer=new Peer(hostPeerId,{debug:0});
+    _peer.on('open',()=>{});
+    _peer.on('connection',conn=>{
+      conn.on('open',()=>{
+        _conns.push(conn);
+        try{conn.send({type:'STATE',from:G.playerId,payload:G.room});}catch(e){}
+        conn.on('data',msg=>{handleMsg(msg);});
+        conn.on('close',()=>{_conns=_conns.filter(c=>c!==conn);});
+        conn.on('error',()=>{_conns=_conns.filter(c=>c!==conn);});
+      });
+    });
+    _peer.on('error',err=>{console.warn('[PeerJS host]',err.type);});
+  } else {
+    _peer=new Peer({debug:0});
+    _peer.on('open',()=>{
+      const conn=_peer.connect(hostPeerId,{reliable:true});
+      _conns=[conn];
+      conn.on('open',()=>{
+        conn.on('data',msg=>{handleMsg(msg);});
+        conn.on('close',()=>{_conns=[];});
+        if (onReady) onReady();
+      });
+      conn.on('error',()=>{toast('Errore di connessione alla stanza.');});
+    });
+    _peer.on('error',err=>{
+      if (err.type==='peer-unavailable') toast('Stanza non trovata. Controlla il codice.');
+      else toast('Errore di rete: '+err.type);
+    });
+  }
+}
+
+function hostWrite(room) {
+  G.room=room;
+  localStorage.setItem('pd_cdn_'+G.roomCode, JSON.stringify(room));
+  broadcastState();
+  resetLocalState();
+  renderScreen();
+}
+
+function playerSend(action) {
+  if (G.isHost){applyAction(G.playerId,action);return;}
+  const msg={type:'ACTION',from:G.playerId,payload:action};
+  if (_bc) _bc.postMessage(msg);
+  if (_conns[0]&&_conns[0].open) _conns[0].send(msg);
+}
+
+function resetLocalState() {
+  if (!G.room) return;
+  // Nuovo round
+  if (G.room.round !== G._localRound) {
+    G._localRound=G.room.round;
+    G._localCurrentTeam=G.room.currentTeam;
+    G._lastProposedCard=undefined;
+    G.clueSubmitted=false;
+    G.proposalVoted=false;
+    G.passTurnConfirmed=false;
+    G._selectedNum=null;
+    const ns=document.getElementById('numSelect');
+    if (ns) ns.innerHTML='';
+    const inp=document.getElementById('clueWordInput');
+    if (inp) inp.value='';
+    const btn=document.getElementById('clueSubmitBtn');
+    if (btn) btn.disabled=false;
+    return;
+  }
+  // Cambio turno (team diverso)
+  if (G.room.currentTeam !== G._localCurrentTeam) {
+    G._localCurrentTeam=G.room.currentTeam;
+    G.clueSubmitted=false;
+    G.passTurnConfirmed=false;
+    G._selectedNum=null;
+    const ns=document.getElementById('numSelect');
+    if (ns) ns.innerHTML='';
+    const inp=document.getElementById('clueWordInput');
+    if (inp) inp.value='';
+    const btn=document.getElementById('clueSubmitBtn');
+    if (btn) btn.disabled=false;
+  }
+  // Cambio proposta
+  const curProposed=G.room.proposedCard;
+  if (curProposed !== G._lastProposedCard) {
+    G._lastProposedCard=curProposed;
+    if (curProposed===null) G.proposalVoted=false;
+  }
+}
+
+/* ══════════════════════════════════════
+   CREATE / JOIN / LEAVE
+══════════════════════════════════════ */
+function genCode(){return Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random()*23)]).join('');}
+function genId(){return Math.random().toString(36).slice(2,10);}
+
+function createRoom() {
+  const nick=document.getElementById('nickCreateInput').value.trim();
+  if (!nick){toast('Inserisci il tuo nome!');return;}
+  G.playerId=sessionStorage.getItem('pd_pid')||genId();
+  sessionStorage.setItem('pd_pid',G.playerId);
+  G.nickname=nick; G.roomCode=genCode(); G.isHost=true;
+  G.myTeam=null; G.myRole=null;
+  const room={
+    phase:'lobby', round:0,
+    grid:[], colorMap:[], revealed:[], revealedColors:[],
+    currentTeam:null, firstTeam:null,
+    currentClue:null, guessesLeft:0,
+    winner:null,
+    scores:{rosso:0,blu:0},
+    proposedCard:null, proposalVotes:[], proposalRejects:[],
+    host:G.playerId,
+    players:{[G.playerId]:{id:G.playerId,nickname:nick,team:null,role:null,isHost:true,online:true,color:PLAYER_COLORS[0]}},
+  };
+  initTransport(G.roomCode);
+  hostWrite(room);
+  showScreen('lobby');
+  setTimeout(generateQR,400);
+}
+
+function joinRoom() {
+  const nick=document.getElementById('nickJoinInput').value.trim();
+  if (!nick){toast('Inserisci il tuo nome!');return;}
+  const code=document.getElementById('codeInput').value.trim().toUpperCase();
+  if (code.length<3){toast('Inserisci un codice valido!');return;}
+  G.playerId=sessionStorage.getItem('pd_pid')||genId();
+  sessionStorage.setItem('pd_pid',G.playerId);
+  G.nickname=nick; G.roomCode=code; G.isHost=false;
+  G.myTeam=null; G.myRole=null;
+  const stored=localStorage.getItem('pd_cdn_'+code);
+  if (stored) G.room=JSON.parse(stored);
+  toast('Connessione alla stanza…');
+  let joined=false;
+  function doJoin(){
+    if (joined) return; joined=true;
+    playerSend({type:'JOIN',nickname:nick});
+    if (G.room) showScreen('lobby');
+  }
+  initTransport(code, doJoin);
+  if (stored) setTimeout(doJoin,150);
+}
+
+function leaveRoom() {
+  playerSend({type:'LEAVE'});
+  if (_bc){_bc.close();_bc=null;}
+  if (_peer){_peer.destroy();_peer=null;}
+  _conns=[];
+  const pid=G.playerId;
+  G={playerId:pid,roomCode:null,isHost:false,nickname:null,room:null,
+     myTeam:null,myRole:null,clueSubmitted:false,proposalVoted:false,
+     passTurnConfirmed:false,_selectedNum:null,
+     _localRound:0,_localCurrentTeam:null,_lastProposedCard:undefined};
+  showScreen('home');
+}
+function goHome(){leaveRoom();}
+
+/* ══════════════════════════════════════
+   GRID GENERATION
+══════════════════════════════════════ */
+function generateGrid() {
+  const shuffled=[...VOCAB].sort(()=>Math.random()-.5);
+  const grid=shuffled.slice(0,25);
+  const firstTeam=Math.random()<.5?'rosso':'blu';
+  const otherTeam=firstTeam==='rosso'?'blu':'rosso';
+  const dist=[];
+  for(let i=0;i<9;i++) dist.push(firstTeam);
+  for(let i=0;i<8;i++) dist.push(otherTeam);
+  for(let i=0;i<7;i++) dist.push('neutro');
+  dist.push('assassino');
+  dist.sort(()=>Math.random()-.5);
+  return {grid,colorMap:dist,firstTeam};
+}
+
+/* ══════════════════════════════════════
+   HOST START / GAME ACTIONS
+══════════════════════════════════════ */
+function validateTeams(r) {
+  const ps=Object.values(r.players);
+  const rosso=ps.filter(p=>p.team==='rosso');
+  const blu=ps.filter(p=>p.team==='blu');
+  if (rosso.length<2) return {ok:false,msg:'Squadra Rosso: almeno 2 giocatori'};
+  if (blu.length<2)   return {ok:false,msg:'Squadra Blu: almeno 2 giocatori'};
+  const rs=rosso.filter(p=>p.role==='suggeritore');
+  const bs=blu.filter(p=>p.role==='suggeritore');
+  if (rs.length===0)  return {ok:false,msg:'Squadra Rosso: serve un suggeritore'};
+  if (bs.length===0)  return {ok:false,msg:'Squadra Blu: serve un suggeritore'};
+  if (rs.length>1)    return {ok:false,msg:'Squadra Rosso: solo 1 suggeritore!'};
+  if (bs.length>1)    return {ok:false,msg:'Squadra Blu: solo 1 suggeritore!'};
+  const rNoRole=rosso.filter(p=>!p.role);
+  const bNoRole=blu.filter(p=>!p.role);
+  if (rNoRole.length>0) return {ok:false,msg:'Squadra Rosso: tutti devono scegliere un ruolo'};
+  if (bNoRole.length>0) return {ok:false,msg:'Squadra Blu: tutti devono scegliere un ruolo'};
+  return {ok:true};
+}
+
+function hostStartGame() {
+  if (!G.isHost||!G.room) return;
+  const v=validateTeams(G.room);
+  if (!v.ok){toast(v.msg);return;}
+  startRound(deep(G.room));
+}
+
+function startRound(r) {
+  // Assicurati che tutti i giocatori con squadra ma senza ruolo siano indovinatori
+  Object.values(r.players).forEach(p=>{ if(p.team&&!p.role) p.role='indovinatore'; });
+  const {grid,colorMap,firstTeam}=generateGrid();
+  r.grid=grid; r.colorMap=colorMap;
+  r.revealed=new Array(25).fill(false);
+  r.revealedColors=new Array(25).fill(null);
+  r.firstTeam=firstTeam; r.currentTeam=firstTeam;
+  r.currentClue=null; r.guessesLeft=0;
+  r.winner=null;
+  r.proposedCard=null; r.proposalVotes=[]; r.proposalRejects=[];
+  r.phase='clue';
+  r.round=(r.round||0)+1;
+  hostWrite(r);
+}
+
+function hostRematch() {
+  if (!G.isHost||!G.room) return;
+  startRound(deep(G.room));
+}
+
+function hostNewGame() {
+  if (!G.isHost||!G.room) return;
+  const r=deep(G.room);
+  Object.values(r.players).forEach(p=>{p.team=null;p.role=null;});
+  r.phase='lobby';
+  hostWrite(r);
+}
+
+function hostForceTurn() {
+  if (!G.isHost||!G.room||G.room.phase!=='guessing') return;
+  nextTurn(deep(G.room));
+}
+
+/* ══════════════════════════════════════
+   GAME LOGIC
+══════════════════════════════════════ */
+function getActiveIndovinatori(r) {
+  return Object.keys(r.players).filter(id=>
+    r.players[id].team===r.currentTeam && r.players[id].role==='indovinatore'
+  );
+}
+
+function checkWin(r, team) {
+  return r.colorMap.every((c,i)=>c!==team||r.revealed[i]);
+}
+
+function nextTurn(r) {
+  r.currentTeam=r.currentTeam==='rosso'?'blu':'rosso';
+  r.currentClue=null; r.guessesLeft=0;
+  r.proposedCard=null; r.proposalVotes=[]; r.proposalRejects=[];
+  r.phase='clue';
+  hostWrite(r);
+}
+
+function revealCard(r, idx) {
+  const color=r.colorMap[idx];
+  r.revealed[idx]=true;
+  r.revealedColors[idx]=color;
+  r.proposedCard=null; r.proposalVotes=[]; r.proposalRejects=[];
+
+  // Assassino: squadra corrente perde
+  if (color==='assassino') {
+    r.winner=r.currentTeam==='rosso'?'blu':'rosso';
+    r.scores[r.winner]=(r.scores[r.winner]||0)+1;
+    r.phase='end';
+    hostWrite(r); return;
+  }
+
+  // Controlla vittoria
+  if (checkWin(r,'rosso')){r.winner='rosso';r.scores['rosso']=(r.scores['rosso']||0)+1;r.phase='end';hostWrite(r);return;}
+  if (checkWin(r,'blu'))  {r.winner='blu';r.scores['blu']=(r.scores['blu']||0)+1;r.phase='end';hostWrite(r);return;}
+
+  if (color===r.currentTeam) {
+    // Carta giusta: scala tentativo
+    r.guessesLeft--;
+    if (r.guessesLeft<=0) { nextTurn(r); return; }
+    hostWrite(r);
+  } else {
+    // Carta sbagliata (avversario o neutro): passa turno
+    nextTurn(r);
+  }
+}
+
+/* ══════════════════════════════════════
+   APPLY ACTION (host only)
+══════════════════════════════════════ */
+function applyAction(fromId, action) {
+  if (!G.isHost||!G.room) return;
+  const r=deep(G.room);
+  const p=r.players[fromId];
+
+  if (action.type==='JOIN') {
+    if (r.phase!=='lobby') return;
+    const idx=Object.keys(r.players).length%PLAYER_COLORS.length;
+    r.players[fromId]={id:fromId,nickname:action.nickname,team:null,role:null,isHost:false,online:true,color:PLAYER_COLORS[idx]};
+    hostWrite(r);
+
+  } else if (action.type==='CHOOSE_TEAM') {
+    if (r.phase!=='lobby'||!p) return;
+    p.team=action.team; p.role=null;
+    hostWrite(r);
+
+  } else if (action.type==='CHOOSE_ROLE') {
+    if (r.phase!=='lobby'||!p||!p.team) return;
+    if (action.role==='suggeritore') {
+      const alreadyHas=Object.values(r.players).find(q=>q.id!==fromId&&q.team===p.team&&q.role==='suggeritore');
+      if (alreadyHas) { hostWrite(r); return; } // reject silently, state will show it
+    }
+    p.role=action.role;
+    hostWrite(r);
+
+  } else if (action.type==='GIVE_CLUE') {
+    if (r.phase!=='clue'||!p) return;
+    if (p.team!==r.currentTeam||p.role!=='suggeritore') return;
+    const word=(action.word||'').trim();
+    if (!word||!action.number) return;
+    r.currentClue={word:word.toLowerCase(),number:action.number};
+    r.guessesLeft=action.number===99?999:action.number+1;
+    r.phase='guessing';
+    r.proposedCard=null; r.proposalVotes=[]; r.proposalRejects=[];
+    hostWrite(r);
+
+  } else if (action.type==='PROPOSE_CARD') {
+    if (r.phase!=='guessing'||!p) return;
+    if (p.team!==r.currentTeam||p.role!=='indovinatore') return;
+    if (r.revealed[action.index]) return;
+    if (r.proposedCard!==null) return; // già una proposta in corso
+    r.proposedCard=action.index;
+    r.proposalVotes=[fromId];
+    r.proposalRejects=[];
+    // Auto-confirm se c'è solo 1 indovinatore attivo
+    const active=getActiveIndovinatori(r);
+    if (active.length<=1) { revealCard(r,action.index); return; }
+    hostWrite(r);
+
+  } else if (action.type==='VOTE_PROPOSAL') {
+    if (r.phase!=='guessing'||r.proposedCard===null||!p) return;
+    if (p.team!==r.currentTeam||p.role!=='indovinatore') return;
+    const idx=r.proposedCard;
+    if (action.approve) {
+      if (!r.proposalVotes.includes(fromId)) r.proposalVotes.push(fromId);
+      const active=getActiveIndovinatori(r);
+      if (active.every(id=>r.proposalVotes.includes(id))) {
+        revealCard(r,idx); return;
+      }
+    } else {
+      // Qualsiasi rifiuto annulla la proposta
+      r.proposedCard=null; r.proposalVotes=[]; r.proposalRejects=[];
+    }
+    hostWrite(r);
+
+  } else if (action.type==='CANCEL_PROPOSAL') {
+    if (r.phase!=='guessing'||!p) return;
+    if (p.team!==r.currentTeam||p.role!=='indovinatore') return;
+    r.proposedCard=null; r.proposalVotes=[]; r.proposalRejects=[];
+    hostWrite(r);
+
+  } else if (action.type==='PASS_TURN') {
+    if (r.phase!=='guessing'||!p) return;
+    if (p.team!==r.currentTeam) return;
+    nextTurn(r);
+
+  } else if (action.type==='LEAVE') {
+    if (!r.players[fromId]) return;
+    delete r.players[fromId];
+    r.proposalVotes=(r.proposalVotes||[]).filter(id=>id!==fromId);
+    r.proposalRejects=(r.proposalRejects||[]).filter(id=>id!==fromId);
+    // Se la proposta può ora auto-confermarsi
+    if (r.proposedCard!==null && r.phase==='guessing') {
+      const active=getActiveIndovinatori(r);
+      if (active.length===0) {
+        r.proposedCard=null; r.proposalVotes=[]; r.proposalRejects=[];
+      } else if (active.every(id=>r.proposalVotes.includes(id))) {
+        revealCard(r,r.proposedCard); return;
+      }
+    }
+    hostWrite(r);
+  }
+}
+
+/* ══════════════════════════════════════
+   PLAYER ACTIONS
+══════════════════════════════════════ */
+function chooseTeam(team) {
+  G.myTeam=team; G.myRole=null;
+  playerSend({type:'CHOOSE_TEAM',team});
+}
+
+function chooseRole(role) {
+  if (!G.myTeam){toast('Scegli prima la squadra!');return;}
+  if (role==='suggeritore'&&G.room) {
+    const already=Object.values(G.room.players).find(p=>p.id!==G.playerId&&p.team===G.myTeam&&p.role==='suggeritore');
+    if (already){toast('La tua squadra ha già un suggeritore!');return;}
+  }
+  G.myRole=role;
+  playerSend({type:'CHOOSE_ROLE',role});
+}
+
+function submitClue() {
+  if (G.clueSubmitted) return;
+  const word=document.getElementById('clueWordInput').value.trim();
+  if (!word){toast('Inserisci una parola indizio!');return;}
+  if (!G._selectedNum){toast('Scegli il numero di carte!');return;}
+  G.clueSubmitted=true;
+  document.getElementById('clueSubmitBtn').disabled=true;
+  playerSend({type:'GIVE_CLUE',word,number:G._selectedNum});
+}
+
+function proposeCard(idx) {
+  if (!G.room||G.room.phase!=='guessing') return;
+  const me=G.room.players[G.playerId];
+  if (!me||me.team!==G.room.currentTeam||me.role!=='indovinatore') return;
+  if (G.room.revealed[idx]) return;
+  if (G.room.proposedCard!==null){toast('C\'è già una carta in attesa di conferma!');return;}
+  G.proposalVoted=false;
+  playerSend({type:'PROPOSE_CARD',index:idx});
+}
+
+function voteProposal(approve) {
+  if (G.proposalVoted) return;
+  G.proposalVoted=true;
+  playerSend({type:'VOTE_PROPOSAL',approve});
+}
+
+function cancelProposal() {
+  playerSend({type:'CANCEL_PROPOSAL'});
+}
+
+function passTurn() {
+  if (G.passTurnConfirmed) return;
+  G.passTurnConfirmed=true;
+  playerSend({type:'PASS_TURN'});
+}
+
+/* ══════════════════════════════════════
+   RENDER ENGINE
+══════════════════════════════════════ */
+function renderScreen() {
+  if (!G.room) return;
+  const p=G.room.phase;
+  if      (p==='lobby')    {showScreen('lobby');    renderLobby();}
+  else if (p==='clue')     {showScreen('clue');     renderClue();}
+  else if (p==='guessing') {showScreen('guessing'); renderGuessing();}
+  else if (p==='end')      {showScreen('end');      renderEnd();}
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+name).classList.add('active');
+}
+
+/* ── LOBBY ── */
+function renderLobby() {
+  if (!G.room) return;
+  const r=G.room;
+  document.getElementById('lobbyCode').textContent=G.roomCode||'—';
+  const players=Object.values(r.players);
+  document.getElementById('lobbyCount').textContent=players.length;
+
+  const me=r.players[G.playerId];
+  if (me){G.myTeam=me.team;G.myRole=me.role;}
+
+  document.getElementById('btnTeamRosso').classList.toggle('active',G.myTeam==='rosso');
+  document.getElementById('btnTeamBlu').classList.toggle('active',G.myTeam==='blu');
+  document.getElementById('btnRoleSugg').classList.toggle('active',G.myRole==='suggeritore');
+  document.getElementById('btnRoleIndo').classList.toggle('active',G.myRole==='indovinatore');
+
+  const mkPlayer=p=>`
+    <div class="lobby-team-player">
+      <div style="width:22px;height:22px;border-radius:50%;background:${p.color}22;color:${p.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${p.nickname[0].toUpperCase()}</div>
+      <span style="font-size:12px;font-weight:600;flex:1">${esc(p.nickname)}${p.id===G.playerId?' <span style="color:var(--ink3);font-size:10px">(tu)</span>':''}</span>
+      <span class="lobby-team-role">${p.role==='suggeritore'?'🧠 Sugg.':p.role==='indovinatore'?'🔍 Indo.':'?'}</span>
+      ${p.isHost?'<span style="font-size:10px;color:var(--gold);margin-left:4px">👑</span>':''}
+    </div>`;
+
+  document.getElementById('lobbyRosso').innerHTML=players.filter(p=>p.team==='rosso').map(mkPlayer).join('')||
+    '<div style="font-size:11px;color:var(--ink3);text-align:center;padding:8px">Nessuno</div>';
+  document.getElementById('lobbyBlu').innerHTML=players.filter(p=>p.team==='blu').map(mkPlayer).join('')||
+    '<div style="font-size:11px;color:var(--ink3);text-align:center;padding:8px">Nessuno</div>';
+
+  const unass=players.filter(p=>!p.team);
+  const uEl=document.getElementById('lobbyUnassigned');
+  uEl.innerHTML=unass.length?`<div class="sec-label" style="margin-top:4px">Senza squadra</div><div class="player-list">${unass.map(p=>`<div class="player-row ${p.id===G.playerId?'is-me':''}"><div class="avatar" style="background:${p.color}22;color:${p.color}">${p.nickname[0].toUpperCase()}</div><div style="font-size:13px;font-weight:600;flex:1">${esc(p.nickname)}</div></div>`).join('')}</div>`:'';
+
+  document.getElementById('lobbyHostSection').style.display=G.isHost?'block':'none';
+  document.getElementById('lobbyGuestSection').style.display=G.isHost?'none':'block';
+
+  if (G.isHost) {
+    const v=validateTeams(r);
+    document.getElementById('startBtn').disabled=!v.ok;
+    document.getElementById('startHint').textContent=v.ok?'':'⚠️ '+v.msg;
+    // QR
+    document.getElementById('qrWrap').style.display='block';
+    generateQR();
+  }
+}
+
+function generateQR() {
+  if (!G.roomCode) return;
+  const container=document.getElementById('qrCanvas');
+  if (container.dataset.code===G.roomCode) return; // già generato
+  container.innerHTML='';
+  container.dataset.code=G.roomCode;
+  const url=`${location.origin}${location.pathname}?room=${G.roomCode}`;
+  try {
+    new QRCode(container,{text:url,width:120,height:120,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  } catch(e){
+    container.innerHTML=`<div style="font-size:11px;color:var(--ink3);word-break:break-all">${url}</div>`;
+  }
+}
+
+/* ── CLUE PHASE ── */
+function renderClue() {
+  if (!G.room) return;
+  const r=G.room;
+  renderScoreStrip('clueScores',r);
+  renderHud('clueHud',r);
+
+  const me=r.players[G.playerId];
+  const isSugg=me&&me.role==='suggeritore';
+  const isMyTurnSugg=me&&me.team===r.currentTeam&&me.role==='suggeritore';
+
+  renderGrid('clueGrid',r,isSugg,false,false);
+
+  const formCard=document.getElementById('clueFormCard');
+  const waitCard=document.getElementById('clueWaitCard');
+
+  if (isMyTurnSugg&&!G.clueSubmitted) {
+    formCard.style.display='block';
+    waitCard.style.display='none';
+    buildNumSelect();
+  } else {
+    formCard.style.display='none';
+    waitCard.style.display='block';
+    const sugg=Object.values(r.players).find(p=>p.team===r.currentTeam&&p.role==='suggeritore');
+    const who=sugg?esc(sugg.nickname):'il suggeritore';
+    const teamLabel=r.currentTeam==='rosso'?'🔴 Rosso':'🔵 Blu';
+    document.getElementById('clueWaitText').textContent=
+      G.clueSubmitted?'Indizio inviato, in attesa degli altri…':
+      `${teamLabel}: ${who} sta pensando all'indizio…`;
+  }
+}
+
+function buildNumSelect() {
+  const ns=document.getElementById('numSelect');
+  if (ns.children.length) return;
+  [1,2,3,4,5,6,7,8,'∞'].forEach(n=>{
+    const btn=document.createElement('button');
+    btn.className='num-btn'; btn.textContent=n;
+    btn.onclick=()=>{
+      document.querySelectorAll('.num-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      G._selectedNum=n==='∞'?99:n;
+    };
+    ns.appendChild(btn);
+  });
+}
+
+/* ── GUESSING PHASE ── */
+function renderGuessing() {
+  if (!G.room) return;
+  const r=G.room;
+  renderScoreStrip('guessScores',r);
+  renderHud('guessHud',r);
+
+  const me=r.players[G.playerId];
+  const isSugg=me&&me.role==='suggeritore';
+  const isMyTeam=me&&me.team===r.currentTeam;
+  const isMyTeamIndo=isMyTeam&&me.role==='indovinatore';
+
+  // Clue display
+  if (r.currentClue) {
+    document.getElementById('clueDisplay').style.display='flex';
+    document.getElementById('clueDisplayWord').textContent=r.currentClue.word.toUpperCase();
+    document.getElementById('clueDisplayNum').textContent=r.currentClue.number===99?'∞':r.currentClue.number;
+    document.getElementById('guessesLeftVal').textContent=r.guessesLeft>50?'∞':r.guessesLeft;
+  } else {
+    document.getElementById('clueDisplay').style.display='none';
+  }
+
+  // Proposal banner
+  const banner=document.getElementById('proposalBanner');
+  if (r.proposedCard!==null) {
+    banner.style.display='block';
+    const word=r.grid[r.proposedCard];
+    const active=getActiveIndovinatori(r);
+    document.getElementById('proposalWord').textContent=`Proposta: "${word.toUpperCase()}"`;
+    document.getElementById('proposalStatus').textContent=`${r.proposalVotes.length}/${active.length} confermano`;
+    const btnsEl=document.getElementById('proposalBtns');
+    if (isMyTeamIndo) {
+      const voted=G.proposalVoted||r.proposalVotes.includes(G.playerId);
+      const isProposer=r.proposalVotes[0]===G.playerId;
+      btnsEl.innerHTML=`
+        <button class="proposal-btn yes"    onclick="voteProposal(true)"  ${voted?'disabled':''}>✓ Sì, scoprila</button>
+        <button class="proposal-btn no"     onclick="voteProposal(false)" ${voted?'disabled':''}>✗ No, annulla</button>
+        ${isProposer?`<button class="proposal-btn cancel" onclick="cancelProposal()">✕ Cancella</button>`:''}
+      `;
+    } else {
+      btnsEl.innerHTML=`<div style="font-size:12px;color:var(--ink3)">Gli indovinatori ${r.currentTeam==='rosso'?'rossi':'blu'} stanno decidendo…</div>`;
+    }
+  } else {
+    banner.style.display='none';
+  }
+
+  // Grid
+  const clickable=isMyTeamIndo&&r.proposedCard===null;
+  renderGrid('guessGrid',r,isSugg,clickable,false);
+
+  // Action panel
+  const panel=document.getElementById('guessPanelContent');
+  if (isMyTeamIndo) {
+    panel.innerHTML=`
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">🔍 Tocca una carta per proporla</div>
+      <div style="font-size:12px;color:var(--ink3);margin-bottom:12px">Tutti gli indovinatori della tua squadra devono confermare prima che venga scoperta.</div>
+      <button class="btn btn-outline" onclick="passTurn()" ${G.passTurnConfirmed?'disabled':''}>⏭ Passa turno (rinuncia ai tentativi)</button>
+    `;
+  } else if (isSugg&&isMyTeam) {
+    panel.innerHTML=`
+      <div style="font-size:13px;color:var(--ink3);text-align:center;margin-bottom:8px">Hai dato l'indizio — ora aspetta.</div>
+      ${G.isHost?`<button class="btn btn-outline btn-sm" style="width:100%" onclick="hostForceTurn()">⚡ Forza cambio turno (host)</button>`:''}
+    `;
+  } else {
+    const tl=r.currentTeam==='rosso'?'🔴 Rosso':'🔵 Blu';
+    panel.innerHTML=`<div class="wait-box"><div class="wait-spin">${r.currentTeam==='rosso'?'🔴':'🔵'}</div><div>La squadra ${tl} sta giocando…</div></div>`;
+  }
+}
+
+/* ── END ── */
+function renderEnd() {
+  if (!G.room) return;
+  const r=G.room;
+  const w=r.winner;
+  const wLabel=w==='rosso'?'Rosso':'Blu';
+  // Determine reason
+  const assIdx=r.colorMap.findIndex(c=>c==='assassino');
+  const byAssassin=assIdx>=0&&r.revealed[assIdx];
+  const sub=byAssassin?`La squadra ${w==='rosso'?'Blu':'Rosso'} ha toccato l'Assassino ☠️`:'Ha trovato tutte le sue carte 🎉';
+  document.getElementById('winBox').innerHTML=`
+    <div class="win-box ${w}">
+      <div class="win-emoji">${w==='rosso'?'🔴':'🔵'}</div>
+      <div class="win-title">Vince la squadra ${wLabel}!</div>
+      <div class="win-sub">${sub}</div>
+    </div>`;
+  document.getElementById('endScoreRosso').textContent=r.scores.rosso||0;
+  document.getElementById('endScoreBlu').textContent=r.scores.blu||0;
+  renderGrid('endGrid',r,true,false,true);
+  const hb=document.getElementById('endHostBtns');
+  hb.style.display=G.isHost?'flex':'none';
+  if (G.isHost) hb.style.flexDirection='column';
+  document.getElementById('endGuestWait').style.display=G.isHost?'none':'block';
+}
+
+/* ══════════════════════════════════════
+   GRID RENDERER
+══════════════════════════════════════ */
+function renderGrid(id, r, showMap, clickable, forceReveal) {
+  const el=document.getElementById(id);
+  if (!el||!r.grid.length) return;
+  el.innerHTML=r.grid.map((word,i)=>{
+    const revealed=r.revealed[i]||forceReveal;
+    const color=r.colorMap[i];
+    const revColor=r.revealedColors[i]||color;
+    const isProposed=!revealed&&r.proposedCard===i;
+    let cls='cn-card';
+    if (revealed) {
+      cls+=` rev-${revColor}`;
+    } else if (showMap) {
+      cls+=` map-${color}`;
+    } else {
+      cls+=' hidden';
+    }
+    if (!revealed&&clickable) cls+=' clickable';
+    if (isProposed) cls+=' proposed';
+    const onclick=(!revealed&&clickable)?`onclick="proposeCard(${i})"`:' ';
+    return `<div class="${cls}" ${onclick}>${esc(word)}</div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   HUD & SCORE HELPERS
+══════════════════════════════════════ */
+function renderScoreStrip(id,r) {
+  const el=document.getElementById(id);
+  if (!el) return;
+  const rem=t=>r.colorMap.filter((c,i)=>c===t&&!r.revealed[i]).length;
+  el.innerHTML=`
+    <div class="score-team rosso">
+      <div class="score-count">${rem('rosso')}</div>
+      <div class="score-label">🔴 Rosso rimaste</div>
+    </div>
+    <div class="score-team blu">
+      <div class="score-count">${rem('blu')}</div>
+      <div class="score-label">🔵 Blu rimaste</div>
+    </div>`;
+}
+
+function renderHud(id,r) {
+  const el=document.getElementById(id);
+  if (!el) return;
+  const me=r.players[G.playerId];
+  const tl=r.currentTeam==='rosso'?'Turno 🔴 Rosso':'Turno 🔵 Blu';
+  const myTeamShort=me?.team==='rosso'?'🔴':me?.team==='blu'?'🔵':'';
+  const myRoleShort=me?.role==='suggeritore'?'Suggeritore':me?.role==='indovinatore'?'Indovinatore':'';
+  el.innerHTML=`
+    <div class="hud-turn ${r.currentTeam}">${tl}</div>
+    <div style="flex:1"></div>
+    ${me&&myTeamShort?`<span class="role-indicator">${myTeamShort} ${myRoleShort}</span>`:''}`;
+}
+
+/* ══════════════════════════════════════
+   UTILS
+══════════════════════════════════════ */
+function deep(o){return JSON.parse(JSON.stringify(o));}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+let _toastT;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_toastT); _toastT=setTimeout(()=>el.classList.remove('show'),3200);
+}
+
+function toggleTheme() {
+  const b=document.body, dark=b.dataset.theme!=='light';
+  b.dataset.theme=dark?'light':'dark';
+  localStorage.setItem('pd_theme',b.dataset.theme);
+  document.getElementById('themeBtn').textContent=dark?'☀️':'🌙';
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+(function(){
+  const theme=localStorage.getItem('pd_theme')||'dark';
+  document.body.dataset.theme=theme;
+  document.getElementById('themeBtn').textContent=theme==='dark'?'🌙':'☀️';
+  const pid=sessionStorage.getItem('pd_pid');
+  if (pid) G.playerId=pid;
+  // Pre-fill room code from URL param ?room=XXXXX
+  const roomParam=new URLSearchParams(location.search).get('room');
+  if (roomParam) document.getElementById('codeInput').value=roomParam.toUpperCase().slice(0,5);
+})();
+</script>
+</body>
+</html>
