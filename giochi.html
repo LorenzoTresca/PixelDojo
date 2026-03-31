@@ -487,6 +487,30 @@ input, select { font-family: inherit; }
     .game-card-full:hover { transform:translateY(-4px); border-color:var(--neon); box-shadow:0 12px 32px rgba(124,58,237,.15); }
     .card-thumb-lg { width:100%; height:150px; display:flex; align-items:center; justify-content:center; font-size:56px; }
     .card-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+
+    /* ── Mobile navbar (<600px) ── */
+    @media(max-width:600px) {
+      .navbar {
+        padding: 8px 14px 0;
+        flex-wrap: wrap;
+        gap: 0;
+      }
+      .nav-logo { margin-right: auto; }
+      .nav-right { gap: 6px; order: 2; }
+      .nav-links {
+        order: 3;
+        width: 100%;
+        border-top: 0.5px solid var(--border);
+        padding: 4px 0;
+        gap: 0;
+        justify-content: space-around;
+        flex: none;
+        margin-top: 2px;
+      }
+      .nav-link { font-size: 12px; padding: 6px 8px; }
+      .btn-sm { padding: 5px 10px; font-size: 12px; }
+      .theme-toggle { width: 30px; height: 30px; font-size: 15px; }
+    }
   </style>
 </head>
 <body>
@@ -524,6 +548,21 @@ input, select { font-family: inherit; }
           <span class="tag tag-neon">Multiplayer</span>
           <span class="tag tag-gray">2-6 giocatori</span>
           <span class="tag tag-gray">300+ domande</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="game-card-full" href="games/oca.html" data-mode="multi" style="position:relative">
+      <div class="badge-new">NUOVO</div>
+      <div class="card-thumb-lg" style="background:linear-gradient(135deg,#0a2a1a,#1a3a0a)">🎲</div>
+      <div class="card-body">
+        <div class="card-title">Gioco dell'Oca Quiz</div>
+        <div class="card-meta">Il classico gioco dell'oca con un twist: ogni casella ha una domanda! Bonus se rispondi bene, malus se sbagli. Prigione, rilanci e colpi di scena!</div>
+        <div class="card-tags">
+          <span class="tag tag-mint">Multiplayer</span>
+          <span class="tag tag-gray">2–4 giocatori</span>
+          <span class="tag tag-gray">30 caselle</span>
+          <span class="tag tag-gray">100 domande</span>
         </div>
       </div>
     </a>

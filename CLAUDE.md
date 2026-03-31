@@ -16,7 +16,8 @@ PixelDojo/
     ├── trivial.html    # Gioco Trivial Otaku (~2700 righe)
     ├── quiz.html       # Gioco Quiz Flash
     ├── impostore.html  # Gioco Impostore (multiplayer cross-device via BroadcastChannel + PeerJS)
-    └── codenames.html  # Gioco Nomi in Codice (multiplayer cross-device via BroadcastChannel + PeerJS)
+    ├── codenames.html  # Gioco Nomi in Codice (multiplayer cross-device via BroadcastChannel + PeerJS)
+    └── oca.html        # Gioco dell'Oca Quiz (multiplayer cross-device via BroadcastChannel + PeerJS)
 ```
 
 ---
@@ -282,6 +283,21 @@ Mostrato quando `G.phase === 'idle'`, nascosto dopo il lancio. Il click/tap su `
 ---
 
 ## Pattern comuni
+
+### Responsive / Mobile
+
+**Navbar (index.html, giochi.html, classifica.html)** — breakpoint `<600px`:
+- La navbar usa `flex-wrap: wrap` per sdoppiarsi in due righe su mobile.
+- Riga 1: logo (margin-right:auto) + `.nav-right` (auth buttons + theme toggle).
+- Riga 2: `.nav-links` (Home/Giochi/Classifica), full-width, distribuiti con `justify-content: space-around`.
+- `.btn-sm` ridotto a `padding: 5px 10px; font-size: 12px`.
+- Quando si aggiunge la navbar mobile a una nuova pagina, copiare il blocco `@media(max-width:600px)` già presente in `index.html`.
+
+**Pannello azioni di trivial.html** — breakpoint `<640px`:
+- Il pannello inferiore non ha più `max-height: 30vw` con scroll orizzontale.
+- Usa `flex-wrap: wrap`: prima riga = turn-info + dado, seconda riga (full width) = action-panel.
+- I bottoni direzione (`dir-inline`) usano un **CSS Grid 2 colonne** (`grid-template-columns: 1fr 1fr`): "↻ Orario" e "↺ Antiorario" affiancati, "⬟ Verso il Centro" a piena larghezza (`grid-column: 1 / -1`).
+- Il board-area (`flex:1`) si adatta automaticamente allo spazio rimanente.
 
 ### Aggiungere il tema toggle a una nuova pagina
 
@@ -616,6 +632,107 @@ Funzione critica chiamata da `hostWrite()` e `handleMsg()`. Gestisce tre casi:
 ### Word list
 
 `codenames.html` contiene una word list italiana di circa 250 parole hardcoded nell'array `WORDS`. Le parole sono nomi comuni (oggetti, concetti, luoghi, animali, ecc.). `generateGrid()` ne pesca 25 casuali ogni round.
+
+---
+
+## `oca.html` — Gioco dell'Oca Quiz
+
+Gioco multiplayer in-browser cross-device basato sul classico Gioco dell'Oca, con domande di cultura generale ad ogni casella. Architettura identica a `impostore.html`: un host mantiene lo stato autorevole su `localStorage`, i guest comunicano tramite trasporto duale BroadcastChannel + PeerJS.
+
+### Struttura del tabellone
+
+64 caselle (0=START, 63=END) disposte in un grid CSS 8×8 a percorso serpentina. L'ordine di rendering (costante `DOM_ORDER`) definisce la posizione di ogni casella nel grid:
+
+```
+Row 0 (top): sq63→56  ← destra a sinistra
+Row 1:       sq48→55  ← sinistra a destra
+Row 2:       sq47→40  ← destra a sinistra
+Row 3:       sq32→39  ← sinistra a destra
+Row 4:       sq31→24  ← destra a sinistra
+Row 5:       sq16→23  ← sinistra a destra
+Row 6:       sq15→8   ← destra a sinistra   (8 è direttamente sopra il 7)
+Row 7 (bot): sq0→7    ← sinistra a destra
+```
+
+Ogni riga è invertita rispetto a quella precedente (snake corretto): la casella N è sempre direttamente sopra la casella N-1 al cambio di riga. **Importante:** il `DOM_ORDER` definisce solo il layout visivo, non la logica di gioco (che usa sempre numeri di casella assoluti 0-63).
+
+### Tipi di casella (`BOARD`)
+
+| Tipo | Classe CSS | Comportamento |
+|---|---|---|
+| `start` | `.sq-start` | Partenza — nessuna domanda |
+| `end` | `.sq-end` | Traguardo — chi ci arriva vince |
+| `normal` | `.sq-normal` | Domanda; nessun effetto posizionale |
+| `bonus` | `.sq-bonus` | Domanda; corretto = effetto bonus (avanza N o rilancia) |
+| `malus` | `.sq-malus` | Domanda; sbagliato = effetto malus (torna indietro N o goto) |
+| `prison` | `.sq-prison` | Domanda; corretto = libero subito; sbagliato = si perde N turni |
+
+### Sistema domande
+
+`Q_POOL` contiene 100 domande di cultura generale in italiano. Ogni casella `N` ha un "window" di 10 domande generate con `getSquareQuestions(N)` tramite offset `(N*7) % 100`. Le domande già mostrate a un giocatore vengono tracciate in `r.usedQIdx[playerId]`.
+
+### Stato della stanza (`room`)
+
+```js
+{
+  phase: 'lobby'|'rolling'|'question'|'result'|'end',
+  host: string,
+  players: { [id]: { id, nickname, isHost, online, color, colorIdx, position, skips } },
+  turnOrder: string[],
+  currentTurnIdx: number,
+  dice: number|null,
+  currentQuestion: null | { sqIdx, sqType, text, opts, correctIdx, answeredBy },
+  lastResult: null | { type, correct, effect, playerName, opts, correctIdx, playerOptIdx },
+  winner: null | string,
+  usedQIdx: { [playerId]: number[] },
+}
+```
+
+### Fasi di gioco (`room.phase`)
+
+| Fase | Descrizione |
+|---|---|
+| `'lobby'` | Sala d'attesa |
+| `'rolling'` | Il giocatore corrente deve lanciare il dado |
+| `'question'` | Domanda in corso (solo il giocatore corrente può rispondere) |
+| `'result'` | Risultato mostrato subito; dopo ~1,2s la pedina si anima verso la casella finale; dopo ~3s il turno avanza |
+| `'end'` | Partita terminata |
+
+### Azioni (`ACTION`)
+
+| `action.type` | Payload | Descrizione |
+|---|---|---|
+| `JOIN` | `nickname` | Guest entra in lobby |
+| `START` | — | Host avvia la partita |
+| `ROLL` | — | Giocatore lancia il dado |
+| `ANSWER` | `optionIdx` | Giocatore risponde alla domanda |
+| `LEAVE` | — | Giocatore abbandona |
+
+### Trasporto
+
+Identico al pattern di `impostore.html`:
+- BroadcastChannel: `'pd_oca_{roomCode}'`
+- PeerJS host ID: `'pixeldojo-oca-{roomCode}'`
+- localStorage key: `'pd_oca_{roomCode}'`
+
+### Rimbalzo al traguardo
+
+Se un giocatore supera la casella 63 col dado, rimbalza indietro: `newPos = 63 - (newPos - 63)` — serve esattamente il numero giusto per vincere.
+
+### Auto-avanzamento turni
+
+L'host usa `setTimeout` per avanzare automaticamente al turno successivo dopo ~3 secondi dalla fase `result`. In caso di "rilancia" (effetto `reroll`), il turno non cambia — il giocatore rilancia direttamente.
+
+### Animazione risultato — flusso in due fasi
+
+**Importante:** l'animazione del movimento della pedina avviene DOPO che il modale di risultato è già visibile. Questo garantisce che il giocatore veda prima se ha risposto correttamente o meno, e solo poi veda la pedina muoversi verso la nuova posizione.
+
+Flusso nella fase `'result'` di `renderScreen()`:
+1. **0s** — chiude il modale domanda, mostra il modale risultato (✅ o ❌), token rimane sulla casella domanda (`G_displayPos` non ancora aggiornato)
+2. **+1,2s** — se c'è un effetto posizionale (`needsAnimation`), parte l'animazione `animatePlayerMove` passo-passo
+3. **+3s** — `scheduleNextTurn` (lanciato dall'host al momento della risposta) svuota `lastResult` e cambia fase a `'rolling'`
+
+`G_isAnimating = true` viene impostato prima del `setTimeout` per evitare che chiamate successive a `renderScreen()` (da broadcast STATE) interferiscano con l'animazione in corso.
 
 ---
 

@@ -547,6 +547,30 @@ input, select { font-family: inherit; }
       .hero-player-card { display:none; }
       .games-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Mobile navbar (<600px) ── */
+    @media(max-width:600px) {
+      .navbar {
+        padding: 8px 14px 0;
+        flex-wrap: wrap;
+        gap: 0;
+      }
+      .nav-logo { margin-right: auto; }
+      .nav-right { gap: 6px; order: 2; }
+      .nav-links {
+        order: 3;
+        width: 100%;
+        border-top: 0.5px solid var(--border);
+        padding: 4px 0;
+        gap: 0;
+        justify-content: space-around;
+        flex: none;
+        margin-top: 2px;
+      }
+      .nav-link { font-size: 12px; padding: 6px 8px; }
+      .btn-sm { padding: 5px 10px; font-size: 12px; }
+      .theme-toggle { width: 30px; height: 30px; font-size: 15px; }
+    }
   </style>
 </head>
 <body>
@@ -636,6 +660,20 @@ input, select { font-family: inherit; }
   <div class="col-mid">
     <div class="section-hd">🕹️ Giochi disponibili <a href="giochi.html">Vedi tutti →</a></div>
     <div class="games-grid">
+
+      <!-- Card Gioco dell'Oca Quiz -->
+      <a class="game-card" href="games/oca.html">
+        <span class="badge-new">NUOVO</span>
+        <div class="card-thumb" style="background:linear-gradient(135deg,#0a2a1a,#1a3a0a)">🎲</div>
+        <div class="card-body">
+          <div class="card-title">Gioco dell'Oca Quiz</div>
+          <div class="card-meta">30 caselle, domande, bonus e malus. Prima al traguardo vince!</div>
+          <div class="card-footer">
+            <div class="tag tag-mint">Multiplayer</div>
+            <div class="diff-pip"><span class="pip" style="background:var(--mint)"></span><span class="pip" style="background:var(--mint)"></span><span class="pip"></span></div>
+          </div>
+        </div>
+      </a>
 
       <!-- Card Nomi in Codice -->
       <a class="game-card" href="games/codenames.html">

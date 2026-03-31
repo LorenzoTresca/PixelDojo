@@ -781,28 +781,44 @@ input, select { font-family: inherit; }
       .board-area { flex:1; min-height:0; width:100%; display:flex; align-items:center; justify-content:center; }
       #boardSvg   { aspect-ratio:1/1; height:100%; width:auto; max-width:100%; max-height:100%; }
 
-      /* Right panel becomes horizontal bottom bar */
+      /* Right panel becomes a compact bottom bar with wrapping rows */
       .right-panel {
-        flex-shrink:0; height:auto; max-height:30vw;
+        flex-shrink:0; height:auto; max-height:none;
         border-left:none; border-top:1px solid var(--g-border);
-        display:flex; flex-direction:row; align-items:center;
-        gap:8px; padding:6px 10px; overflow-x:auto; overflow-y:hidden;
+        display:flex; flex-direction:row; flex-wrap:wrap; align-items:center;
+        gap:6px; padding:7px 10px; overflow:visible;
       }
       .turn-info { text-align:left; padding:0; flex-shrink:0; }
       .turn-label { display:none; }
-      .turn-name  { font-size:13px; white-space:nowrap; max-width:72px; overflow:hidden; text-overflow:ellipsis; }
+      .turn-name  { font-size:13px; white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis; }
       .dice-area  { width:52px; height:52px; margin:0; flex-shrink:0; }
+
+      /* Action panel: full-width second row, buttons wrap naturally */
       .action-panel {
-        flex:1; min-width:0; margin-top:0;
-        display:flex; flex-direction:row; gap:6px; overflow-x:auto;
+        flex-basis:100%; min-width:0; margin-top:0;
+        display:flex; flex-direction:row; flex-wrap:wrap; gap:6px; overflow:visible;
       }
       .action-panel .action-btn {
-        white-space:nowrap; width:auto; min-width:max-content;
-        margin-bottom:0; padding:7px 11px; font-size:12px; flex-shrink:0;
+        flex:1 1 auto; white-space:nowrap; min-width:0;
+        margin-bottom:0; padding:9px 12px; font-size:13px;
+        text-align:center; justify-content:center;
       }
-      .dir-inline { padding:0; display:flex; flex-direction:row; gap:6px; }
+
+      /* Direction buttons: 2-column grid so Orario + Antiorario always visible */
+      .dir-inline {
+        padding:0; display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:6px; width:100%;
+      }
       .dir-title  { display:none; }
-      .dir-btn    { margin-bottom:0; padding:8px 12px; font-size:13px; flex-shrink:0; min-width:max-content; }
+      .dir-btn {
+        margin-bottom:0; padding:10px 8px; font-size:13px;
+        width:100%; min-width:0;
+        text-align:center; justify-content:center;
+      }
+      /* "Verso il Centro" spans full width */
+      .dir-btn.center { grid-column: 1 / -1; }
+
       .help-box, #phaseMsg { display:none; }
       .mobile-players-btn { display:flex !important; }
     }

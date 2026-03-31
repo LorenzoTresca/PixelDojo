@@ -514,7 +514,29 @@ input, select { font-family: inherit; }
     .stat-card    { background:var(--surf); border:0.5px solid var(--border); border-radius:var(--r2); padding:16px 20px; }
     .stat-card .sv { font-size:28px; font-weight:800; color:var(--ink); }
     .stat-card .sl { font-size:12px; color:var(--ink3); margin-top:4px; }
-    @media(max-width:600px){ .stats-strip{grid-template-columns:1fr 1fr;} }
+    @media(max-width:600px){
+      .stats-strip{grid-template-columns:1fr 1fr;}
+      .navbar {
+        padding: 8px 14px 0;
+        flex-wrap: wrap;
+        gap: 0;
+      }
+      .nav-logo { margin-right: auto; }
+      .nav-right { gap: 6px; order: 2; }
+      .nav-links {
+        order: 3;
+        width: 100%;
+        border-top: 0.5px solid var(--border);
+        padding: 4px 0;
+        gap: 0;
+        justify-content: space-around;
+        flex: none;
+        margin-top: 2px;
+      }
+      .nav-link { font-size: 12px; padding: 6px 8px; }
+      .btn-sm { padding: 5px 10px; font-size: 12px; }
+      .theme-toggle { width: 30px; height: 30px; font-size: 15px; }
+    }
   </style>
 </head>
 <body>
