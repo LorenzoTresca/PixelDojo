@@ -440,6 +440,24 @@ function broadcastState() {
   _conns.forEach(conn=>{ try{if(conn.open)conn.send(msg);}catch(e){} });
 }
 
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turn:openrelay.metered.ca:443?transport=tcp',
+        'turns:openrelay.metered.ca:443?transport=tcp'
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
+  ]
+};
+
 function initTransport(code, onReady) {
   if (_bc){_bc.close();_bc=null;}
   if (_peer){_peer.destroy();_peer=null;}
@@ -448,7 +466,7 @@ function initTransport(code, onReady) {
   _bc.onmessage=({data})=>{handleMsg(data);};
   const hostPeerId='pixeldojo-cdn-'+code;
   if (G.isHost) {
-    _peer=new Peer(hostPeerId,{debug:0});
+    _peer=new Peer(hostPeerId,{debug:0,config:ICE_CONFIG});
     _peer.on('open',()=>{});
     _peer.on('connection',conn=>{
       conn.on('open',()=>{
@@ -461,7 +479,7 @@ function initTransport(code, onReady) {
     });
     _peer.on('error',err=>{console.warn('[PeerJS host]',err.type);});
   } else {
-    _peer=new Peer({debug:0});
+    _peer=new Peer({debug:0,config:ICE_CONFIG});
     _peer.on('open',()=>{
       const conn=_peer.connect(hostPeerId,{reliable:true});
       _conns=[conn];

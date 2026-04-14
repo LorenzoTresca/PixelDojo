@@ -512,6 +512,25 @@ function broadcastState() {
   _conns.forEach(conn => { try { if (conn.open) conn.send(msg); } catch(e) {} });
 }
 
+/* Configurazione ICE: STUN multipli + TURN per NAT simmetrico (reti mobili) */
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turn:openrelay.metered.ca:443?transport=tcp',
+        'turns:openrelay.metered.ca:443?transport=tcp'
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
+  ]
+};
+
 /* onReady (solo guest): callback chiamata quando la connessione PeerJS all'host è aperta */
 function initTransport(code, onReady) {
   // Chiudi trasporti precedenti
@@ -528,7 +547,7 @@ function initTransport(code, onReady) {
 
   if (G.isHost) {
     // Host: crea Peer con ID prevedibile, accetta connessioni dai guest
-    _peer = new Peer(hostPeerId, {debug:0});
+    _peer = new Peer(hostPeerId, {debug:0, config: ICE_CONFIG});
     _peer.on('open', () => { console.log('[PeerJS] host pronto:', hostPeerId); });
     _peer.on('connection', conn => {
       conn.on('open', () => {
@@ -550,7 +569,7 @@ function initTransport(code, onReady) {
     });
   } else {
     // Guest: crea Peer con ID casuale, si connette all'host
-    _peer = new Peer({debug:0});
+    _peer = new Peer({debug:0, config: ICE_CONFIG});
     _peer.on('open', () => {
       const conn = _peer.connect(hostPeerId, {reliable:true});
       _conns = [conn];

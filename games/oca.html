@@ -807,34 +807,72 @@ let G = {
 ═══════════════════════════════════════════════════════════ */
 let _bc = null, _peer = null, _conns = [];
 
+/* Configurazione ICE: STUN multipli + TURN per NAT simmetrico (reti mobili) */
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turn:openrelay.metered.ca:443?transport=tcp',
+        'turns:openrelay.metered.ca:443?transport=tcp'
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
+  ]
+};
+
 function initTransport(code, onReady) {
   _bc = new BroadcastChannel(`pd_oca_${code}`);
   _bc.onmessage = e => handleMsg(e.data);
 
   if (typeof Peer === 'undefined') { if(onReady) onReady(); return; }
-  _peer = new Peer(`pixeldojo-oca-${code}`, {debug:0});
-  _peer.on('open', () => {
-    if (G.isHost) {
+
+  const hostPeerId = `pixeldojo-oca-${code}`;
+
+  if (G.isHost) {
+    // Host: ID prevedibile, accetta connessioni dai guest
+    _peer = new Peer(hostPeerId, {debug:0, config:ICE_CONFIG});
+    _peer.on('open', () => {
       _peer.on('connection', conn => {
         conn.on('open', () => {
           _conns.push(conn);
           conn.on('data', d => handleMsg(d));
           conn.on('close', () => { _conns = _conns.filter(c=>c!==conn); });
-          // Send current state immediately
           if (G.room) conn.send({type:'STATE', from:G.playerId, payload:G.room});
         });
       });
-    } else {
-      const conn = _peer.connect(`pixeldojo-oca-${code}`);
+    });
+    _peer.on('error', e => {
+      if (e.type === 'unavailable-id') console.warn('[PeerJS oca] ID già in uso');
+      else console.warn('[PeerJS oca] errore host:', e.type);
+    });
+  } else {
+    // Guest: ID casuale, si connette all'ID prevedibile dell'host
+    _peer = new Peer({debug:0, config:ICE_CONFIG});
+    _peer.on('open', () => {
+      const conn = _peer.connect(hostPeerId, {reliable:true});
       _conns.push(conn);
       conn.on('open', () => {
         conn.on('data', d => handleMsg(d));
+        conn.on('close', () => { _conns = []; });
         if (onReady) onReady();
       });
-      conn.on('error', () => { if(onReady) onReady(); });
-    }
-  });
-  _peer.on('error', e => { console.warn('PeerJS:', e); if(!G.isHost && onReady) onReady(); });
+      conn.on('error', e => {
+        console.warn('[PeerJS oca] errore connessione guest:', e);
+        if (onReady) onReady();
+      });
+    });
+    _peer.on('error', e => {
+      if (e.type === 'peer-unavailable') toast('Stanza non trovata. Controlla il codice.');
+      else console.warn('[PeerJS oca] errore guest:', e.type);
+      if (onReady) onReady();
+    });
+  }
 }
 
 function broadcastState() {
